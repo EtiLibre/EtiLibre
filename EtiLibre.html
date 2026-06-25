@@ -1848,19 +1848,20 @@ document.addEventListener('DOMContentLoaded', () => {
   checkMpReturn();
 });
 
+let _googleAuthInProgress = false;
 async function googleAuth() {
-  if (!_firebaseAuth) {
-    alert('Google Sign-In no está configurado aún.');
-    return;
-  }
+  if (!_firebaseAuth || _googleAuthInProgress) return;
+  _googleAuthInProgress = true;
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result   = await _firebaseAuth.signInWithPopup(provider);
     if (result && result.user) await _handleGoogleUser(result.user);
   } catch (e) {
-    if (e.code !== 'auth/popup-closed-by-user') {
+    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
       alert('Error al iniciar sesión con Google:\n' + e.message);
     }
+  } finally {
+    _googleAuthInProgress = false;
   }
 }
 
