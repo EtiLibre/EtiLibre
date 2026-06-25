@@ -1844,25 +1844,24 @@ async function _handleGoogleUser(fbUser) {
   return true;
 }
 
-// Al cargar la página: verificar si volvemos de un redirect de Google
 document.addEventListener('DOMContentLoaded', () => {
   checkMpReturn();
-  if (!_firebaseAuth) return;
-  _firebaseAuth.getRedirectResult()
-    .then(result => { if (result && result.user) _handleGoogleUser(result.user); })
-    .catch(e => { if (e.code && e.code !== 'auth/no-auth-event') console.warn('Google redirect error:', e.message); });
-
 });
 
-function googleAuth() {
+async function googleAuth() {
   if (!_firebaseAuth) {
-    alert('Google Sign-In no está configurado aún.\n\nCompletá el objeto FIREBASE_CONFIG en el código.');
+    alert('Google Sign-In no está configurado aún.');
     return;
   }
-  const provider = new firebase.auth.GoogleAuthProvider();
-  _firebaseAuth.signInWithRedirect(provider).catch(e => {
-    alert('Error al iniciar sesión con Google:\n' + e.message);
-  });
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result   = await _firebaseAuth.signInWithPopup(provider);
+    if (result && result.user) await _handleGoogleUser(result.user);
+  } catch (e) {
+    if (e.code !== 'auth/popup-closed-by-user') {
+      alert('Error al iniciar sesión con Google:\n' + e.message);
+    }
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
