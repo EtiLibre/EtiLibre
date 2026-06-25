@@ -1829,19 +1829,17 @@ document.addEventListener('click', e => {
    GOOGLE AUTH — Firebase (redirect flow)
 ═══════════════════════════════════════════════════════ */
 async function _handleGoogleUser(fbUser) {
-  if (!fbUser) { alert('DEBUG: fbUser es null'); return false; }
+  if (!fbUser) return false;
   const email = fbUser.email || '';
   const name  = fbUser.displayName || email.split('@')[0] || 'usuario';
-  if (!email) { alert('DEBUG: email vacío'); return false; }
-  alert('DEBUG: llamando API con email=' + email);
+  if (!email) return false;
   try {
     const data = await _api('/api/auth', 'POST', { action:'google', email, displayName: name });
-    alert('DEBUG: API ok, username=' + data?.user?.username);
     _setToken(data.token);
     _cacheUser(data.user);
     enterApp(data.user.username);
   } catch (e) {
-    alert('ERROR API: ' + (e.message || 'sin mensaje') + ' | status: ' + (e.status || '?'));
+    alert('Error al iniciar sesión con Google: ' + (e.message || 'Intentá de nuevo'));
   }
   return true;
 }
