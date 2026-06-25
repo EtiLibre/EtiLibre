@@ -1828,19 +1828,32 @@ document.addEventListener('click', e => {
 /* ═══════════════════════════════════════════════════════
    GOOGLE AUTH — Firebase (redirect flow)
 ═══════════════════════════════════════════════════════ */
-function _handleGoogleUser(fbUser) {
+async function _handleGoogleUser(fbUser) {
   if (!fbUser) return false;
   const email    = fbUser.email || '';
   const name     = fbUser.displayName || email.split('@')[0] || 'usuario';
   const safeUser = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '.');
-  const users    = getUsers();
-  if (!users[safeUser] && safeUser !== 'admin') {
-    registerUser(safeUser, email, '__google__', 'free');
-    const u2 = getUsers();
-    u2[safeUser].displayName = name;
-    saveUsers(u2);
+  if (safeUser === 'admin') return false;
+
+  try {
+    // Intentar login primero (usuario ya existente)
+    const loginData = await _api('/api/auth', 'POST', { action:'login', user: email, pass: '__google__' });
+    _setToken(loginData.token);
+    _cacheUser(loginData.user);
+    enterApp(loginData.user.username);
+  } catch (_) {
+    // No existe → registrar
+    try {
+      const regData = await _api('/api/auth', 'POST', { action:'register', username: safeUser, email, pass: '__google__', plan: 'free' });
+      _setToken(regData.token);
+      // Actualizar displayName
+      await _api('/api/user', 'PUT', { action:'update', displayName: name });
+      _cacheUser({ ...regData.user, displayName: name });
+      enterApp(regData.user.username);
+    } catch (e) {
+      alert('Error al iniciar sesión con Google: ' + (e.message || 'Intentá de nuevo'));
+    }
   }
-  enterApp(safeUser === 'admin' ? 'admin' : safeUser);
   return true;
 }
 
@@ -1851,6 +1864,7 @@ document.addEventListener('DOMContentLoaded', () => {
   _firebaseAuth.getRedirectResult()
     .then(result => { if (result && result.user) _handleGoogleUser(result.user); })
     .catch(e => { if (e.code && e.code !== 'auth/no-auth-event') console.warn('Google redirect error:', e.message); });
+
 });
 
 function googleAuth() {
