@@ -1471,15 +1471,24 @@ async function _api(path, method = 'GET', body = null) {
   return data;
 }
 
-// Actualiza el localStorage cache con datos frescos del servidor
+// Cache en memoria del usuario actual (fuente de verdad en sesión)
+let _userData = null;
+
 function _cacheUser(userData) {
   if (!userData?.username) return;
-  const users = getUsers();
-  users[userData.username] = { ...users[userData.username], ...userData };
-  saveUsers(users);
+  _userData = { ..._userData, ...userData };
+  // También guardar en localStorage como backup
+  try {
+    const users = getUsers();
+    users[userData.username] = { ...users[userData.username], ...userData };
+    saveUsers(users);
+  } catch(_) {}
 }
 
-// Refresca datos del usuario actual desde Firestore
+function _getCachedUser() {
+  return _userData;
+}
+
 async function _refreshCurrentUser() {
   if (!currentUser) return;
   try {
@@ -1552,6 +1561,7 @@ function saveUsers(u) {
    Admin es hardcodeado y nunca se almacena en localStorage. ── */
 function getUser(username) {
   if (username === 'admin') return ADMIN;
+  if (username === currentUser && _userData) return _userData;
   return getUsers()[username] || null;
 }
 
@@ -1576,24 +1586,27 @@ function registerUser(username, email, pass, plan) {
 
 function getUsage(username) {
   if (username === 'admin') return { used:0, limit:99999 };
-  const users = getUsers();
-  const u = users[username];
+  const u = (username === currentUser && _userData) ? _userData : getUsers()[username];
   if (!u) return { used:0, limit:2 };
   const now = new Date();
   const curMonth = now.getFullYear() * 100 + now.getMonth();
   if (u.resetMonth !== curMonth) {
-    u.used = 0; u.resetMonth = curMonth;
-    users[username] = u; saveUsers(users);
+    if (username === currentUser && _userData) { _userData.used = 0; _userData.resetMonth = curMonth; }
   }
   return { used: u.used || 0, limit: PLAN_CONFIG[u.plan || 'free']?.limit || 2 };
 }
 
 function incrementUsage(username, count = 1) {
   if (username === 'admin') return;
-  const users = getUsers();
-  if (!users[username]) return;
-  users[username].used = (users[username].used || 0) + count;
-  saveUsers(users);
+  // Actualizar en memoria
+  if (username === currentUser && _userData) {
+    _userData.used = (_userData.used || 0) + count;
+  }
+  // Actualizar en localStorage como backup
+  try {
+    const users = getUsers();
+    if (users[username]) { users[username].used = (users[username].used || 0) + count; saveUsers(users); }
+  } catch(_) {}
   // Sincronizar con Firestore
   _api('/api/user', 'PUT', { action:'increment-usage', count }).catch(() => {});
 }
@@ -1628,13 +1641,23 @@ function cleanExpiredPDFs(username) {
 
 function addHistoryEntry(username, entry) {
   if (username === 'admin') return;
-  const users = getUsers();
-  if (!users[username]) return;
-  if (!Array.isArray(users[username].history)) users[username].history = [];
-  users[username].history.unshift(entry);
-  if (users[username].history.length > 100) users[username].history = users[username].history.slice(0, 100);
-  saveUsers(users);
-  // Sincronizar con Firestore (sin pdfData — queda solo en localStorage)
+  // Actualizar en memoria
+  if (username === currentUser && _userData) {
+    if (!Array.isArray(_userData.history)) _userData.history = [];
+    _userData.history.unshift(entry);
+    if (_userData.history.length > 100) _userData.history = _userData.history.slice(0, 100);
+  }
+  // Backup en localStorage
+  try {
+    const users = getUsers();
+    if (users[username]) {
+      if (!Array.isArray(users[username].history)) users[username].history = [];
+      users[username].history.unshift(entry);
+      if (users[username].history.length > 100) users[username].history = users[username].history.slice(0, 100);
+      saveUsers(users);
+    }
+  } catch(_) {}
+  // Sincronizar con Firestore (sin pdfData)
   const { pdfData: _, ...meta } = entry;
   _api('/api/user', 'POST', { action:'add-history', ...meta }).catch(() => {});
 }
