@@ -1830,29 +1830,16 @@ document.addEventListener('click', e => {
 ═══════════════════════════════════════════════════════ */
 async function _handleGoogleUser(fbUser) {
   if (!fbUser) return false;
-  const email    = fbUser.email || '';
-  const name     = fbUser.displayName || email.split('@')[0] || 'usuario';
-  const safeUser = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '.');
-  if (safeUser === 'admin') return false;
-
+  const email = fbUser.email || '';
+  const name  = fbUser.displayName || email.split('@')[0] || 'usuario';
+  if (!email) return false;
   try {
-    // Intentar login primero (usuario ya existente)
-    const loginData = await _api('/api/auth', 'POST', { action:'login', user: email, pass: '__google__' });
-    _setToken(loginData.token);
-    _cacheUser(loginData.user);
-    enterApp(loginData.user.username);
-  } catch (_) {
-    // No existe → registrar
-    try {
-      const regData = await _api('/api/auth', 'POST', { action:'register', username: safeUser, email, pass: '__google__', plan: 'free' });
-      _setToken(regData.token);
-      // Actualizar displayName
-      await _api('/api/user', 'PUT', { action:'update', displayName: name });
-      _cacheUser({ ...regData.user, displayName: name });
-      enterApp(regData.user.username);
-    } catch (e) {
-      alert('Error al iniciar sesión con Google: ' + (e.message || 'Intentá de nuevo'));
-    }
+    const data = await _api('/api/auth', 'POST', { action:'google', email, displayName: name });
+    _setToken(data.token);
+    _cacheUser(data.user);
+    enterApp(data.user.username);
+  } catch (e) {
+    alert('Error al iniciar sesión con Google: ' + (e.message || 'Intentá de nuevo'));
   }
   return true;
 }

@@ -72,5 +72,40 @@ export default async function handler(req, res) {
     return res.json({ token, user: safe });
   }
 
+  // POST /api/auth  action=google
+  if (action === 'google') {
+    const { email, displayName } = req.body;
+    if (!email) return res.status(400).json({ error: 'Faltan datos' });
+    // Buscar usuario por email
+    const snap = await db.collection('users').where('email','==',email).limit(1).get();
+    if (!snap.empty) {
+      // Usuario existente — devolver token sin verificar contraseña
+      const ud = snap.docs[0].data();
+      const token = signToken({ username: ud.username, role:'user' });
+      const { pass:_, ...safe } = ud;
+      return res.json({ token, user: safe });
+    }
+    // Usuario nuevo — registrar
+    const safeUser = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '.');
+    const username = (await db.collection('users').doc(safeUser).get()).exists
+      ? safeUser + '_' + Date.now().toString().slice(-4)
+      : safeUser;
+    const now = new Date();
+    const userData = {
+      username, email, pass: await bcrypt.hash('__google__', 12),
+      googleAuth: true,
+      plan: 'free', active: true,
+      displayName: displayName || username, avatar:'👤', nameColor:'',
+      invoices:[], history:[],
+      notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a EtiLibre!',
+        body:'Tu cuenta fue creada con éxito. ¡Empezá a combinar etiquetas!', date:now.toISOString(), read:false }],
+      used:0, resetMonth: now.getFullYear()*100+now.getMonth(), createdAt: now.toISOString()
+    };
+    await db.collection('users').doc(username).set(userData);
+    const token = signToken({ username, role:'user' });
+    const { pass:_, ...safe } = userData;
+    return res.json({ token, user: safe });
+  }
+
   res.status(400).json({ error: 'Acción inválida' });
 }
