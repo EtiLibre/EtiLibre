@@ -1594,6 +1594,8 @@ function incrementUsage(username, count = 1) {
   if (!users[username]) return;
   users[username].used = (users[username].used || 0) + count;
   saveUsers(users);
+  // Sincronizar con Firestore
+  _api('/api/user', 'PUT', { action:'increment-usage', count }).catch(() => {});
 }
 
 function getUserPlan(username) {
@@ -1629,9 +1631,12 @@ function addHistoryEntry(username, entry) {
   const users = getUsers();
   if (!users[username]) return;
   if (!Array.isArray(users[username].history)) users[username].history = [];
-  users[username].history.unshift(entry); // más reciente primero
+  users[username].history.unshift(entry);
   if (users[username].history.length > 100) users[username].history = users[username].history.slice(0, 100);
   saveUsers(users);
+  // Sincronizar con Firestore (sin pdfData — queda solo en localStorage)
+  const { pdfData: _, ...meta } = entry;
+  _api('/api/user', 'POST', { action:'add-history', ...meta }).catch(() => {});
 }
 
 /* ═══════════════════════════════════════════════════════

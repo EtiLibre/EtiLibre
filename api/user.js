@@ -58,6 +58,16 @@ export default async function handler(req, res) {
       await ref.update(updates);
       return res.json({ ok:true });
     }
+    if (action === 'increment-usage') {
+      const { count } = req.body;
+      const doc = await ref.get();
+      const d = doc.data();
+      const now = new Date();
+      const curMonth = now.getFullYear() * 100 + now.getMonth();
+      const used = d.resetMonth !== curMonth ? (count||1) : (d.used||0) + (count||1);
+      await ref.update({ used, resetMonth: curMonth });
+      return res.json({ ok:true, used });
+    }
     if (action === 'change-password') {
       if (payload.username === 'admin') return res.status(403).end();
       const { oldPass, newPass } = req.body;
