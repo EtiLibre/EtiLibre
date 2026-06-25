@@ -1,0 +1,76 @@
+import { db }        from './_lib/firebase.js';
+import { signToken } from './_lib/auth.js';
+import { requireAuth } from './_lib/auth.js';
+import bcrypt        from 'bcryptjs';
+
+const ADMIN_HASH = process.env.ADMIN_PASS_HASH;
+
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // GET /api/auth — devuelve usuario actual (me)
+  if (req.method === 'GET') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
+    if (payload.username === 'admin') {
+      return res.json({ username:'admin', role:'admin', displayName:'Administrador', avatar:'⚙️', nameColor:'#FFE600', plan:'admin', active:true });
+    }
+    const doc = await db.collection('users').doc(payload.username).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Usuario no encontrado' });
+    const { pass:_, ...safe } = doc.data();
+    return res.json(safe);
+  }
+
+  if (req.method !== 'POST') return res.status(405).end();
+  const { action } = req.body;
+
+  // POST /api/auth  action=login
+  if (action === 'login') {
+    const { user, pass } = req.body;
+    if (!user || !pass) return res.status(400).json({ error: 'Faltan datos' });
+    if (user === 'admin' || user === 'admin@etilibre.com') {
+      const ok = await bcrypt.compare(pass, ADMIN_HASH);
+      if (!ok) return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
+      const token = signToken({ username:'admin', role:'admin' });
+      return res.json({ token, user:{ username:'admin', role:'admin', displayName:'Administrador', avatar:'⚙️', nameColor:'#FFE600', plan:'admin', active:true } });
+    }
+    let snap = await db.collection('users').where('username','==',user).limit(1).get();
+    if (snap.empty) snap = await db.collection('users').where('email','==',user).limit(1).get();
+    if (snap.empty) return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
+    const doc = snap.docs[0]; const ud = doc.data();
+    if (!await bcrypt.compare(pass, ud.pass)) return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
+    const token = signToken({ username: ud.username, role:'user' });
+    const { pass:_, ...safe } = ud;
+    return res.json({ token, user: safe });
+  }
+
+  // POST /api/auth  action=register
+  if (action === 'register') {
+    const { username, email, pass, plan } = req.body;
+    if (!username || !email || !pass || !plan) return res.status(400).json({ error: 'Faltan datos' });
+    if (username === 'admin') return res.status(400).json({ error: 'Ese nombre de usuario ya está en uso.' });
+    if (!(await db.collection('users').where('username','==',username).limit(1).get()).empty)
+      return res.status(400).json({ error: 'Ese nombre de usuario ya está en uso.' });
+    if (!(await db.collection('users').where('email','==',email).limit(1).get()).empty)
+      return res.status(400).json({ error: 'Ese email ya está registrado.' });
+    const now = new Date();
+    const userData = {
+      username, email, pass: await bcrypt.hash(pass, 12),
+      plan: plan||'free', active: plan==='free',
+      displayName: username, avatar:'👤', nameColor:'',
+      invoices:[], history:[],
+      notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a EtiLibre!',
+        body:'Tu cuenta fue creada con éxito. ¡Empezá a combinar etiquetas!', date:now.toISOString(), read:false }],
+      used:0, resetMonth: now.getFullYear()*100+now.getMonth(), createdAt: now.toISOString()
+    };
+    await db.collection('users').doc(username).set(userData);
+    const token = signToken({ username, role:'user' });
+    const { pass:_, ...safe } = userData;
+    return res.json({ token, user: safe });
+  }
+
+  res.status(400).json({ error: 'Acción inválida' });
+}

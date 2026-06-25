@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Gonza\\\\Downloads\\\\EtiLibre\\\\EtiLibre\" -Force | Select-Object Name, @{N=\"IsDir\";E={$_.PSIsContainer}})",
+      "Bash(vercel --version)",
+      "Bash(npm install *)",
+      "Bash(vercel --yes)",
+      "Bash(vercel --yes --scope eti-libre)",
+      "Bash(vercel --yes --scope eti-libre --name etibre)",
+      "Bash(vercel deploy *)"
+    ]
+  }
+}

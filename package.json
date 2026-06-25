@@ -1,0 +1,11 @@
+{
+  "name": "etilibre-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "firebase-admin": "^12.0.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
