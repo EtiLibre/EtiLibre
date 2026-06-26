@@ -707,6 +707,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-sa:hover{border-color:var(--accent);color:var(--accent)}
 .btn-sa.danger:hover{border-color:var(--danger);color:var(--danger)}
 .btn-sa.success:hover{border-color:var(--teal);color:var(--teal)}
+.sa-tos-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
+.sa-tos-table{width:100%;border-collapse:collapse;font-size:13px}
+.sa-tos-table th{background:var(--surface2);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.sa-tos-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.sa-tos-table tr:last-child td{border-bottom:none}
+.sa-tos-table tr:hover td{background:var(--surface2)}
+.tos-badge-ok{display:inline-flex;align-items:center;gap:5px;background:#0996660d;color:#099666;border:1px solid #09966644;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700}
+.tos-badge-no{display:inline-flex;align-items:center;gap:5px;background:#e020480d;color:var(--danger);border:1px solid #e0204844;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700}
 .sa-plan-select{background:var(--bg);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:inherit;font-size:12px;padding:6px 10px;outline:none;cursor:pointer}
 .sa-invoice-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
 .sa-invoice-label{font-size:11px;color:var(--text2);font-weight:600;white-space:nowrap;padding-top:4px}
@@ -3429,6 +3437,48 @@ async function openSuperAdmin() {
 function renderSuperAdmin() {
   renderSAStats();
   renderSAUsers();
+  renderSATosTable();
+}
+
+function renderSATosTable() {
+  const tbody = document.getElementById('sa-tos-tbody');
+  if (!tbody) return;
+  const users = [..._saUsersCache].sort((a, b) => new Date(a.createdAt||0) - new Date(b.createdAt||0));
+  if (!users.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">No hay usuarios registrados.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = users.map((u, i) => {
+    const createdAt = u.createdAt ? new Date(u.createdAt).toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' }) : '—';
+    const tos = u.tosAccepted === true
+      ? `<span class="tos-badge-ok">✔ Aceptó</span>`
+      : `<span class="tos-badge-no">✘ Pendiente</span>`;
+    const planLabel = { free:'Free', starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' }[u.plan] || u.plan || '—';
+    return `<tr>
+      <td style="color:var(--text3)">${i + 1}</td>
+      <td><strong>@${u.username}</strong></td>
+      <td>${u.displayName || '—'}</td>
+      <td>${u.email || '—'}</td>
+      <td>${planLabel}</td>
+      <td style="color:var(--text3)">${createdAt}</td>
+      <td>${tos}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportTosCSV() {
+  const users = [..._saUsersCache].sort((a, b) => new Date(a.createdAt||0) - new Date(b.createdAt||0));
+  const rows = [['#','Usuario','Nombre','Email','Plan','Fecha de registro','T&C aceptados']];
+  users.forEach((u, i) => {
+    const createdAt = u.createdAt ? new Date(u.createdAt).toLocaleDateString('es-AR') : '';
+    rows.push([i+1, u.username, u.displayName||'', u.email||'', u.plan||'', createdAt, u.tosAccepted ? 'Sí' : 'No']);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `etilibre_usuarios_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
 }
 
 function renderSAStats() {
@@ -3660,6 +3710,30 @@ async function saNotifyUser(username) {
       </select>
     </div>
     <div class="sa-user-list" id="sa-user-list"></div>
+
+    <!-- Registro T&C -->
+    <div style="margin-top:48px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <p class="sa-section-title" style="margin:0">Registro de aceptación de Términos y Condiciones</p>
+        <button class="btn-sa success" onclick="exportTosCSV()">⬇ Exportar CSV</button>
+      </div>
+      <div class="sa-tos-table-wrap">
+        <table class="sa-tos-table" id="sa-tos-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Correo electrónico</th>
+              <th>Plan</th>
+              <th>Registro</th>
+              <th>T&C aceptados</th>
+            </tr>
+          </thead>
+          <tbody id="sa-tos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
