@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EtiLibre — Etiquetas ML en segundos</title>
+<title>EtiLibre — Combinador de etiquetas</title>
 <!-- Firebase SDK (Google Auth) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -165,7 +165,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .faq-item h4{font-size:15px;font-weight:700;margin-bottom:8px}
 .faq-item p{font-size:14px;color:var(--text2);line-height:1.6}
 
-.footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between}
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-links{display:flex;align-items:center;gap:8px}
+.footer-sep{color:var(--text3);font-size:12px}
+.footer-link-btn{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:0;text-decoration:underline;font-family:inherit}
+.footer-link-btn:hover{color:var(--accent)}
+.legal-modal-overlay{display:none;position:fixed;inset:0;background:var(--shadow-overlay);z-index:9999;align-items:center;justify-content:center;padding:20px}
+.legal-modal-overlay.open{display:flex}
+.legal-modal{background:var(--surface);border-radius:var(--r-lg);max-width:680px;width:100%;max-height:85vh;overflow-y:auto;padding:40px;position:relative;box-shadow:var(--card-shadow)}
+.legal-modal h2{font-size:20px;font-weight:700;color:var(--text);margin:0 0 4px}
+.legal-modal h3{font-size:14px;font-weight:700;color:var(--text);margin:24px 0 8px}
+.legal-modal p,.legal-modal li{font-size:13px;color:var(--text2);line-height:1.7;margin:0 0 8px}
+.legal-modal ul{padding-left:20px;margin:0 0 8px}
+.legal-modal strong{color:var(--text)}
+.legal-updated{color:var(--text3);font-size:12px;margin-bottom:24px !important}
+.legal-modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);line-height:1;padding:4px 8px;border-radius:var(--r-sm)}
+.legal-modal-close:hover{background:var(--surface2);color:var(--text)}
 .footer-logo{font-size:16px;font-weight:800;color:var(--text)}
 .footer-logo span{color:var(--accent)}
 .footer-copy{font-size:13px;color:var(--text3)}
@@ -697,7 +712,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <!-- HERO -->
   <section class="hero">
     <div class="hero-glow"></div>
-    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Para vendedores de Mercado Libre</div>
+    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Compatible con etiquetas de Mercado Libre</div>
     <h2>Combinar etiquetas<br><em>nunca fue tan fácil</em></h2>
     <p class="hero-sub">Subí tus PDFs de etiquetas y EtiLibre las acomoda automáticamente en hojas A4 listas para imprimir. Sin Illustrator. Sin complicaciones.</p>
     <div class="hero-actions">
@@ -885,9 +900,105 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-logo">📦 Eti<span>Label</span></div>
-    <div class="footer-copy">© 2025 EtiLibre · Herramienta para vendedores de Mercado Libre</div>
+    <div class="footer-logo">📦 Eti<span>Libre</span></div>
+    <div class="footer-copy">© 2025 EtiLibre · Herramienta independiente compatible con etiquetas de Mercado Libre</div>
+    <div class="footer-links">
+      <button class="footer-link-btn" onclick="openModal('modal-tos')">Términos y Condiciones</button>
+      <span class="footer-sep">·</span>
+      <button class="footer-link-btn" onclick="openModal('modal-privacy')">Política de Privacidad</button>
+    </div>
   </footer>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     MODAL: TÉRMINOS Y CONDICIONES
+════════════════════════════════════════════════════════ -->
+<div id="modal-tos" class="legal-modal-overlay" onclick="if(event.target===this)closeModal('modal-tos')">
+  <div class="legal-modal">
+    <button class="legal-modal-close" onclick="closeModal('modal-tos')">✕</button>
+    <h2>Términos y Condiciones de Uso</h2>
+    <p class="legal-updated">Última actualización: junio de 2025</p>
+
+    <h3>1. Descripción del servicio</h3>
+    <p>EtiLibre es una plataforma web que permite a los usuarios combinar y reorganizar etiquetas de envío en formato PDF sobre hojas A4, con el fin de optimizar su impresión. El servicio no almacena los archivos subidos en servidores propios ni altera la información contenida en las etiquetas.</p>
+
+    <h3>2. Exención de responsabilidad</h3>
+    <p>Esta plataforma es una herramienta independiente para optimizar la impresión de etiquetas. <strong>No pertenece ni está afiliada a Mercado Libre, Mercado Pago, Andreani, Correo Argentino ni a ninguna empresa de logística.</strong></p>
+    <p>EtiLibre no se responsabiliza por:</p>
+    <ul>
+      <li>Archivos PDF defectuosos, ilegibles o con información incorrecta subidos por el usuario.</li>
+      <li>Errores en la impresión derivados de configuraciones del dispositivo del usuario.</li>
+      <li>Etiquetas rechazadas por operadores logísticos por causas ajenas al funcionamiento de la plataforma.</li>
+      <li>Pérdida de datos derivada de la expiración del historial (los PDFs generados se eliminan automáticamente a los 10 días).</li>
+    </ul>
+
+    <h3>3. Responsabilidad del usuario</h3>
+    <p>El usuario es el único responsable de los archivos que sube a la plataforma. Al utilizar EtiLibre, el usuario declara que:</p>
+    <ul>
+      <li>Cuenta con autorización para procesar los archivos que sube.</li>
+      <li>Los archivos no contienen contenido ilegal, malicioso ni que infrinja derechos de terceros.</li>
+      <li>Es responsable de verificar que las etiquetas generadas sean correctas antes de imprimirlas y utilizarlas.</li>
+    </ul>
+
+    <h3>4. Funcionamiento de la plataforma</h3>
+    <p>EtiLibre únicamente reorganiza visualmente las etiquetas dentro del PDF. <strong>No modifica, altera ni reemplaza ningún código de barras, texto, dirección ni dato contenido en las etiquetas originales.</strong> El resultado final es equivalente a las etiquetas originales, dispuestas en formato A4 para optimizar la impresión.</p>
+
+    <h3>5. Historial y almacenamiento</h3>
+    <p>Los PDFs generados quedan disponibles para su descarga en el historial del usuario por un período de <strong>10 días</strong>, tras los cuales son eliminados automáticamente. EtiLibre no garantiza la disponibilidad de los archivos más allá de dicho plazo.</p>
+
+    <h3>6. Planes y pagos</h3>
+    <p>EtiLibre ofrece planes de suscripción mensual. Los pagos se procesan a través de Mercado Pago. El usuario puede cancelar su suscripción en cualquier momento. No se realizan reembolsos por períodos parciales ya facturados, salvo que la legislación argentina vigente lo requiera.</p>
+
+    <h3>7. Modificaciones</h3>
+    <p>EtiLibre se reserva el derecho de modificar estos términos en cualquier momento. Los cambios serán notificados a los usuarios registrados y entrarán en vigencia a los 10 días de su publicación.</p>
+
+    <h3>8. Legislación aplicable</h3>
+    <p>Estos términos se rigen por las leyes de la República Argentina. Cualquier controversia será sometida a la jurisdicción de los tribunales ordinarios de la Ciudad Autónoma de Buenos Aires.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     MODAL: POLÍTICA DE PRIVACIDAD
+════════════════════════════════════════════════════════ -->
+<div id="modal-privacy" class="legal-modal-overlay" onclick="if(event.target===this)closeModal('modal-privacy')">
+  <div class="legal-modal">
+    <button class="legal-modal-close" onclick="closeModal('modal-privacy')">✕</button>
+    <h2>Política de Privacidad</h2>
+    <p class="legal-updated">Última actualización: junio de 2025</p>
+
+    <h3>1. Datos que recopilamos</h3>
+    <p>Al registrarte en EtiLibre recopilamos:</p>
+    <ul>
+      <li><strong>Nombre de usuario y dirección de correo electrónico</strong>, necesarios para identificar tu cuenta.</li>
+      <li><strong>Contraseña</strong>, almacenada de forma segura mediante hash bcrypt. Nunca guardamos tu contraseña en texto plano.</li>
+      <li><strong>Datos de uso</strong>: cantidad de hojas generadas por mes, historial de PDFs combinados (sin contenido de los archivos).</li>
+      <li><strong>Datos de pago</strong>: EtiLibre no almacena datos de tarjetas. Los pagos son procesados íntegramente por Mercado Pago.</li>
+    </ul>
+
+    <h3>2. Cómo usamos tus datos</h3>
+    <p>Los datos recopilados se utilizan exclusivamente para:</p>
+    <ul>
+      <li>Gestionar tu cuenta y acceso a la plataforma.</li>
+      <li>Controlar el uso mensual según tu plan contratado.</li>
+      <li>Enviarte notificaciones relacionadas con tu cuenta (cambios de plan, comprobantes, alertas del sistema).</li>
+    </ul>
+    <p><strong>No vendemos, cedemos ni compartimos tus datos personales con terceros</strong>, salvo obligación legal o cuando sea estrictamente necesario para la prestación del servicio (ej: procesador de pagos).</p>
+
+    <h3>3. Archivos subidos</h3>
+    <p>Los archivos PDF que subís a la plataforma son procesados en tu propio navegador (<em>client-side</em>). <strong>No se almacenan en ningún servidor de EtiLibre.</strong> Los PDFs generados se guardan temporalmente en tu dispositivo y en el historial de tu cuenta por hasta 10 días, tras los cuales se eliminan automáticamente.</p>
+
+    <h3>4. Cookies y almacenamiento local</h3>
+    <p>EtiLibre utiliza <em>localStorage</em> del navegador para mantener tu sesión activa y guardar preferencias como el tema visual. No utilizamos cookies de seguimiento ni publicidad.</p>
+
+    <h3>5. Seguridad</h3>
+    <p>Implementamos medidas de seguridad que incluyen cifrado de contraseñas con bcrypt, autenticación mediante tokens JWT, y comunicación cifrada por HTTPS. Aun así, ningún sistema es 100% seguro; te recomendamos usar una contraseña única para tu cuenta en EtiLibre.</p>
+
+    <h3>6. Tus derechos</h3>
+    <p>De acuerdo con la <strong>Ley N° 25.326 de Protección de Datos Personales</strong> de la República Argentina, tenés derecho a acceder, rectificar y suprimir tus datos personales. Para ejercer estos derechos, podés eliminar tu cuenta desde la sección "Zona de peligro" en tu perfil, o contactarnos.</p>
+
+    <h3>7. Contacto</h3>
+    <p>Para consultas sobre privacidad escribinos a: <strong>contacto@etilibre.com</strong></p>
+  </div>
 </div>
 
 <!-- ════════════════════════════════════════════════════
@@ -1040,7 +1151,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </nav>
 
   <div class="main">
-    <h2 class="page-title">Combinar <em>etiquetas</em> ML</h2>
+    <h2 class="page-title">Combinar <em>etiquetas</em></h2>
     <p class="page-desc">Tirá todos tus PDFs de etiquetas acá abajo. Se agrupan automáticamente en hojas A4 de hasta 3 etiquetas cada una.</p>
 
     <!-- USAGE BAR -->
@@ -1616,7 +1727,7 @@ function getUserPlan(username) {
   return getUsers()[username]?.plan || 'free';
 }
 
-const PDF_EXPIRY_DAYS = 30;
+const PDF_EXPIRY_DAYS = 10;
 
 function cleanExpiredPDFs(username) {
   const users = getUsers();
@@ -2129,6 +2240,18 @@ function showLimitModal(isUpgradePrompt = false) {
   document.getElementById('limit-modal').style.display = 'flex';
 }
 function closeLimitModal() { document.getElementById('limit-modal').style.display = 'none'; }
+
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') ['modal-tos','modal-privacy'].forEach(closeModal);
+});
 function goUpgrade() { closeLimitModal(); openProfile('plan'); }
 
 /* ═══════════════════════════════════════════════════════
@@ -2453,7 +2576,7 @@ async function combineLabels() {
     // Incrementar uso POR HOJA
     if (currentUser) {
       incrementUsage(currentUser, totalSheets);
-      // Convertir PDF a base64 para re-descarga (se elimina a los 30 días)
+      // Convertir PDF a base64 para re-descarga (se elimina a los 10 días)
       let pdfBase64 = null;
       try {
         const reader = new FileReader();
