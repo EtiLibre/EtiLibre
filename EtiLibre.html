@@ -2077,6 +2077,9 @@ document.addEventListener('click', e => {
 /* ═══════════════════════════════════════════════════════
    GOOGLE AUTH — Firebase (redirect flow)
 ═══════════════════════════════════════════════════════ */
+// username pendiente de aceptar T&C
+let _pendingGoogleUsername = null;
+
 async function _handleGoogleUser(fbUser) {
   if (!fbUser) return false;
   const email = fbUser.email || '';
@@ -2086,16 +2089,18 @@ async function _handleGoogleUser(fbUser) {
     const data = await _api('/api/auth', 'POST', { action:'google', email, displayName: name });
     _setToken(data.token);
     _cacheUser(data.user);
-    enterApp(data.user.username);
-    if (data.needsTos) showGoogleTosModal();
+    if (data.needsTos) {
+      // No entrar a la app — mostrar modal bloqueante primero
+      _pendingGoogleUsername = data.user.username;
+      showScreen('screen-landing');
+      document.getElementById('modal-google-tos').style.display = 'flex';
+    } else {
+      enterApp(data.user.username);
+    }
   } catch (e) {
     alert('Error al iniciar sesión con Google: ' + (e.message || 'Intentá de nuevo'));
   }
   return true;
-}
-
-function showGoogleTosModal() {
-  document.getElementById('modal-google-tos').style.display = 'flex';
 }
 
 async function acceptGoogleTos() {
@@ -2103,13 +2108,20 @@ async function acceptGoogleTos() {
   const err = document.getElementById('google-tos-error');
   if (!cb.checked) { err.style.display = 'block'; return; }
   err.style.display = 'none';
+  const btn = document.querySelector('#modal-google-tos .btn-auth');
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
   try {
     await _api('/api/user', 'PUT', { action:'update', tosAccepted: true });
     if (_userData) _userData.tosAccepted = true;
     document.getElementById('modal-google-tos').style.display = 'none';
+    if (_pendingGoogleUsername) {
+      enterApp(_pendingGoogleUsername);
+      _pendingGoogleUsername = null;
+    }
   } catch(e) {
     err.textContent = 'Error al guardar. Intentá de nuevo.';
     err.style.display = 'block';
+    if (btn) { btn.disabled = false; btn.textContent = 'Aceptar y continuar'; }
   }
 }
 
