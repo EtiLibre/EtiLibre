@@ -568,17 +568,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .auth-card{padding:28px 18px;border-radius:16px}
   .auth-card .field input,.auth-card .field select{font-size:14px}
   /* TOPBAR */
-  .topbar{padding:0 12px;height:52px;gap:6px}
+  .topbar{padding:0 12px;height:52px}
   .topbar-logo{font-size:15px}
-  .topbar-right{gap:6px}
-  .user-pill{padding:4px 8px;gap:5px;border-radius:16px}
-  .user-pill span:first-child{font-size:14px!important}
-  #user-display{font-size:11px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .plan-badge{font-size:9px;padding:2px 6px}
-  .btn-upgrade-top{font-size:10px;padding:4px 8px}
-  .btn-logout{font-size:11px;padding:4px 10px}
+  .topbar-right{gap:8px}
+  /* En mobile solo mostramos campana + pill compacto; logout y upgrade van al dropdown */
+  .btn-upgrade-top{display:none!important}
+  .btn-logout{display:none!important}
+  /* Pill compacto: solo avatar + flecha */
+  .user-pill{padding:6px 8px;gap:4px;border-radius:50px}
+  #user-display{display:none}
+  .plan-badge{display:none}
   /* USER DROPDOWN */
-  .user-dropdown{right:-8px;min-width:200px}
+  .user-dropdown{right:-8px;min-width:220px}
   /* MAIN */
   .main{padding:16px 14px}
   .page-title{font-size:20px}
