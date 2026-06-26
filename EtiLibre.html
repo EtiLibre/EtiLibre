@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EtiLibre — Combinador de etiquetas</title>
+<title>Etify — Combinador de etiquetas</title>
 <!-- Firebase SDK (Google Auth) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -76,10 +76,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
    LANDING — NAV
 ════════════════════════════════════════════════════════ */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.nav-logo h1{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.4px}
-.nav-logo span{color:var(--accent)}
+.nav-logo{display:flex;align-items:center;text-decoration:none}
+.brand-logo{height:36px;width:auto;display:block;color:var(--text)}
+.topbar-logo .brand-logo{height:28px}
+.footer-logo .brand-logo{height:26px}
 .nav-actions{display:flex;align-items:center;gap:12px}
 .btn-nav-ghost{background:none;border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-family:inherit;font-size:14px;font-weight:500;padding:8px 18px;cursor:pointer;transition:all .2s}
 .btn-nav-ghost:hover{border-color:var(--accent);color:var(--accent)}
@@ -210,8 +210,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .legal-updated{color:var(--text3);font-size:12px;margin-bottom:24px !important}
 .legal-modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);line-height:1;padding:4px 8px;border-radius:var(--r-sm)}
 .legal-modal-close:hover{background:var(--surface2);color:var(--text)}
-.footer-logo{font-size:16px;font-weight:800;color:var(--text)}
-.footer-logo span{color:var(--accent)}
+.footer-logo{display:flex;align-items:center}
 .footer-copy{font-size:13px;color:var(--text3)}
 
 /* ════════════════════════════════════════════════════════
@@ -220,7 +219,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 30% 40%,rgba(255,230,0,.04) 0%,var(--bg) 65%)}
 .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:44px 40px;width:100%;max-width:440px;box-shadow:var(--card-shadow)}
 .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.auth-logo-icon{width:40px;height:40px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.auth-logo{display:flex;justify-content:center}
 .auth-logo h1{font-size:20px;font-weight:800;letter-spacing:-.4px}
 .auth-logo span{color:var(--accent)}
 .auth-subtitle{font-size:14px;color:var(--text2);margin-bottom:30px;line-height:1.5}
@@ -265,8 +264,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
    APP SCREEN
 ════════════════════════════════════════════════════════ */
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;flex-shrink:0}
-.topbar-logo{font-weight:800;font-size:17px;letter-spacing:-.3px}
-.topbar-logo span{color:var(--accent)}
+.topbar-logo{display:flex;align-items:center}
 .topbar-right{display:flex;align-items:center;gap:12px}
 .user-pill{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px}
 .plan-badge{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:2px 8px;border-radius:100px}
@@ -543,7 +541,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 @media(max-width:700px){
   /* NAV */
   .nav{padding:0 14px;height:54px}
-  .nav-logo h1{font-size:16px}
+  .brand-logo{height:30px}
   .nav-actions{gap:8px}
   .btn-nav-ghost{font-size:12px;padding:6px 10px}
   .btn-nav-cta{font-size:12px;padding:6px 12px}
@@ -570,7 +568,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .auth-card .field input,.auth-card .field select{font-size:14px}
   /* TOPBAR */
   .topbar{padding:0 12px;height:52px}
-  .topbar-logo{font-size:15px}
+  .topbar-logo .brand-logo{height:24px}
   .topbar-right{gap:8px}
   /* En mobile solo mostramos campana + pill compacto; logout y upgrade van al dropdown */
   .btn-upgrade-top{display:none!important}
@@ -641,8 +639,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .current-plan-card{flex-wrap:wrap}
 }
 @media(max-width:380px){
-  .nav-logo h1{display:none}
-  .topbar-logo{font-size:14px}
+  .brand-logo{height:26px}
+  .topbar-logo .brand-logo{height:22px}
   .avatar-grid{grid-template-columns:repeat(4,1fr)}
   .profile-tab{font-size:10px;padding:6px 7px}
 }
@@ -733,6 +731,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 
+<!-- ═══ LOGO SVG SYMBOL (currentColor adapts to dark/light theme) ═══ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="logo-etify" viewBox="0 0 512 197.93">
+    <path d="M128.5,48.47v107.46c0,8.4-6.85,15.24-15.26,15.24H23.49c-8.4,0-15.24-6.84-15.24-15.24V22.96c0-8.41,6.84-15.24,15.24-15.24h63.57l.31.02h.12c1.28.11,2.57.49,3.73,1.11.82.46,1.54,1,2.15,1.61l32.38,32.39c.3.29.52.55.72.8.84,1.04,1.46,2.32,1.77,3.67l.08.35.18.8Z" style="fill:#fff;stroke-width:0"/>
+    <polygon points="87.37 7.72 87.37 7.74 87.06 7.72 87.37 7.72" style="fill:#fff;stroke-width:0"/>
+    <polygon points="128.5 47.67 128.5 48.47 128.32 47.67 128.5 47.67" style="fill:#fff;stroke-width:0"/>
+    <polygon points="87.06 7.72 85.78 7.72 85.78 7.63 87.06 7.72" style="fill:#fff;stroke-width:0"/>
+    <polygon points="128.68 49.27 128.5 49.27 128.5 48.47 128.68 49.27" style="fill:#fff;stroke-width:0"/>
+    <path d="M158.29,33.42h85.02v22.94h-60.9v25.81h55.5v22.44h-55.5v26.31h61.74v23.11h-85.86V33.42Z" style="fill:currentColor;stroke-width:0"/>
+    <path d="M279.58,48.26v18.89h24.12v20.75h-24.12v29.52c0,6.19,1.63,10.35,4.89,12.48,3.26,2.14,7.76,3.2,13.49,3.2h7.59v20.92h-11.3c-25.3,0-37.95-11.69-37.95-35.09V48.26h23.28Z" style="fill:currentColor;stroke-width:0"/>
+    <rect x="314.66" y="33.42" width="23.28" height="22.6" rx="11.3" ry="11.3" style="fill:#c9a000;stroke-width:0"/>
+    <rect x="314.66" y="67.15" width="23.28" height="86.87" style="fill:currentColor;stroke-width:0"/>
+    <path d="M355.9,51.3c3.32-5.73,8.01-10.15,14.09-13.24,6.07-3.09,13.04-4.64,20.92-4.64h12.15v20.41h-12.15c-5.62,0-9.81,1.49-12.57,4.47-2.76,2.98-4.13,7.62-4.13,13.92v.17h25.98v20.41h-25.98v61.23h-23.28v-82.65c0-7.65,1.66-14.34,4.97-20.07Z" style="fill:currentColor;stroke-width:0"/>
+    <path d="M413.51,169.21h11.81c5.85,0,10.4-3.32,13.66-9.95l3.88-8.6-36.27-83.5h25.64l14.84,35.93,8.1,22.6,8.27-22.6,14.68-35.93h25.64l-37.78,86.87c-3.15,7.53-6.33,13.86-9.53,18.98-3.2,5.12-7.23,9.28-12.06,12.48-4.84,3.2-10.69,4.81-17.54,4.81h-13.33v-21.09Z" style="fill:currentColor;stroke-width:0"/>
+    <path d="M128.59,47.67v108.26c0,8.4-6.85,15.24-15.26,15.24H23.58c-8.4,0-15.24-6.84-15.24-15.24V22.96c0-8.41,6.84-15.24,15.24-15.24h63.88v7.35l-1.59-.13h-.13c-.17-.02-.37-.02-.54-.02H23.58c-4.44,0-8.05,3.61-8.05,8.04v132.97c0,4.43,3.61,8.04,8.05,8.04h89.75c4.45,0,8.06-3.61,8.06-8.04V51.11c0-.47-.05-.98-.17-1.48l-.08-.36-.38-1.6h7.83Z" style="fill:currentColor;stroke-width:0"/>
+    <path d="M128.77,49.27h-29.42c-7.43,0-13.48-6.06-13.48-13.5V7.63l1.28.09.31.02h.12c1.28.11,2.57.49,3.73,1.11.82.46,1.54,1,2.15,1.61l32.38,32.39c.3.29.52.55.72.8.84,1.04,1.46,2.32,1.77,3.67l.08.35.18.8.18.8Z" style="fill:#c9a000;stroke-width:0"/>
+    <path d="M111.62,50.36v22.93c0,1.68-1.37,3.06-3.06,3.06H28.36c-1.69,0-3.06-1.38-3.06-3.06v-24.32c0-1.68,1.37-3.05,3.06-3.05h54.28v-1.33H28.36c-2.42,0-4.4,1.96-4.4,4.38v24.32c0,2.43,1.98,4.39,4.4,4.39h80.2c2.42,0,4.4-1.96,4.4-4.39v-22.93h-1.34Z" style="fill:currentColor;stroke-width:0"/>
+    <path d="M47.2,55.16v11.95c0,1.6-1.3,2.9-2.9,2.9h-10.78c-1.6,0-2.9-1.3-2.9-2.9v-11.95c0-1.61,1.3-2.91,2.9-2.91h10.78c1.6,0,2.9,1.3,2.9,2.91Z" style="fill:currentColor;stroke-width:0"/>
+    <rect x="51.88" y="65.78" width="24.85" height="2.48" rx=".93" ry=".93" style="fill:currentColor;stroke-width:0"/>
+    <path d="M64.55,57.96v.62c0,.51-.42.93-.94.93h-10.8c-.52,0-.93-.42-.93-.93v-.62c0-.51.41-.93.93-.93h10.8c.52,0,.94.42.94.93Z" style="fill:currentColor;stroke-width:0"/>
+    <rect x="91.44" y="52.6" width="2.77" height="17.06" style="fill:currentColor;stroke-width:0"/>
+    <rect x="97.65" y="52.6" width="2.76" height="17.06" style="fill:currentColor;stroke-width:0"/>
+    <rect x="103.85" y="52.6" width="2.77" height="17.06" style="fill:currentColor;stroke-width:0"/>
+    <path d="M108.56,83.2H28.36c-2.42,0-4.4,1.97-4.4,4.39v24.32c0,2.42,1.98,4.39,4.4,4.39h80.2c2.42,0,4.39-1.97,4.39-4.39v-24.32c0-2.42-1.97-4.39-4.39-4.39ZM111.62,111.91c0,1.68-1.37,3.06-3.06,3.06H28.36c-1.69,0-3.06-1.38-3.06-3.06v-24.32c0-1.68,1.37-3.05,3.06-3.05h80.2c1.69,0,3.06,1.37,3.06,3.05v24.32Z" style="fill:currentColor;stroke-width:0"/>
+    <rect x="30.62" y="90.87" width="16.58" height="17.76" rx="2.9" ry="2.9" style="fill:currentColor;stroke-width:0"/>
+    <rect x="51.88" y="104.4" width="24.86" height="2.48" rx=".93" ry=".93" style="fill:currentColor;stroke-width:0"/>
+    <rect x="51.88" y="95.64" width="12.67" height="2.48" rx=".93" ry=".93" style="fill:currentColor;stroke-width:0"/>
+    <rect x="91.44" y="91.22" width="2.77" height="17.06" style="fill:currentColor;stroke-width:0"/>
+    <rect x="97.65" y="91.22" width="2.77" height="17.06" style="fill:currentColor;stroke-width:0"/>
+    <rect x="103.85" y="91.22" width="2.77" height="17.06" style="fill:currentColor;stroke-width:0"/>
+    <path d="M108.56,121.82H28.36c-2.42,0-4.4,1.97-4.4,4.39v24.32c0,2.42,1.98,4.39,4.4,4.39h80.2c2.42,0,4.39-1.97,4.39-4.39v-24.32c0-2.42-1.97-4.39-4.39-4.39ZM111.62,150.53c0,1.68-1.37,3.05-3.06,3.05H28.36c-1.69,0-3.06-1.37-3.06-3.05v-24.32c0-1.68,1.37-3.05,3.06-3.05h80.2c1.69,0,3.06,1.37,3.06,3.05v24.32Z" style="fill:currentColor;stroke-width:0"/>
+    <path d="M121.22,49.64l-.08-.36h-21.79c-7.43,0-13.48-6.06-13.48-13.5V14.95h-.13c-.17-.02-.37-.02-.54-.02H23.58c-4.44,0-8.05,3.61-8.05,8.04v132.97c0,4.43,3.61,8.04,8.05,8.04h89.75c4.45,0,8.06-3.61,8.06-8.04V51.12c0-.47-.05-.98-.17-1.48ZM103.85,52.6h2.77v17.06h-2.77v-17.06ZM97.65,52.6h2.76v17.06h-2.76v-17.06ZM91.44,52.6h2.77v17.06h-2.77v-17.06ZM112.95,150.53c0,2.42-1.97,4.39-4.39,4.39H28.36c-2.42,0-4.4-1.97-4.4-4.39v-24.32c0-2.42,1.98-4.39,4.4-4.39h80.2c2.42,0,4.39,1.97,4.39,4.39v24.32ZM112.95,111.91c0,2.42-1.97,4.39-4.39,4.39H28.36c-2.42,0-4.4-1.97-4.4-4.39v-24.32c0-2.42,1.98-4.39,4.4-4.39h80.2c2.42,0,4.39,1.97,4.39,4.39v24.32ZM112.96,73.29c0,2.43-1.98,4.39-4.4,4.39H28.36c-2.42,0-4.4-1.96-4.4-4.39v-24.32c0-2.42,1.98-4.38,4.4-4.38h54.28v1.33H28.36c-1.69,0-3.06,1.37-3.06,3.05v24.32c0,1.68,1.37,3.06,3.06,3.06h80.2c1.69,0,3.06-1.38,3.06-3.06v-22.93h1.34v22.93ZM52.81,65.78h22.99c.52,0,.93.42.93.93v.62c0,.52-.41.93-.93.93h-22.99c-.52,0-.93-.41-.93-.93v-.62c0-.51.41-.93.93-.93ZM51.88,58.58v-.62c0-.51.41-.93.93-.93h10.8c.52,0,.94.42.94.93v.62c0,.51-.42.93-.94.93h-10.8c-.52,0-.93-.42-.93-.93ZM47.2,55.16v11.95c0,1.6-1.3,2.9-2.9,2.9h-10.78c-1.6,0-2.9-1.3-2.9-2.9v-11.95c0-1.61,1.3-2.91,2.9-2.91h10.78c1.6,0,2.9,1.3,2.9,2.91Z" style="fill:none;stroke-width:0"/>
+    <rect x="30.62" y="129.49" width="16.58" height="17.76" rx="2.9" ry="2.9" style="fill:currentColor;stroke-width:0"/>
+    <rect x="51.88" y="143.01" width="24.86" height="2.48" rx=".93" ry=".93" style="fill:currentColor;stroke-width:0"/>
+    <rect x="51.88" y="134.26" width="12.67" height="2.48" rx=".93" ry=".93" style="fill:currentColor;stroke-width:0"/>
+    <rect x="91.44" y="129.84" width="2.77" height="17.06" style="fill:currentColor;stroke-width:0"/>
+    <rect x="97.65" y="129.84" width="2.77" height="17.06" style="fill:currentColor;stroke-width:0"/>
+    <rect x="103.85" y="129.84" width="2.77" height="17.06" style="fill:currentColor;stroke-width:0"/>
+  </symbol>
+</svg>
+
 <!-- ════════════════════════════════════════════════════
      SCREEN: LANDING
 ════════════════════════════════════════════════════════ -->
@@ -741,8 +780,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <!-- NAV -->
   <nav class="nav">
     <a href="#" class="nav-logo" onclick="return false">
-      <div class="nav-logo-icon">📦</div>
-      <h1>Eti<span>Label</span></h1>
+      <svg class="brand-logo" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify"/></svg>
     </a>
     <div class="nav-actions">
       <button class="btn-theme-toggle" id="theme-toggle-landing" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
@@ -756,7 +794,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="hero-glow"></div>
     <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Compatible con etiquetas de Mercado Libre</div>
     <h2>Combinar etiquetas<br><em>nunca fue tan fácil</em></h2>
-    <p class="hero-sub">Subí tus PDFs de etiquetas y EtiLibre las acomoda automáticamente en hojas A4 listas para imprimir. Sin Illustrator. Sin complicaciones.</p>
+    <p class="hero-sub">Subí tus PDFs de etiquetas y Etify las acomoda automáticamente en hojas A4 listas para imprimir. Sin Illustrator. Sin complicaciones.</p>
     <div class="hero-actions">
       <button class="btn-hero-primary" onclick="showScreen('screen-register')">Empezar gratis</button>
       <button class="btn-hero-ghost" onclick="scrollToPricing()">Ver planes →</button>
@@ -774,7 +812,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="section">
     <div class="section-tag">Cómo funciona</div>
     <h2 class="section-title">Tres pasos y<br>a imprimir</h2>
-    <p class="section-desc">Sin registros, sin configuraciones raras. EtiLibre hace el trabajo sucio para que vos te enfoques en vender.</p>
+    <p class="section-desc">Sin registros, sin configuraciones raras. Etify hace el trabajo sucio para que vos te enfoques en vender.</p>
     <div class="steps-grid">
       <div class="step-card">
         <div class="step-num">01</div>
@@ -783,7 +821,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       </div>
       <div class="step-card">
         <div class="step-num">02</div>
-        <h3>EtiLibre los organiza</h3>
+        <h3>Etify los organiza</h3>
         <p>Se agrupan automáticamente en hojas A4 de hasta 3 etiquetas, centradas y con líneas de corte opcionales.</p>
       </div>
       <div class="step-card">
@@ -982,8 +1020,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-logo">📦 Eti<span>Libre</span></div>
-    <div class="footer-copy">© 2025 EtiLibre · Herramienta independiente compatible con etiquetas de Mercado Libre</div>
+    <div class="footer-logo"><svg class="brand-logo" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify"/></svg></div>
+    <div class="footer-copy">© 2025 Etify · Herramienta independiente compatible con etiquetas de Mercado Libre</div>
     <div class="footer-links">
       <button class="footer-link-btn" onclick="openModal('modal-tos')">Términos y Condiciones</button>
       <span class="footer-sep">·</span>
@@ -1004,25 +1042,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <p class="legal-updated">Última actualización: junio de 2025</p>
 
     <h3>1. Aceptación de los términos</h3>
-    <p>Al registrarse o utilizar EtiLibre, el usuario declara haber leído, comprendido y aceptado los presentes Términos y Condiciones. Si el usuario no está de acuerdo con alguno de ellos, deberá abstenerse de utilizar la plataforma.</p>
+    <p>Al registrarse o utilizar Etify, el usuario declara haber leído, comprendido y aceptado los presentes Términos y Condiciones. Si el usuario no está de acuerdo con alguno de ellos, deberá abstenerse de utilizar la plataforma.</p>
 
     <h3>2. Descripción del servicio</h3>
-    <p>EtiLibre es una plataforma web que permite a los usuarios combinar y reorganizar etiquetas de envío en formato PDF sobre hojas A4 con el fin de optimizar su impresión.</p>
+    <p>Etify es una plataforma web que permite a los usuarios combinar y reorganizar etiquetas de envío en formato PDF sobre hojas A4 con el fin de optimizar su impresión.</p>
     <p>Los archivos subidos por el usuario se almacenan de forma temporal únicamente para permitir su procesamiento y acceso desde el historial. Los archivos generados se eliminan automáticamente transcurridos siete (7) días desde su creación.</p>
 
     <h3>3. Exención de responsabilidad</h3>
-    <p>EtiLibre es una herramienta independiente para optimizar la impresión de etiquetas. <strong>No pertenece ni está afiliada a Mercado Libre, Mercado Pago, Andreani, Correo Argentino ni a ninguna empresa de logística.</strong></p>
-    <p>EtiLibre no se responsabiliza por:</p>
+    <p>Etify es una herramienta independiente para optimizar la impresión de etiquetas. <strong>No pertenece ni está afiliada a Mercado Libre, Mercado Pago, Andreani, Correo Argentino ni a ninguna empresa de logística.</strong></p>
+    <p>Etify no se responsabiliza por:</p>
     <ul>
       <li>Archivos PDF defectuosos, ilegibles o con información incorrecta proporcionados por el usuario.</li>
       <li>Errores de impresión ocasionados por configuraciones del dispositivo, impresora o software utilizado por el usuario.</li>
       <li>Etiquetas rechazadas por operadores logísticos por causas ajenas al funcionamiento de la plataforma.</li>
       <li>La pérdida de archivos una vez transcurrido el período de almacenamiento establecido.</li>
     </ul>
-    <p>En ningún caso EtiLibre será responsable por daños directos, indirectos, incidentales, pérdida de beneficios o cualquier otro perjuicio derivado del uso o de la imposibilidad de utilizar la plataforma, salvo en los casos expresamente previstos por la legislación aplicable.</p>
+    <p>En ningún caso Etify será responsable por daños directos, indirectos, incidentales, pérdida de beneficios o cualquier otro perjuicio derivado del uso o de la imposibilidad de utilizar la plataforma, salvo en los casos expresamente previstos por la legislación aplicable.</p>
 
     <h3>4. Responsabilidad del usuario</h3>
-    <p>El usuario es el único responsable de los archivos que sube a la plataforma. Al utilizar EtiLibre declara que:</p>
+    <p>El usuario es el único responsable de los archivos que sube a la plataforma. Al utilizar Etify declara que:</p>
     <ul>
       <li>Cuenta con autorización para procesar los archivos que sube.</li>
       <li>Los archivos no contienen contenido ilegal, malicioso ni que infrinja derechos de terceros.</li>
@@ -1030,14 +1068,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </ul>
 
     <h3>5. Funcionamiento de la plataforma</h3>
-    <p>EtiLibre reorganiza visualmente las etiquetas dentro del PDF sin modificar la información contenida en ellas.</p>
+    <p>Etify reorganiza visualmente las etiquetas dentro del PDF sin modificar la información contenida en ellas.</p>
     <p>La plataforma no altera códigos de barras, códigos QR, direcciones, textos ni ningún otro dato presente en las etiquetas originales proporcionadas por el usuario.</p>
 
     <h3>6. Historial y almacenamiento</h3>
     <p>Los archivos generados permanecerán disponibles en el historial del usuario durante diez (10) días desde su creación. Cumplido dicho plazo serán eliminados automáticamente y no podrán recuperarse.</p>
 
     <h3>7. Disponibilidad del servicio</h3>
-    <p>EtiLibre procura mantener la plataforma disponible de forma continua. Sin embargo, no garantiza la disponibilidad ininterrumpida del servicio, pudiendo producirse interrupciones por tareas de mantenimiento, actualizaciones, fallas técnicas o causas ajenas a su control.</p>
+    <p>Etify procura mantener la plataforma disponible de forma continua. Sin embargo, no garantiza la disponibilidad ininterrumpida del servicio, pudiendo producirse interrupciones por tareas de mantenimiento, actualizaciones, fallas técnicas o causas ajenas a su control.</p>
 
     <h3>8. Uso permitido</h3>
     <p>El usuario se compromete a utilizar la plataforma de forma lícita y conforme a estos Términos y Condiciones.</p>
@@ -1048,25 +1086,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <li>Intentar acceder sin autorización a sistemas, servidores o cuentas de otros usuarios.</li>
       <li>Realizar un uso abusivo o automatizado que pueda afectar la estabilidad de la plataforma.</li>
     </ul>
-    <p>EtiLibre podrá suspender o cancelar cuentas que incumplan estas condiciones.</p>
+    <p>Etify podrá suspender o cancelar cuentas que incumplan estas condiciones.</p>
 
     <h3>9. Planes y pagos</h3>
-    <p>EtiLibre ofrece planes de suscripción mensual. Los pagos se procesan a través de Mercado Pago.</p>
+    <p>Etify ofrece planes de suscripción mensual. Los pagos se procesan a través de Mercado Pago.</p>
     <p>El usuario podrá cancelar su suscripción en cualquier momento. La cancelación impedirá futuras renovaciones automáticas, manteniéndose el acceso hasta la finalización del período ya abonado.</p>
     <p>No se realizarán reembolsos por períodos parciales ya facturados, salvo que la legislación argentina vigente disponga lo contrario.</p>
 
     <h3>10. Propiedad intelectual</h3>
-    <p>El software, diseño, logotipo, nombre comercial, funcionalidades y demás elementos que integran EtiLibre son propiedad de sus titulares y se encuentran protegidos por la legislación aplicable sobre propiedad intelectual.</p>
+    <p>El software, diseño, logotipo, nombre comercial, funcionalidades y demás elementos que integran Etify son propiedad de sus titulares y se encuentran protegidos por la legislación aplicable sobre propiedad intelectual.</p>
     <p>Queda prohibida su reproducción, distribución, modificación o utilización sin autorización previa y por escrito.</p>
 
     <h3>11. Fuerza mayor</h3>
-    <p>EtiLibre no será responsable por incumplimientos o interrupciones del servicio ocasionados por hechos de fuerza mayor o caso fortuito, incluyendo, entre otros, fallas de proveedores de Internet, servicios en la nube, cortes de energía eléctrica, ataques informáticos o desastres naturales.</p>
+    <p>Etify no será responsable por incumplimientos o interrupciones del servicio ocasionados por hechos de fuerza mayor o caso fortuito, incluyendo, entre otros, fallas de proveedores de Internet, servicios en la nube, cortes de energía eléctrica, ataques informáticos o desastres naturales.</p>
 
     <h3>12. Modificaciones</h3>
-    <p>EtiLibre podrá modificar estos Términos y Condiciones en cualquier momento. Los cambios serán publicados en la plataforma y, cuando corresponda, notificados a los usuarios registrados. Las modificaciones entrarán en vigencia a los diez (10) días de su publicación.</p>
+    <p>Etify podrá modificar estos Términos y Condiciones en cualquier momento. Los cambios serán publicados en la plataforma y, cuando corresponda, notificados a los usuarios registrados. Las modificaciones entrarán en vigencia a los diez (10) días de su publicación.</p>
 
     <h3>13. Política de Privacidad</h3>
-    <p>El tratamiento de los datos personales se encuentra regulado por la Política de Privacidad de EtiLibre, la cual forma parte integrante de los presentes Términos y Condiciones.</p>
+    <p>El tratamiento de los datos personales se encuentra regulado por la Política de Privacidad de Etify, la cual forma parte integrante de los presentes Términos y Condiciones.</p>
 
     <h3>14. Legislación aplicable</h3>
     <p>Estos Términos y Condiciones se rigen por las leyes de la República Argentina. Toda controversia derivada de la utilización del servicio será sometida a la jurisdicción de los tribunales ordinarios de la Ciudad Autónoma de Buenos Aires, salvo que la legislación aplicable establezca otra competencia obligatoria.</p>
@@ -1083,31 +1121,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <p class="legal-updated">Última actualización: junio de 2025</p>
 
     <h3>1. Introducción</h3>
-    <p>En EtiLibre nos comprometemos a proteger la privacidad y seguridad de la información de nuestros usuarios. Esta Política de Privacidad explica qué datos recopilamos, cómo los utilizamos, cómo los protegemos y cuáles son tus derechos respecto de dicha información.</p>
-    <p>Al registrarte o utilizar EtiLibre aceptás las prácticas descritas en esta Política de Privacidad.</p>
+    <p>En Etify nos comprometemos a proteger la privacidad y seguridad de la información de nuestros usuarios. Esta Política de Privacidad explica qué datos recopilamos, cómo los utilizamos, cómo los protegemos y cuáles son tus derechos respecto de dicha información.</p>
+    <p>Al registrarte o utilizar Etify aceptás las prácticas descritas en esta Política de Privacidad.</p>
 
     <h3>2. Información que recopilamos</h3>
     <p>Para brindar el servicio recopilamos únicamente la información necesaria para el funcionamiento de la plataforma.</p>
-    <p><strong>Datos de la cuenta:</strong> Al crear una cuenta recopilamos nombre de usuario, dirección de correo electrónico y contraseña, almacenada exclusivamente mediante algoritmos de hash seguros (bcrypt). EtiLibre nunca almacena contraseñas en texto plano.</p>
+    <p><strong>Datos de la cuenta:</strong> Al crear una cuenta recopilamos nombre de usuario, dirección de correo electrónico y contraseña, almacenada exclusivamente mediante algoritmos de hash seguros (bcrypt). Etify nunca almacena contraseñas en texto plano.</p>
     <p><strong>Datos de uso:</strong> Podemos registrar cantidad de hojas generadas, conversiones realizadas, fecha y hora de utilización, plan contratado, historial de archivos generados e información técnica necesaria para el funcionamiento y seguridad de la plataforma. Estos datos son utilizados únicamente para administrar el servicio, mejorar su funcionamiento y prevenir usos indebidos.</p>
-    <p><strong>Datos de pago:</strong> EtiLibre no almacena información de tarjetas de crédito, débito ni otros medios de pago. Los pagos son procesados exclusivamente por Mercado Pago, quien actúa conforme a sus propias políticas de privacidad y seguridad.</p>
+    <p><strong>Datos de pago:</strong> Etify no almacena información de tarjetas de crédito, débito ni otros medios de pago. Los pagos son procesados exclusivamente por Mercado Pago, quien actúa conforme a sus propias políticas de privacidad y seguridad.</p>
 
     <h3>3. Archivos subidos por el usuario</h3>
     <p>Los archivos PDF cargados por el usuario son procesados principalmente en el navegador (<em>client-side</em>), reduciendo al mínimo el tratamiento de la información. Los archivos generados podrán almacenarse temporalmente únicamente para permitir su descarga y acceso desde el historial del usuario.</p>
     <p>Los archivos almacenados serán eliminados automáticamente una vez transcurridos diez (10) días desde su generación.</p>
-    <p>EtiLibre no utiliza el contenido de los archivos para fines comerciales, publicitarios ni de entrenamiento de modelos de inteligencia artificial.</p>
+    <p>Etify no utiliza el contenido de los archivos para fines comerciales, publicitarios ni de entrenamiento de modelos de inteligencia artificial.</p>
 
     <h3>4. Finalidad del tratamiento de los datos</h3>
     <p>Utilizamos la información recopilada exclusivamente para crear y administrar tu cuenta, permitir el acceso a la plataforma, gestionar tu suscripción, controlar los límites de uso según el plan contratado, brindar soporte técnico, mejorar el rendimiento y la seguridad del servicio, y enviar comunicaciones relacionadas con el funcionamiento de la plataforma, cambios importantes, comprobantes de pago o notificaciones del sistema.</p>
     <p>No utilizamos tus datos para realizar publicidad personalizada.</p>
 
     <h3>5. Compartición de información</h3>
-    <p>EtiLibre no vende, alquila ni cede datos personales a terceros. Solo podremos compartir información cuando sea necesario para prestar el servicio (por ejemplo, con proveedores de infraestructura o procesadores de pago), exista una obligación legal o requerimiento de una autoridad competente, o sea necesario para proteger los derechos, seguridad o funcionamiento de EtiLibre.</p>
+    <p>Etify no vende, alquila ni cede datos personales a terceros. Solo podremos compartir información cuando sea necesario para prestar el servicio (por ejemplo, con proveedores de infraestructura o procesadores de pago), exista una obligación legal o requerimiento de una autoridad competente, o sea necesario para proteger los derechos, seguridad o funcionamiento de Etify.</p>
     <p>Los terceros que colaboran en la prestación del servicio solo podrán utilizar la información para cumplir con las funciones contratadas.</p>
 
     <h3>6. Cookies y almacenamiento local</h3>
-    <p>EtiLibre utiliza tecnologías de almacenamiento local del navegador (<em>localStorage</em> o tecnologías similares) para mantener la sesión iniciada, recordar preferencias del usuario y mejorar la experiencia de uso.</p>
-    <p>Actualmente EtiLibre no utiliza cookies destinadas al seguimiento publicitario ni a la elaboración de perfiles comerciales.</p>
+    <p>Etify utiliza tecnologías de almacenamiento local del navegador (<em>localStorage</em> o tecnologías similares) para mantener la sesión iniciada, recordar preferencias del usuario y mejorar la experiencia de uso.</p>
+    <p>Actualmente Etify no utiliza cookies destinadas al seguimiento publicitario ni a la elaboración de perfiles comerciales.</p>
 
     <h3>7. Seguridad de la información</h3>
     <p>Implementamos medidas técnicas y organizativas razonables para proteger la información de nuestros usuarios, incluyendo contraseñas protegidas mediante bcrypt, comunicación cifrada mediante HTTPS, autenticación mediante tokens seguros, controles de acceso a la plataforma y protección contra accesos no autorizados.</p>
@@ -1122,13 +1160,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <p>La eliminación de la cuenta puede realizarse desde la sección "Zona de peligro" dentro del perfil del usuario o contactándonos mediante los canales oficiales.</p>
 
     <h3>10. Enlaces a servicios de terceros</h3>
-    <p>La plataforma puede utilizar servicios externos necesarios para su funcionamiento, como procesadores de pago o proveedores de infraestructura. Cada uno de dichos servicios posee sus propias políticas de privacidad, sobre las cuales EtiLibre no tiene control.</p>
+    <p>La plataforma puede utilizar servicios externos necesarios para su funcionamiento, como procesadores de pago o proveedores de infraestructura. Cada uno de dichos servicios posee sus propias políticas de privacidad, sobre las cuales Etify no tiene control.</p>
 
     <h3>11. Modificaciones de esta Política</h3>
-    <p>EtiLibre podrá modificar esta Política de Privacidad cuando resulte necesario por cambios legales, técnicos o funcionales. Cuando las modificaciones sean relevantes, serán publicadas en la plataforma y, en caso de corresponder, notificadas a los usuarios registrados antes de su entrada en vigencia.</p>
+    <p>Etify podrá modificar esta Política de Privacidad cuando resulte necesario por cambios legales, técnicos o funcionales. Cuando las modificaciones sean relevantes, serán publicadas en la plataforma y, en caso de corresponder, notificadas a los usuarios registrados antes de su entrada en vigencia.</p>
 
     <h3>12. Contacto</h3>
-    <p>Si tenés consultas relacionadas con esta Política de Privacidad o sobre el tratamiento de tus datos personales, podés comunicarte con nosotros a través de: <strong><a href="mailto:contacto@etilibre.com" style="color:var(--accent)">contacto@etilibre.com</a></strong></p>
+    <p>Si tenés consultas relacionadas con esta Política de Privacidad o sobre el tratamiento de tus datos personales, podés comunicarte con nosotros a través de: <strong><a href="mailto:contacto@Etify.com" style="color:var(--accent)">contacto@Etify.com</a></strong></p>
   </div>
 </div>
 
@@ -1140,8 +1178,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="auth-card">
       <button class="auth-back" onclick="showScreen('screen-landing')">← Volver</button>
       <div class="auth-logo">
-        <div class="auth-logo-icon">📦</div>
-        <h1>Eti<span>Label</span></h1>
+        <svg class="brand-logo" style="height:32px" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify"/></svg>
       </div>
       <p class="auth-subtitle">Ingresá a tu cuenta para combinar tus etiquetas.</p>
 
@@ -1204,8 +1241,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="auth-card">
       <button class="auth-back" onclick="showScreen('screen-landing')">← Volver</button>
       <div class="auth-logo">
-        <div class="auth-logo-icon">📦</div>
-        <h1>Eti<span>Label</span></h1>
+        <svg class="brand-logo" style="height:32px" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify"/></svg>
       </div>
       <p class="auth-subtitle">Creá tu cuenta y empezá a combinar etiquetas hoy.</p>
       <button class="btn-google" onclick="googleAuth()">
@@ -1242,7 +1278,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 ════════════════════════════════════════════════════════ -->
 <div id="screen-app" class="screen">
   <nav class="topbar">
-    <div class="topbar-logo">📦 Eti<span>Label</span></div>
+    <div class="topbar-logo"><svg class="brand-logo" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify"/></svg></div>
     <div class="topbar-right">
       <button class="notif-bell" onclick="openProfile('notifications')" title="Notificaciones">
         🔔<span class="notif-badge" id="notif-badge-top" style="display:none"></span>
@@ -1383,7 +1419,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       </button>
       <div class="gate-pay-hint" id="gate-pay-hint" style="display:none"></div>
       <button class="btn-gate-back" onclick="cancelPaymentGate()">← Volver al inicio</button>
-      <p class="payment-gate-note">🔒 El pago es procesado de forma segura por Mercado Pago. EtiLibre nunca almacena tus datos de tarjeta.<br>Serás redirigido al checkout de MP y al volver tu plan se activará automáticamente.</p>
+      <p class="payment-gate-note">🔒 El pago es procesado de forma segura por Mercado Pago. Etify nunca almacena tus datos de tarjeta.<br>Serás redirigido al checkout de MP y al volver tu plan se activará automáticamente.</p>
     </div>
   </div>
 </div>
@@ -1438,7 +1474,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 ════════════════════════════════════════════════════════ -->
 <div id="screen-profile" class="screen">
   <nav class="topbar">
-    <div class="topbar-logo">📦 Eti<span>Label</span></div>
+    <div class="topbar-logo"><svg class="brand-logo" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify"/></svg></div>
     <div class="topbar-right">
       <button class="btn-nav-ghost" onclick="showScreen('screen-app')" style="font-size:13px;padding:6px 14px">← Volver</button>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
@@ -1547,7 +1583,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
       <div class="profile-section">
         <div class="profile-section-title"><span>🛡️</span> Sesiones activas</div>
-        <p style="font-size:14px;color:var(--text2);line-height:1.7">Tenés <strong style="color:var(--text)">1 sesión activa</strong> en este momento (este navegador).<br>EtiLibre no almacena tokens de sesión en servidores externos — todo funciona localmente en tu dispositivo.</p>
+        <p style="font-size:14px;color:var(--text2);line-height:1.7">Tenés <strong style="color:var(--text)">1 sesión activa</strong> en este momento (este navegador).<br>Etify no almacena tokens de sesión en servidores externos — todo funciona localmente en tu dispositivo.</p>
       </div>
     </div>
 
@@ -1803,7 +1839,7 @@ function sanitize(str) {
 
 function getUsers() {
   try {
-    const raw = localStorage.getItem('etiLibre_users');
+    const raw = localStorage.getItem('Etify_users');
     if (!raw) return {};
     // Intentar deobfuscar (nuevo formato)
     const plain = _deobf(raw);
@@ -1816,7 +1852,7 @@ function getUsers() {
   } catch { return {}; }
 }
 function saveUsers(u) {
-  try { localStorage.setItem('etiLibre_users', _obf(JSON.stringify(u))); } catch {}
+  try { localStorage.setItem('Etify_users', _obf(JSON.stringify(u))); } catch {}
 }
 
 /* ── Nota: al entregar este archivo, localStorage se inicia vacío.
@@ -2507,7 +2543,7 @@ function submitContactForm(e) {
   const message = document.getElementById('cf-message').value.trim();
   const plan    = document.getElementById('cf-plan')?.value || '';
   const planLine = plan ? `\nPlan de interés: ${plan}` : '';
-  window.location.href = `mailto:contacto@etilibre.com?subject=${encodeURIComponent('[EtiLibre] ' + subject)}&body=${encodeURIComponent('Nombre: ' + name + '\nEmail: ' + email + planLine + '\n\n' + message)}`;
+  window.location.href = `mailto:contacto@Etify.com?subject=${encodeURIComponent('[Etify] ' + subject)}&body=${encodeURIComponent('Nombre: ' + name + '\nEmail: ' + email + planLine + '\n\n' + message)}`;
   ok.style.display = 'block';
   document.getElementById('contact-form').reset();
   if (typeof grecaptcha !== 'undefined') grecaptcha.reset(recaptchaWidgetContact);
@@ -2840,7 +2876,7 @@ async function combineLabels() {
     downloadUrl = URL.createObjectURL(blob);
     const dl = document.getElementById('btn-download');
     dl.href     = downloadUrl;
-    const _n=new Date();const _dd=String(_n.getDate()).padStart(2,'0');const _mm=String(_n.getMonth()+1).padStart(2,'0');const _yy=_n.getFullYear();dl.download=`EtiLibre_${_yy}-${_mm}-${_dd}.pdf`;
+    const _n=new Date();const _dd=String(_n.getDate()).padStart(2,'0');const _mm=String(_n.getMonth()+1).padStart(2,'0');const _yy=_n.getFullYear();dl.download=`Etify_${_yy}-${_mm}-${_dd}.pdf`;
 
     // Incrementar uso POR HOJA
     if (currentUser) {
@@ -2858,7 +2894,7 @@ async function combineLabels() {
         date:     new Date().toISOString(),
         sheets:   totalSheets,
         labels:   slots.length,
-        filename: `EtiLibre_${_yy}-${_mm}-${_dd}.pdf`,
+        filename: `Etify_${_yy}-${_mm}-${_dd}.pdf`,
         pdfData:  pdfBase64
       });
       cleanExpiredPDFs(currentUser);
@@ -3594,7 +3630,7 @@ function exportTosCSV() {
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `etilibre_usuarios_${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = `Etify_usuarios_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
 }
 
@@ -3910,9 +3946,9 @@ async function saNotifyUser(username) {
   <div class="legal-modal" style="max-width:480px">
     <div style="font-size:32px;margin-bottom:12px">📋</div>
     <h2 style="margin:0 0 8px">Antes de continuar</h2>
-    <p style="font-size:14px;color:var(--text2);margin:0 0 20px;line-height:1.6">Para usar EtiLibre necesitás aceptar nuestros Términos y Condiciones y la Política de Privacidad.</p>
+    <p style="font-size:14px;color:var(--text2);margin:0 0 20px;line-height:1.6">Para usar Etify necesitás aceptar nuestros Términos y Condiciones y la Política de Privacidad.</p>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px;margin-bottom:20px;max-height:180px;overflow-y:auto;font-size:12px;color:var(--text2);line-height:1.7">
-      Al usar EtiLibre aceptás que: la plataforma reorganiza etiquetas sin alterar su contenido; sos responsable de los archivos que subís; los PDFs generados se eliminan a los 7 días; EtiLibre no está afiliada a Mercado Libre, Mercado Pago ni ninguna empresa de logística. Los datos de tu cuenta se almacenan de forma segura conforme a la Ley 25.326.
+      Al usar Etify aceptás que: la plataforma reorganiza etiquetas sin alterar su contenido; sos responsable de los archivos que subís; los PDFs generados se eliminan a los 7 días; Etify no está afiliada a Mercado Libre, Mercado Pago ni ninguna empresa de logística. Los datos de tu cuenta se almacenan de forma segura conforme a la Ley 25.326.
     </div>
     <label class="tos-check" style="margin-bottom:16px">
       <input type="checkbox" id="google-tos-check">
@@ -3947,18 +3983,18 @@ async function saNotifyUser(username) {
     <p class="legal-updated">Última actualización: junio de 2025</p>
 
     <h3>1. Introducción</h3>
-    <p>La presente Política de Cookies explica cómo EtiLibre utiliza cookies y tecnologías similares para el funcionamiento de la plataforma. Al utilizar EtiLibre, aceptás el uso de cookies y tecnologías similares de acuerdo con esta Política.</p>
+    <p>La presente Política de Cookies explica cómo Etify utiliza cookies y tecnologías similares para el funcionamiento de la plataforma. Al utilizar Etify, aceptás el uso de cookies y tecnologías similares de acuerdo con esta Política.</p>
 
     <h3>2. ¿Qué son las cookies?</h3>
-    <p>Las cookies son pequeños archivos de texto que un sitio web almacena en el navegador del usuario para recordar información sobre su visita, facilitar el uso del servicio y mejorar la experiencia de navegación. Además de cookies, EtiLibre puede utilizar tecnologías similares, como localStorage o sessionStorage, que permiten almacenar información directamente en el navegador.</p>
+    <p>Las cookies son pequeños archivos de texto que un sitio web almacena en el navegador del usuario para recordar información sobre su visita, facilitar el uso del servicio y mejorar la experiencia de navegación. Además de cookies, Etify puede utilizar tecnologías similares, como localStorage o sessionStorage, que permiten almacenar información directamente en el navegador.</p>
 
     <h3>3. ¿Qué cookies utilizamos?</h3>
-    <p>Actualmente EtiLibre utiliza únicamente cookies y tecnologías necesarias para el funcionamiento de la plataforma.</p>
+    <p>Actualmente Etify utiliza únicamente cookies y tecnologías necesarias para el funcionamiento de la plataforma.</p>
     <p><strong>Cookies esenciales:</strong> Son indispensables para el funcionamiento del sitio y permiten mantener la sesión iniciada, recordar la autenticación del usuario, proteger la cuenta frente a accesos no autorizados, mantener la seguridad de la plataforma y recordar preferencias básicas de funcionamiento. Estas cookies no pueden deshabilitarse sin afectar el funcionamiento del servicio.</p>
-    <p><strong>Almacenamiento local (Local Storage):</strong> EtiLibre puede utilizar localStorage para guardar preferencia de tema (claro u oscuro), configuraciones de la interfaz, información necesaria para mantener la sesión iniciada y preferencias del usuario. Esta información permanece únicamente en el navegador del usuario y no se utiliza para fines publicitarios.</p>
+    <p><strong>Almacenamiento local (Local Storage):</strong> Etify puede utilizar localStorage para guardar preferencia de tema (claro u oscuro), configuraciones de la interfaz, información necesaria para mantener la sesión iniciada y preferencias del usuario. Esta información permanece únicamente en el navegador del usuario y no se utiliza para fines publicitarios.</p>
 
     <h3>4. Cookies de terceros</h3>
-    <p>EtiLibre puede integrar servicios proporcionados por terceros que utilizan sus propias cookies:</p>
+    <p>Etify puede integrar servicios proporcionados por terceros que utilizan sus propias cookies:</p>
     <ul>
       <li>Mercado Pago (procesamiento de pagos).</li>
       <li>Firebase Authentication (inicio de sesión y autenticación).</li>
@@ -3967,16 +4003,16 @@ async function saNotifyUser(username) {
     <p>El uso de cookies por parte de estos servicios se encuentra sujeto a sus respectivas políticas de privacidad.</p>
 
     <h3>5. Publicidad</h3>
-    <p>Actualmente EtiLibre no utiliza cookies para publicidad personalizada. En caso de incorporar publicidad en el futuro, esta Política será actualizada.</p>
+    <p>Actualmente Etify no utiliza cookies para publicidad personalizada. En caso de incorporar publicidad en el futuro, esta Política será actualizada.</p>
 
     <h3>6. Cómo administrar las cookies</h3>
-    <p>La mayoría de los navegadores permiten ver, eliminar o bloquear cookies. La desactivación de cookies esenciales puede impedir el correcto funcionamiento de EtiLibre.</p>
+    <p>La mayoría de los navegadores permiten ver, eliminar o bloquear cookies. La desactivación de cookies esenciales puede impedir el correcto funcionamiento de Etify.</p>
 
     <h3>7. Cambios en esta Política</h3>
-    <p>EtiLibre podrá modificar esta Política de Cookies cuando resulte necesario. La versión vigente estará siempre disponible en la plataforma.</p>
+    <p>Etify podrá modificar esta Política de Cookies cuando resulte necesario. La versión vigente estará siempre disponible en la plataforma.</p>
 
     <h3>8. Contacto</h3>
-    <p>Consultas: <strong><a href="mailto:contacto@etilibre.com" style="color:var(--accent)">contacto@etilibre.com</a></strong></p>
+    <p>Consultas: <strong><a href="mailto:contacto@Etify.com" style="color:var(--accent)">contacto@Etify.com</a></strong></p>
   </div>
 </div>
 
