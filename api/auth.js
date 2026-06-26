@@ -83,7 +83,7 @@ export default async function handler(req, res) {
       const ud = snap.docs[0].data();
       const token = signToken({ username: ud.username, role:'user' });
       const { pass:_, ...safe } = ud;
-      return res.json({ token, user: safe });
+      return res.json({ token, user: safe, needsTos: !ud.tosAccepted });
     }
     // Usuario nuevo — registrar
     const safeUser = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '.');
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
     const now = new Date();
     const userData = {
       username, email, pass: await bcrypt.hash('__google__', 12),
-      googleAuth: true,
+      googleAuth: true, tosAccepted: false,
       plan: 'free', active: true,
       displayName: displayName || username, avatar:'👤', nameColor:'',
       invoices:[], history:[],
@@ -104,7 +104,7 @@ export default async function handler(req, res) {
     await db.collection('users').doc(username).set(userData);
     const token = signToken({ username, role:'user' });
     const { pass:_, ...safe } = userData;
-    return res.json({ token, user: safe });
+    return res.json({ token, user: safe, needsTos: true });
   }
 
   res.status(400).json({ error: 'Acción inválida' });

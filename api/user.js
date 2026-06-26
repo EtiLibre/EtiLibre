@@ -52,7 +52,7 @@ export default async function handler(req, res) {
   if (req.method === 'PUT') {
     const { action } = req.body;
     if (action === 'update') {
-      const allowed = ['displayName','avatar','nameColor'];
+      const allowed = ['displayName','avatar','nameColor','tosAccepted'];
       const updates = {};
       for (const k of allowed) if (req.body[k] !== undefined) updates[k] = req.body[k];
       await ref.update(updates);
