@@ -170,6 +170,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .footer-sep{color:var(--text3);font-size:12px}
 .footer-link-btn{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:0;text-decoration:underline;font-family:inherit}
 .footer-link-btn:hover{color:var(--accent)}
+/* ── CONTACT SECTION ── */
+.contact-section{background:var(--surface2);border-top:1px solid var(--border);padding:72px 40px}
+.contact-inner{max-width:680px;margin:0 auto}
+.contact-title{font-size:26px;font-weight:800;color:var(--text);margin:0 0 8px}
+.contact-sub{color:var(--text2);font-size:15px;margin:0 0 32px}
+.contact-form .field{margin-bottom:16px}
+.contact-form .field label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px}
+.contact-form .field input,.contact-form .field textarea{width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box;transition:border-color .2s}
+.contact-form .field input:focus,.contact-form .field textarea:focus{outline:none;border-color:var(--accent)}
+.contact-form .field textarea{resize:vertical;min-height:110px}
+.contact-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.contact-captcha{margin:16px 0}
+.btn-contact-send{background:var(--accent);color:#000;font-weight:700;border:none;border-radius:var(--r-sm);padding:12px 28px;font-size:15px;cursor:pointer;margin-top:8px;transition:opacity .2s}
+.btn-contact-send:hover{opacity:.85}
+/* ── TOS CHECKBOX ── */
+.tos-check{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2);margin:12px 0;cursor:pointer;line-height:1.5}
+.tos-check input[type=checkbox]{margin-top:2px;accent-color:var(--accent);flex-shrink:0;width:15px;height:15px}
+/* ── COOKIE BANNER ── */
+.cookie-banner{position:fixed;bottom:24px;left:24px;z-index:10000;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-lg);box-shadow:0 8px 32px rgba(0,0,0,.18);padding:20px 24px;max-width:380px;display:flex;flex-direction:column;gap:14px;animation:cookieFadeIn .4s ease}
+@keyframes cookieFadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cookieFadeOut{to{opacity:0;transform:translateY(16px)}}
+.cookie-banner-text{display:flex;gap:12px;align-items:flex-start}
+.cookie-banner-text span{font-size:22px;flex-shrink:0}
+.cookie-banner-text p{font-size:13px;color:var(--text2);margin:0;line-height:1.6}
+.cookie-banner-btns{display:flex;gap:10px}
+.cookie-btn-accept{background:var(--accent);color:#000;font-weight:700;border:none;border-radius:var(--r-sm);padding:9px 20px;font-size:13px;cursor:pointer;flex:1}
+.cookie-btn-info{background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:9px 16px;font-size:13px;cursor:pointer}
+.cookie-btn-info:hover{border-color:var(--accent);color:var(--text)}
+/* ── LEGAL MODALS ── */
 .legal-modal-overlay{display:none;position:fixed;inset:0;background:var(--shadow-overlay);z-index:9999;align-items:center;justify-content:center;padding:20px}
 .legal-modal-overlay.open{display:flex}
 .legal-modal{background:var(--surface);border-radius:var(--r-lg);max-width:680px;width:100%;max-height:85vh;overflow-y:auto;padding:40px;position:relative;box-shadow:var(--card-shadow)}
@@ -532,6 +561,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .plans-grid{grid-template-columns:1fr}
   .faq-grid{grid-template-columns:1fr}
   .footer{padding:24px 16px;flex-direction:column;text-align:center}
+  .contact-section{padding:48px 20px}
+  .contact-row{grid-template-columns:1fr}
+  .cookie-banner{left:12px;right:12px;bottom:12px;max-width:none}
   /* AUTH */
   .auth-card{padding:28px 18px;border-radius:16px}
   .auth-card .field input,.auth-card .field select{font-size:14px}
@@ -898,6 +930,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
   </div>
 
+  <!-- SECCIÓN CONTACTO -->
+  <section class="contact-section" id="contact">
+    <div class="contact-inner">
+      <h2 class="contact-title">¿Tenés algún problema o consulta?</h2>
+      <p class="contact-sub">Completá el formulario y te respondemos a la brevedad.</p>
+      <form class="contact-form" id="contact-form" onsubmit="submitContactForm(event)">
+        <div class="contact-row">
+          <div class="field"><label>Nombre</label><input type="text" id="cf-name" placeholder="Tu nombre" required></div>
+          <div class="field"><label>Email</label><input type="email" id="cf-email" placeholder="tu@email.com" required></div>
+        </div>
+        <div class="field"><label>Asunto</label><input type="text" id="cf-subject" placeholder="¿En qué podemos ayudarte?" required></div>
+        <div class="field"><label>Mensaje</label><textarea id="cf-message" rows="4" placeholder="Describí tu problema o consulta con el mayor detalle posible…" required></textarea></div>
+        <div class="contact-captcha">
+          <div id="recaptcha-contact"></div>
+        </div>
+        <div class="auth-error" id="cf-error" style="display:none"></div>
+        <div id="cf-success" style="display:none;background:var(--teal);color:#fff;padding:12px 16px;border-radius:var(--r-sm);font-size:14px;margin-top:8px">✅ ¡Mensaje enviado! Te responderemos pronto.</div>
+        <button type="submit" class="btn-contact-send">Enviar mensaje</button>
+      </form>
+    </div>
+  </section>
+
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-logo">📦 Eti<span>Libre</span></div>
@@ -906,6 +960,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <button class="footer-link-btn" onclick="openModal('modal-tos')">Términos y Condiciones</button>
       <span class="footer-sep">·</span>
       <button class="footer-link-btn" onclick="openModal('modal-privacy')">Política de Privacidad</button>
+      <span class="footer-sep">·</span>
+      <button class="footer-link-btn" onclick="openModal('modal-cookies')">Política de Cookies</button>
     </div>
   </footer>
 </div>
@@ -1103,6 +1159,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </div>
         <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:8px">Verificación</label>
         <div class="recaptcha-container" id="recaptcha-1"></div>
+        <label class="tos-check"><input type="checkbox" id="reg-tos"> Acepto los <button type="button" class="auth-link" onclick="openModal('modal-tos')">Términos y Condiciones</button> y la <button type="button" class="auth-link" onclick="openModal('modal-privacy')">Política de Privacidad</button></label>
         <button class="btn-auth" onclick="doRegister()">Crear cuenta</button>
         <div class="auth-error" id="register-error">Verificá los datos e intentá de nuevo.</div>
         <p class="auth-hint">¿Ya tenés cuenta? <button class="auth-link" onclick="switchAuthTab('login')">Iniciá sesión</button></p>
@@ -1144,6 +1201,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       </div>
       <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:8px">Verificación</label>
       <div class="recaptcha-container" id="recaptcha-2"></div>
+      <label class="tos-check"><input type="checkbox" id="reg2-tos"> Acepto los <button type="button" class="auth-link" onclick="openModal('modal-tos')">Términos y Condiciones</button> y la <button type="button" class="auth-link" onclick="openModal('modal-privacy')">Política de Privacidad</button></label>
       <button class="btn-auth" onclick="doRegister2()">Crear cuenta</button>
       <div class="auth-error" id="register2-error">Verificá los datos e intentá de nuevo.</div>
       <p class="auth-hint">¿Ya tenés cuenta? <button class="auth-link" onclick="showScreen('screen-login')">Iniciá sesión</button></p>
@@ -1911,13 +1969,15 @@ try {
    4. Copiar la Site Key y pegarla abajo
 ═══════════════════════════════════════════════════════ */
 const RECAPTCHA_SITE_KEY = '6LcmOjMtAAAAALwyqPJagEulWKCexQVUiTY9qyQC';
-let recaptchaWidget1 = null, recaptchaWidget2 = null;
+let recaptchaWidget1 = null, recaptchaWidget2 = null, recaptchaWidgetContact = null;
 
 window.onRecaptchaLoad = function() {
   const el1 = document.getElementById('recaptcha-1');
   const el2 = document.getElementById('recaptcha-2');
   if (el1) recaptchaWidget1 = grecaptcha.render('recaptcha-1', { sitekey: RECAPTCHA_SITE_KEY, theme: 'dark' });
   if (el2) recaptchaWidget2 = grecaptcha.render('recaptcha-2', { sitekey: RECAPTCHA_SITE_KEY, theme: 'dark' });
+  const el3 = document.getElementById('recaptcha-contact');
+  if (el3) recaptchaWidgetContact = grecaptcha.render('recaptcha-contact', { sitekey: RECAPTCHA_SITE_KEY, theme: 'dark' });
 };
 
 /* ═══════════════════════════════════════════════════════
@@ -1962,11 +2022,14 @@ async function _doRegister(userField, emailField, passField, passConfirmField, p
   const pass    = document.getElementById(passField).value;
   const confirm = document.getElementById(passConfirmField).value;
   const plan    = document.getElementById(planField).value;
+  const tosId   = userField === 'reg-user' ? 'reg-tos' : 'reg2-tos';
+  const tosOk   = document.getElementById(tosId)?.checked;
 
   if (!user || user.length < 3) { err.textContent = 'El usuario debe tener al menos 3 caracteres.'; err.style.display='block'; return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Ingresá un email válido.'; err.style.display='block'; return; }
   if (pass.length < 8)           { err.textContent = 'La contraseña debe tener al menos 8 caracteres.'; err.style.display='block'; return; }
   if (pass !== confirm)          { err.textContent = 'Las contraseñas no coinciden.'; err.style.display='block'; return; }
+  if (!tosOk)                    { err.textContent = 'Debés aceptar los Términos y Condiciones para continuar.'; err.style.display='block'; return; }
 
   const rcResp = (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null)
     ? grecaptcha.getResponse(recaptchaWidgetId) : '';
@@ -2288,6 +2351,24 @@ function showLimitModal(isUpgradePrompt = false) {
 }
 function closeLimitModal() { document.getElementById('limit-modal').style.display = 'none'; }
 
+function submitContactForm(e) {
+  e.preventDefault();
+  const err  = document.getElementById('cf-error');
+  const ok   = document.getElementById('cf-success');
+  err.style.display = 'none'; ok.style.display = 'none';
+  const rc = (typeof grecaptcha !== 'undefined' && recaptchaWidgetContact !== null)
+    ? grecaptcha.getResponse(recaptchaWidgetContact) : '';
+  if (!rc) { err.textContent = 'Completá la verificación reCAPTCHA.'; err.style.display='block'; return; }
+  const name    = document.getElementById('cf-name').value.trim();
+  const email   = document.getElementById('cf-email').value.trim();
+  const subject = document.getElementById('cf-subject').value.trim();
+  const message = document.getElementById('cf-message').value.trim();
+  window.location.href = `mailto:contacto@etilibre.com?subject=${encodeURIComponent('[EtiLibre] ' + subject)}&body=${encodeURIComponent('Nombre: ' + name + '\nEmail: ' + email + '\n\n' + message)}`;
+  ok.style.display = 'block';
+  document.getElementById('contact-form').reset();
+  if (typeof grecaptcha !== 'undefined') grecaptcha.reset(recaptchaWidgetContact);
+}
+
 function openModal(id) {
   const el = document.getElementById(id);
   if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
@@ -2296,9 +2377,6 @@ function closeModal(id) {
   const el = document.getElementById(id);
   if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
 }
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') ['modal-tos','modal-privacy'].forEach(closeModal);
-});
 function goUpgrade() { closeLimitModal(); openProfile('plan'); }
 
 /* ═══════════════════════════════════════════════════════
@@ -3555,6 +3633,83 @@ async function saNotifyUser(username) {
 
 <!-- INPUT FILE oculto para subir facturas desde el admin -->
 <input type="file" id="sa-invoice-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="saHandleInvoiceUpload(event)"/>
+
+<!-- ════════════════════════════════════════════════════
+     COOKIE CONSENT POPUP
+════════════════════════════════════════════════════════ -->
+<div id="cookie-banner" class="cookie-banner" style="display:none">
+  <div class="cookie-banner-text">
+    <span>🍪</span>
+    <p>Usamos cookies esenciales para el funcionamiento de la plataforma. Al continuar, aceptás su uso según nuestra <button class="auth-link" onclick="openModal('modal-cookies')">Política de Cookies</button>.</p>
+  </div>
+  <div class="cookie-banner-btns">
+    <button class="cookie-btn-accept" onclick="acceptCookies()">Aceptar</button>
+    <button class="cookie-btn-info" onclick="openModal('modal-cookies')">Más info</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     MODAL: POLÍTICA DE COOKIES
+════════════════════════════════════════════════════════ -->
+<div id="modal-cookies" class="legal-modal-overlay" onclick="if(event.target===this)closeModal('modal-cookies')">
+  <div class="legal-modal">
+    <button class="legal-modal-close" onclick="closeModal('modal-cookies')">✕</button>
+    <h2>Política de Cookies</h2>
+    <p class="legal-updated">Última actualización: junio de 2025</p>
+
+    <h3>1. Introducción</h3>
+    <p>La presente Política de Cookies explica cómo EtiLibre utiliza cookies y tecnologías similares para el funcionamiento de la plataforma. Al utilizar EtiLibre, aceptás el uso de cookies y tecnologías similares de acuerdo con esta Política.</p>
+
+    <h3>2. ¿Qué son las cookies?</h3>
+    <p>Las cookies son pequeños archivos de texto que un sitio web almacena en el navegador del usuario para recordar información sobre su visita, facilitar el uso del servicio y mejorar la experiencia de navegación. Además de cookies, EtiLibre puede utilizar tecnologías similares, como localStorage o sessionStorage, que permiten almacenar información directamente en el navegador.</p>
+
+    <h3>3. ¿Qué cookies utilizamos?</h3>
+    <p>Actualmente EtiLibre utiliza únicamente cookies y tecnologías necesarias para el funcionamiento de la plataforma.</p>
+    <p><strong>Cookies esenciales:</strong> Son indispensables para el funcionamiento del sitio y permiten mantener la sesión iniciada, recordar la autenticación del usuario, proteger la cuenta frente a accesos no autorizados, mantener la seguridad de la plataforma y recordar preferencias básicas de funcionamiento. Estas cookies no pueden deshabilitarse sin afectar el funcionamiento del servicio.</p>
+    <p><strong>Almacenamiento local (Local Storage):</strong> EtiLibre puede utilizar localStorage para guardar preferencia de tema (claro u oscuro), configuraciones de la interfaz, información necesaria para mantener la sesión iniciada y preferencias del usuario. Esta información permanece únicamente en el navegador del usuario y no se utiliza para fines publicitarios.</p>
+
+    <h3>4. Cookies de terceros</h3>
+    <p>EtiLibre puede integrar servicios proporcionados por terceros que utilizan sus propias cookies:</p>
+    <ul>
+      <li>Mercado Pago (procesamiento de pagos).</li>
+      <li>Firebase Authentication (inicio de sesión y autenticación).</li>
+      <li>Google Analytics (solo si se implementa en el futuro).</li>
+    </ul>
+    <p>El uso de cookies por parte de estos servicios se encuentra sujeto a sus respectivas políticas de privacidad.</p>
+
+    <h3>5. Publicidad</h3>
+    <p>Actualmente EtiLibre no utiliza cookies para publicidad personalizada. En caso de incorporar publicidad en el futuro, esta Política será actualizada.</p>
+
+    <h3>6. Cómo administrar las cookies</h3>
+    <p>La mayoría de los navegadores permiten ver, eliminar o bloquear cookies. La desactivación de cookies esenciales puede impedir el correcto funcionamiento de EtiLibre.</p>
+
+    <h3>7. Cambios en esta Política</h3>
+    <p>EtiLibre podrá modificar esta Política de Cookies cuando resulte necesario. La versión vigente estará siempre disponible en la plataforma.</p>
+
+    <h3>8. Contacto</h3>
+    <p>Consultas: <strong><a href="mailto:contacto@etilibre.com" style="color:var(--accent)">contacto@etilibre.com</a></strong></p>
+  </div>
+</div>
+
+<script>
+// Cookie consent
+(function() {
+  if (!localStorage.getItem('etl-cookies-ok')) {
+    setTimeout(() => {
+      const b = document.getElementById('cookie-banner');
+      if (b) b.style.display = 'flex';
+    }, 1500);
+  }
+})();
+function acceptCookies() {
+  localStorage.setItem('etl-cookies-ok', '1');
+  const b = document.getElementById('cookie-banner');
+  if (b) { b.style.animation = 'cookieFadeOut .3s forwards'; setTimeout(() => b.style.display='none', 300); }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') ['modal-tos','modal-privacy','modal-cookies'].forEach(closeModal);
+});
+</script>
 
 </body>
 </html>
