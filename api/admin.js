@@ -14,8 +14,13 @@ export default async function handler(req, res) {
 
   const ref = db.collection('users');
 
-  // GET — listar todos los usuarios
+  // GET — listar todos los usuarios (o bajas si ?type=deleted)
   if (req.method === 'GET') {
+    if (req.query.type === 'deleted') {
+      const snap = await db.collection('deleted_users').get();
+      const users = snap.docs.map(d => { const { pass:_, ...u } = d.data(); return u; });
+      return res.json(users);
+    }
     const snap = await ref.get();
     const users = snap.docs.map(d => { const { pass:_, ...u } = d.data(); return u; });
     return res.json(users);
@@ -32,11 +37,22 @@ export default async function handler(req, res) {
     return res.json({ ok:true });
   }
 
-  // DELETE — eliminar usuario
+  // DELETE — soft-delete: mover a deleted_users
   if (req.method === 'DELETE') {
     const { username } = req.body;
     if (!username || username === 'admin') return res.status(400).json({ error: 'Usuario inválido' });
-    await ref.doc(username).delete();
+    const doc = await ref.doc(username).get();
+    if (doc.exists) {
+      const { pass:_, ...ud } = doc.data();
+      await db.collection('deleted_users').doc(username).set({
+        ...ud,
+        deletedAt: new Date().toISOString(),
+        previousPlan: ud.plan || 'free',
+        hadInvoice: !!(ud.invoices?.length),
+        mpSubId: ud.mpSubId || null,
+      });
+      await ref.doc(username).delete();
+    }
     return res.json({ ok:true });
   }
 

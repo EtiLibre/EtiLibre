@@ -68,6 +68,20 @@ export default async function handler(req, res) {
       await ref.update({ used, resetMonth: curMonth });
       return res.json({ ok:true, used });
     }
+    if (action === 'watch-ad') {
+      const doc = await ref.get();
+      const d = doc.data();
+      const now = new Date();
+      const curMonth = now.getFullYear() * 100 + now.getMonth();
+      const adExts = d.resetMonth !== curMonth ? 0 : (d.adExtensions || 0);
+      if (adExts >= 2) return res.status(400).json({ error: 'Límite de anuncios alcanzado' });
+      await ref.update({ adExtensions: adExts + 1 });
+      return res.json({ ok:true, adExtensions: adExts + 1 });
+    }
+    if (action === 'cancel-plan') {
+      await ref.update({ plan: 'free', active: true });
+      return res.json({ ok:true });
+    }
     if (action === 'change-password') {
       if (payload.username === 'admin') return res.status(403).end();
       const { oldPass, newPass } = req.body;

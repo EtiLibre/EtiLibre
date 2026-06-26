@@ -818,6 +818,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <li>Líneas de corte</li>
             <li class="na">Soporte prioritario</li>
             <li class="na">Historial de descargas</li>
+            <li class="na">Re-descarga de PDFs</li>
           </ul>
           <button class="btn-plan" onclick="selectPlan('free')">Empezar gratis</button>
         </div>
@@ -840,6 +841,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <li>Líneas de corte</li>
             <li class="na">Soporte prioritario</li>
             <li class="na">Historial de descargas</li>
+            <li>Re-descarga de PDFs</li>
           </ul>
           <button class="btn-plan" onclick="selectPlan('starter')">Elegir Starter</button>
         </div>
@@ -861,7 +863,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <li>Hasta 3 etiquetas por hoja</li>
             <li>Líneas de corte</li>
             <li>Soporte prioritario</li>
-            <li class="na">Historial de descargas</li>
+            <li>Historial de descargas</li>
+            <li>Re-descarga de PDFs</li>
           </ul>
           <button class="btn-plan" onclick="selectPlan('pro')">Elegir Pro</button>
         </div>
@@ -884,6 +887,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <li>Líneas de corte</li>
             <li>Soporte prioritario</li>
             <li>Historial de descargas</li>
+            <li>Re-descarga de PDFs</li>
           </ul>
           <button class="btn-plan" onclick="selectPlan('business')">Elegir Business</button>
         </div>
@@ -891,7 +895,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <!-- PREMIUM -->
         <div class="plan-card">
           <div class="plan-name">Premium</div>
-          <div class="plan-price"><span class="plan-price-amount">$6.500</span> <span class="plan-price-period">/ mes</span></div>
+          <div class="plan-price"><span class="plan-price-amount">$10.500</span> <span class="plan-price-period">/ mes</span></div>
           <div class="plan-tagline">Sin límites para grandes operaciones.</div>
           <div class="plan-meter">
             <div class="plan-meter-label">
@@ -906,6 +910,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <li>Líneas de corte</li>
             <li>Soporte prioritario</li>
             <li>Historial de descargas</li>
+            <li>Re-descarga de PDFs</li>
           </ul>
           <button class="btn-plan" onclick="selectPlan('premium')">Elegir Premium</button>
         </div>
@@ -938,6 +943,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
   </div>
 
+  <!-- SCROLL TO TOP -->
+  <button id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba" style="display:none;position:fixed;bottom:28px;right:28px;z-index:999;width:44px;height:44px;border-radius:50%;background:var(--accent);color:#080b14;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .2s">↑</button>
+
   <!-- SECCIÓN CONTACTO -->
   <section class="contact-section" id="contact">
     <div class="contact-inner">
@@ -950,6 +958,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </div>
         <div class="field"><label>Asunto</label><input type="text" id="cf-subject" placeholder="¿En qué podemos ayudarte?" required></div>
         <div class="field"><label>Mensaje</label><textarea id="cf-message" rows="4" placeholder="Describí tu problema o consulta con el mayor detalle posible…" required></textarea></div>
+        <div class="field"><label>Plan de interés <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3)">(opcional)</span></label>
+          <select id="cf-plan" style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+            <option value="">Sin plan / No estoy seguro/a</option>
+            <option value="Free">Free</option>
+            <option value="Starter">Starter</option>
+            <option value="Pro">Pro</option>
+            <option value="Business">Business</option>
+            <option value="Premium">Premium</option>
+          </select>
+        </div>
         <div class="contact-captcha">
           <div id="recaptcha-contact"></div>
         </div>
@@ -988,7 +1006,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
     <h3>2. Descripción del servicio</h3>
     <p>EtiLibre es una plataforma web que permite a los usuarios combinar y reorganizar etiquetas de envío en formato PDF sobre hojas A4 con el fin de optimizar su impresión.</p>
-    <p>Los archivos subidos por el usuario se almacenan de forma temporal únicamente para permitir su procesamiento y acceso desde el historial. Los archivos generados se eliminan automáticamente transcurridos diez (10) días desde su creación.</p>
+    <p>Los archivos subidos por el usuario se almacenan de forma temporal únicamente para permitir su procesamiento y acceso desde el historial. Los archivos generados se eliminan automáticamente transcurridos siete (7) días desde su creación.</p>
 
     <h3>3. Exención de responsabilidad</h3>
     <p>EtiLibre es una herramienta independiente para optimizar la impresión de etiquetas. <strong>No pertenece ni está afiliada a Mercado Libre, Mercado Pago, Andreani, Correo Argentino ni a ninguna empresa de logística.</strong></p>
@@ -1224,6 +1242,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <nav class="topbar">
     <div class="topbar-logo">📦 Eti<span>Label</span></div>
     <div class="topbar-right">
+      <button class="notif-bell" onclick="openProfile('notifications')" title="Notificaciones">
+        🔔<span class="notif-badge" id="notif-badge-top" style="display:none"></span>
+      </button>
       <div class="user-menu-wrap" id="user-menu-wrap">
         <div class="user-pill" onclick="toggleUserMenu()" title="Menú de usuario">
           <span id="user-avatar-top" style="font-size:16px">👤</span>
@@ -1248,16 +1269,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <button class="user-dropdown-item" onclick="closeUserMenu();openProfile('vouchers')">🧾 Comprobantes</button>
           <button class="user-dropdown-item" onclick="closeUserMenu();openProfile('history')">📋 Historial</button>
           <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-item btn-theme-toggle" onclick="closeUserMenu();toggleTheme()">🌙 Cambiar tema</button>
+          <div class="user-dropdown-divider"></div>
           <button class="user-dropdown-item" id="udrop-cancel-sub" onclick="closeUserMenu();confirmCancelSubscription()">⛔ Darme de baja</button>
           <button class="user-dropdown-item danger" onclick="closeUserMenu();confirmDeleteAccount()">🗑️ Eliminar mi cuenta</button>
           <div class="user-dropdown-divider"></div>
           <button class="user-dropdown-item" onclick="closeUserMenu();doLogout()">🚪 Cerrar sesión</button>
         </div>
       </div>
-      <button class="btn-theme-toggle" id="theme-toggle-app" onclick="toggleTheme()" title="Cambiar tema" style="margin-right:4px">🌙</button>
-      <button class="notif-bell" onclick="openProfile('notifications')" title="Notificaciones" style="margin-right:4px">
-        🔔<span class="notif-badge" id="notif-badge-top" style="display:none"></span>
-      </button>
       <button class="btn-upgrade-top" id="btn-upgrade-top" onclick="openProfile('plan')" style="display:none">⬆ Mejorar plan</button>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
@@ -1375,8 +1394,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <p id="modal-body">Usaste todos los PDFs disponibles de tu plan este mes. Actualizá tu plan para seguir generando etiquetas.</p>
     <div class="modal-actions">
       <button class="btn-modal-primary" onclick="goUpgrade()">Ver planes →</button>
+      <button class="btn-modal-ghost" id="btn-watch-ad" style="display:none" onclick="openAdModal()">📺 Ver un anuncio (+1 uso)</button>
       <button class="btn-modal-ghost" onclick="closeLimitModal()">Ahora no</button>
     </div>
+    <p id="modal-ad-note" style="display:none;font-size:11px;color:var(--text3);margin-top:8px"></p>
+  </div>
+</div>
+
+<!-- AD MODAL -->
+<div class="modal-overlay" id="ad-modal" style="display:none">
+  <div class="modal-card" style="max-width:380px">
+    <div class="modal-icon">📺</div>
+    <h3>Mirá este anuncio</h3>
+    <p style="font-size:13px;color:var(--text2)">Vas a obtener 1 uso extra al finalizar.</p>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);height:120px;display:flex;align-items:center;justify-content:center;margin:16px 0;font-size:13px;color:var(--text3)">
+      [Espacio publicitario]
+    </div>
+    <div id="ad-countdown" style="font-size:22px;font-weight:800;color:var(--accent);margin-bottom:12px">5</div>
+    <button class="btn-modal-primary" id="btn-ad-claim" style="display:none;width:100%" onclick="claimAdBonus()">✅ Obtener uso extra</button>
+    <button class="btn-modal-ghost" onclick="closeAdModal()" style="margin-top:8px;width:100%">Cancelar</button>
   </div>
 </div>
 
@@ -1664,7 +1700,7 @@ const PLAN_CONFIG = {
   starter:  { label:'Starter',  limit:25,    price:'$2.000/mes',     color:'starter' },
   pro:      { label:'Pro',      limit:80,    price:'$3.000/mes',     color:'pro'     },
   business: { label:'Business', limit:200,   price:'$4.500/mes',     color:'business'},
-  premium:  { label:'Premium',  limit:1000,  price:'$6.500/mes',     color:'premium' },
+  premium:  { label:'Premium',  limit:1000,  price:'$10.500/mes',    color:'premium' },
   admin:    { label:'Admin',    limit:99999, price:'—',              color:'premium' },
 };
 
@@ -1815,7 +1851,7 @@ function getUsage(username) {
   const now = new Date();
   const curMonth = now.getFullYear() * 100 + now.getMonth();
   if (u.resetMonth !== curMonth) {
-    if (username === currentUser && _userData) { _userData.used = 0; _userData.resetMonth = curMonth; }
+    if (username === currentUser && _userData) { _userData.used = 0; _userData.adExtensions = 0; _userData.resetMonth = curMonth; }
   }
   return { used: u.used || 0, limit: PLAN_CONFIG[u.plan || 'free']?.limit || 2 };
 }
@@ -1837,10 +1873,11 @@ function incrementUsage(username, count = 1) {
 
 function getUserPlan(username) {
   if (username === 'admin') return 'admin';
+  if (username === currentUser && _userData?.plan) return _userData.plan;
   return getUsers()[username]?.plan || 'free';
 }
 
-const PDF_EXPIRY_DAYS = 10;
+const PDF_EXPIRY_DAYS = 7;
 
 function cleanExpiredPDFs(username) {
   const users = getUsers();
@@ -1897,7 +1934,7 @@ let currentUser = null;
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   const icon = theme === 'dark' ? '☀️' : '🌙';
-  document.querySelectorAll('.btn-theme-toggle').forEach(b => b.textContent = icon);
+  document.querySelectorAll('.btn-theme-toggle').forEach(b => b.textContent = icon + ' Cambiar tema');
   localStorage.setItem('etl-theme', theme);
 }
 function toggleTheme() {
@@ -2387,9 +2424,69 @@ function showLimitModal(isUpgradePrompt = false) {
   document.getElementById('modal-body').textContent  = isUpgradePrompt
     ? `Tu plan actual permite ${limit} hojas por mes. Actualizá para generar más este mes.`
     : `Usaste las ${limit} hojas disponibles de tu plan este mes. Actualizá tu plan para seguir generando etiquetas.`;
+
+  const adBtn  = document.getElementById('btn-watch-ad');
+  const adNote = document.getElementById('modal-ad-note');
+  const planKey = getUserPlan(currentUser);
+  const adExts  = _userData?.adExtensions || 0;
+  if (planKey === 'free') {
+    const remaining = 2 - adExts;
+    if (remaining > 0) {
+      adBtn.style.display  = '';
+      adNote.style.display = '';
+      adNote.textContent   = `Podés ver ${remaining} anuncio${remaining!==1?'s':''} más este mes para obtener usos extra.`;
+    } else {
+      adBtn.style.display  = 'none';
+      adNote.style.display = '';
+      adNote.textContent   = 'Ya usaste tus 2 anuncios disponibles este mes.';
+    }
+  } else {
+    adBtn.style.display  = 'none';
+    adNote.style.display = 'none';
+  }
+
   document.getElementById('limit-modal').style.display = 'flex';
 }
 function closeLimitModal() { document.getElementById('limit-modal').style.display = 'none'; }
+
+let _adTimer = null;
+function openAdModal() {
+  closeLimitModal();
+  document.getElementById('ad-modal').style.display = 'flex';
+  document.getElementById('btn-ad-claim').style.display = 'none';
+  let secs = 5;
+  document.getElementById('ad-countdown').style.display = 'block';
+  document.getElementById('ad-countdown').textContent = secs;
+  _adTimer = setInterval(() => {
+    secs--;
+    if (secs > 0) {
+      document.getElementById('ad-countdown').textContent = secs;
+    } else {
+      clearInterval(_adTimer);
+      document.getElementById('ad-countdown').style.display = 'none';
+      document.getElementById('btn-ad-claim').style.display = '';
+    }
+  }, 1000);
+}
+function closeAdModal() {
+  if (_adTimer) { clearInterval(_adTimer); _adTimer = null; }
+  document.getElementById('ad-modal').style.display = 'none';
+}
+async function claimAdBonus() {
+  try {
+    const data = await _api('/api/user', 'PUT', { action:'watch-ad' });
+    if (_userData) {
+      _userData.adExtensions = data.adExtensions;
+      _userData.used = Math.max(0, (_userData.used || 1) - 1);
+    }
+    closeAdModal();
+    updateUsageUI();
+    alert('✅ ¡Uso extra añadido! Ya podés generar otro PDF.');
+  } catch (e) {
+    closeAdModal();
+    alert('No se pudo aplicar el bono: ' + (e.message || 'Error'));
+  }
+}
 
 function submitContactForm(e) {
   e.preventDefault();
@@ -2403,7 +2500,9 @@ function submitContactForm(e) {
   const email   = document.getElementById('cf-email').value.trim();
   const subject = document.getElementById('cf-subject').value.trim();
   const message = document.getElementById('cf-message').value.trim();
-  window.location.href = `mailto:contacto@etilibre.com?subject=${encodeURIComponent('[EtiLibre] ' + subject)}&body=${encodeURIComponent('Nombre: ' + name + '\nEmail: ' + email + '\n\n' + message)}`;
+  const plan    = document.getElementById('cf-plan')?.value || '';
+  const planLine = plan ? `\nPlan de interés: ${plan}` : '';
+  window.location.href = `mailto:contacto@etilibre.com?subject=${encodeURIComponent('[EtiLibre] ' + subject)}&body=${encodeURIComponent('Nombre: ' + name + '\nEmail: ' + email + planLine + '\n\n' + message)}`;
   ok.style.display = 'block';
   document.getElementById('contact-form').reset();
   if (typeof grecaptcha !== 'undefined') grecaptcha.reset(recaptchaWidgetContact);
@@ -3029,6 +3128,7 @@ function changePlan(newPlan) {
     `Tu plan pasará de ${PLAN_CONFIG[oldPlan].label} a ${planCfg.label} (${planCfg.limit} hojas/mes, ${planCfg.price}).`,
     () => {
       const users = getUsers();
+      if (!users[currentUser]) users[currentUser] = {};
       users[currentUser].plan = newPlan;
       if (newPlan !== 'free') {
         // Paid upgrade → go to payment gate
@@ -3039,6 +3139,10 @@ function changePlan(newPlan) {
         // Downgrade to free → immediate
         users[currentUser].active = true;
         saveUsers(users);
+        // Update in-memory cache so UI reflects change immediately
+        if (_userData) { _userData.plan = 'free'; _userData.active = true; }
+        // Persist to Firestore
+        _api('/api/user', 'PUT', { action:'cancel-plan' }).catch(() => {});
         populateProfileHeader(); refreshTopbar(); updateUsageUI(); renderPlanTab();
         const ok = document.getElementById('plan-success');
         ok.style.display = 'block'; setTimeout(() => ok.style.display='none', 3500);
@@ -3211,12 +3315,17 @@ function _renderHistoryItems(items) {
     const daysLeft = Math.max(0, Math.ceil(PDF_EXPIRY_DAYS - ageDays));
     const div  = document.createElement('div');
     div.className = 'history-item';
+    const isFree = getUserPlan(currentUser) === 'free';
     let dlBtn = '';
     if (item.pdfData) {
-      const expiryNote = daysLeft <= 7
-        ? `<span class="history-expiry-warn">⚠️ Se elimina en ${daysLeft} día${daysLeft!==1?'s':''}</span>`
-        : `<span class="history-expiry-ok">🗓️ Disponible ${daysLeft} día${daysLeft!==1?'s':''} más</span>`;
-      dlBtn = `<div class="history-item-actions">${expiryNote}<button class="btn-history-dl" onclick="redownloadPDF(this)" data-filename="${item.filename}" data-pdf="${item.pdfData}">⬇ Descargar</button></div>`;
+      if (isFree) {
+        dlBtn = `<div class="history-item-actions"><span class="history-expiry-warn">🔒 Re-descarga disponible en planes de pago</span></div>`;
+      } else {
+        const expiryNote = daysLeft <= 3
+          ? `<span class="history-expiry-warn">⚠️ Se elimina en ${daysLeft} día${daysLeft!==1?'s':''}</span>`
+          : `<span class="history-expiry-ok">🗓️ Disponible ${daysLeft} día${daysLeft!==1?'s':''} más</span>`;
+        dlBtn = `<div class="history-item-actions">${expiryNote}<button class="btn-history-dl" onclick="redownloadPDF(this)" data-filename="${item.filename}" data-pdf="${item.pdfData}">⬇ Descargar</button></div>`;
+      }
     } else {
       dlBtn = `<div class="history-item-actions"><span class="history-expiry-expired">🗑️ PDF eliminado</span></div>`;
     }
@@ -3422,9 +3531,11 @@ function confirmDeleteAccount() {
 ═══════════════════════════════════════════════════════ */
 let saInvoiceTargetUser = null;
 let _saUsersCache = [];
+let _saDeletedUsersCache = [];
 
 async function _refreshSAUsers() {
   try { _saUsersCache = await _api('/api/admin'); } catch (_) {}
+  try { _saDeletedUsersCache = await _api('/api/admin?type=deleted'); } catch (_) {}
 }
 
 async function openSuperAdmin() {
@@ -3438,6 +3549,7 @@ function renderSuperAdmin() {
   renderSAStats();
   renderSAUsers();
   renderSATosTable();
+  renderSADeletedUsers();
 }
 
 function renderSATosTable() {
@@ -3481,6 +3593,30 @@ function exportTosCSV() {
   a.click();
 }
 
+function renderSADeletedUsers() {
+  const tbody = document.getElementById('sa-deleted-tbody');
+  if (!tbody) return;
+  const users = [..._saDeletedUsersCache].sort((a, b) => new Date(b.deletedAt||0) - new Date(a.deletedAt||0));
+  if (!users.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:24px">No hay bajas registradas.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = users.map(u => {
+    const deletedAt = u.deletedAt ? new Date(u.deletedAt).toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' }) : '—';
+    const planLabel = { free:'Free', starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' }[u.previousPlan || u.plan] || '—';
+    const hadInv = u.hadInvoice ? `<span class="tos-badge-ok">✔ Sí</span>` : `<span class="tos-badge-no">✘ No</span>`;
+    const hasSub = u.mpSubId ? `<span class="tos-badge-ok">✔ ${u.mpSubId.slice(0,12)}…</span>` : `<span style="color:var(--text3)">—</span>`;
+    return `<tr>
+      <td><strong>@${u.username}</strong></td>
+      <td>${u.email || '—'}</td>
+      <td><span class="plan-badge ${PLAN_CONFIG[u.previousPlan||u.plan]?.color||'free'}">${planLabel}</span></td>
+      <td style="color:var(--text3)">${deletedAt}</td>
+      <td>${hadInv}</td>
+      <td>${hasSub}</td>
+    </tr>`;
+  }).join('');
+}
+
 function renderSAStats() {
   const users = _saUsersCache;
   const total    = users.length;
@@ -3488,15 +3624,17 @@ function renderSAStats() {
   const inactive = users.filter(u => !u.active).length;
   const planCount = (p) => users.filter(u => u.plan === p).length;
   const revenue = users.filter(u => u.active).reduce((sum, u) => {
-    const prices = { starter: 2000, pro: 3000, business: 4500, premium: 6500 };
+    const prices = { starter: 2000, pro: 3000, business: 4500, premium: 10500 };
     return sum + (prices[u.plan] || 0);
   }, 0);
 
+  const totalAds = users.reduce((sum, u) => sum + (u.adExtensions || 0), 0);
   document.getElementById('sa-stats').innerHTML = `
     <div class="sa-stat"><div class="sa-stat-val">${total}</div><div class="sa-stat-label">Usuarios registrados</div></div>
     <div class="sa-stat"><div class="sa-stat-val" style="color:var(--teal)">${active}</div><div class="sa-stat-label">Cuentas activas (pagaron)</div></div>
     <div class="sa-stat"><div class="sa-stat-val" style="color:var(--danger)">${inactive}</div><div class="sa-stat-label">Sin pago pendiente</div></div>
     <div class="sa-stat"><div class="sa-stat-val">$${revenue.toLocaleString('es-AR')}</div><div class="sa-stat-label">Ingresos estimados / mes</div></div>
+    <div class="sa-stat"><div class="sa-stat-val" style="color:var(--blue)">${totalAds}</div><div class="sa-stat-label">Anuncios vistos este mes</div></div>
   `;
 }
 
@@ -3711,6 +3849,26 @@ async function saNotifyUser(username) {
     </div>
     <div class="sa-user-list" id="sa-user-list"></div>
 
+    <!-- Bajas y eliminados -->
+    <div style="margin-top:48px">
+      <p class="sa-section-title">Bajas y eliminados</p>
+      <div class="sa-tos-table-wrap">
+        <table class="sa-tos-table" id="sa-deleted-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Plan que tenía</th>
+              <th>Fecha de baja</th>
+              <th>¿Tiene factura?</th>
+              <th>Suscripción MP</th>
+            </tr>
+          </thead>
+          <tbody id="sa-deleted-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Registro T&C -->
     <div style="margin-top:48px">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
@@ -3749,7 +3907,7 @@ async function saNotifyUser(username) {
     <h2 style="margin:0 0 8px">Antes de continuar</h2>
     <p style="font-size:14px;color:var(--text2);margin:0 0 20px;line-height:1.6">Para usar EtiLibre necesitás aceptar nuestros Términos y Condiciones y la Política de Privacidad.</p>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px;margin-bottom:20px;max-height:180px;overflow-y:auto;font-size:12px;color:var(--text2);line-height:1.7">
-      Al usar EtiLibre aceptás que: la plataforma reorganiza etiquetas sin alterar su contenido; sos responsable de los archivos que subís; los PDFs generados se eliminan a los 10 días; EtiLibre no está afiliada a Mercado Libre, Mercado Pago ni ninguna empresa de logística. Los datos de tu cuenta se almacenan de forma segura conforme a la Ley 25.326.
+      Al usar EtiLibre aceptás que: la plataforma reorganiza etiquetas sin alterar su contenido; sos responsable de los archivos que subís; los PDFs generados se eliminan a los 7 días; EtiLibre no está afiliada a Mercado Libre, Mercado Pago ni ninguna empresa de logística. Los datos de tu cuenta se almacenan de forma segura conforme a la Ley 25.326.
     </div>
     <label class="tos-check" style="margin-bottom:16px">
       <input type="checkbox" id="google-tos-check">
@@ -3834,6 +3992,10 @@ function acceptCookies() {
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') ['modal-tos','modal-privacy','modal-cookies'].forEach(closeModal);
+});
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scroll-top-btn');
+  if (btn) btn.style.display = window.scrollY > 400 ? 'block' : 'none';
 });
 </script>
 
