@@ -545,10 +545,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .nav{padding:0 14px;height:54px}
   .nav-logo h1{font-size:16px}
   .nav-actions{gap:8px}
-  /* Ocultar toggle de tema en nav del landing en mobile */
-  .nav-actions .btn-theme-toggle{display:none}
-  .btn-nav-ghost{font-size:13px;padding:7px 14px}
-  .btn-nav-cta{font-size:13px;padding:7px 16px}
+  .btn-nav-ghost{font-size:12px;padding:6px 10px}
+  .btn-nav-cta{font-size:12px;padding:6px 12px}
+  .nav-actions .btn-theme-toggle{font-size:15px;padding:5px 7px;border-radius:8px}
   /* HERO */
   .hero{padding:80px 16px 48px}
   .hero h2{font-size:36px;letter-spacing:-2px}
@@ -1937,7 +1936,10 @@ let currentUser = null;
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   const icon = theme === 'dark' ? '☀️' : '🌙';
-  document.querySelectorAll('.btn-theme-toggle').forEach(b => b.textContent = icon + ' Cambiar tema');
+  document.querySelectorAll('.btn-theme-toggle').forEach(b => {
+    // Botones con id son iconos standalone (landing nav); sin id es el dropdown
+    b.textContent = b.id ? icon : icon + ' Cambiar tema';
+  });
   localStorage.setItem('etl-theme', theme);
 }
 function toggleTheme() {
