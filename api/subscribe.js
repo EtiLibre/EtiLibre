@@ -1,5 +1,6 @@
 import { db } from './_lib/firebase.js';
 import { requireAuth } from './_lib/auth.js';
+import { randomBytes } from 'crypto';
 
 const PLAN_IDS = {
   starter:  '4f3cbb4d7b7643ccac2f4c5d06353e2c',
@@ -8,7 +9,6 @@ const PLAN_IDS = {
   premium:  '55add3001b744fbab79927fe89c1c28f'
 };
 
-// Fallback: URL directa sin external_reference (último recurso)
 const PLAN_CHECKOUT = {
   starter:  'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=4f3cbb4d7b7643ccac2f4c5d06353e2c',
   pro:      'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=8249ed9006064842b67ece3d76b38e0a',
@@ -32,12 +32,12 @@ export default async function handler(req, res) {
 
   const username = payload.username;
 
-  // Obtener email del usuario desde Firestore
+  // Obtener datos del usuario
   const userDoc = await db.collection('users').doc(username).get();
   if (!userDoc.exists) return res.status(404).json({ error: 'Usuario no encontrado' });
   const userEmail = userDoc.data().email;
 
-  // Verificar si ya tiene suscripción activa para evitar duplicados
+  // Verificar si ya tiene suscripción activa (evitar duplicados)
   try {
     const searchRes = await fetch(
       `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${planId}&status=authorized&limit=50`,
@@ -51,31 +51,39 @@ export default async function handler(req, res) {
     }
   } catch (_) {}
 
-  // Crear suscripción pendiente con external_reference + payer_email
-  // Así el webhook identifica al usuario sin importar con qué email pague
+  // Generar token único para identificar al usuario al volver de MP
+  // Funciona sin importar con qué email de MP paguen
+  const token   = randomBytes(20).toString('hex');
+  const backUrl = `https://etify.com.ar?mp_ref=${token}`;
+
+  // Guardar token en Firestore (expira en 2 horas)
+  await db.collection('mp_tokens').doc(token).set({
+    username,
+    planKey,
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
+  });
+  await db.collection('users').doc(username).update({ mpPendingPlan: planKey });
+
+  // Intentar crear preapproval via API con external_reference
   try {
     const mpRes = await fetch('https://api.mercadopago.com/preapproval', {
       method: 'POST',
-      headers: {
-        Authorization:  `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         preapproval_plan_id: planId,
         external_reference:  username,
         payer_email:         userEmail,
-        back_url:            'https://etify.com.ar'
+        back_url:            backUrl
       })
     });
     const mpData = await mpRes.json();
-
     if (mpRes.ok && mpData.init_point) {
-      await db.collection('users').doc(username).update({ mpPendingPlan: planKey });
       return res.json({ init_point: mpData.init_point });
     }
   } catch (_) {}
 
-  // Fallback: URL de checkout directa (sin external_reference, identificación por email)
-  await db.collection('users').doc(username).update({ mpPendingPlan: planKey }).catch(() => {});
-  res.json({ init_point: PLAN_CHECKOUT[planKey] });
+  // Fallback: URL directa (el token en back_url igual funciona para identificar al usuario al volver)
+  const fallbackUrl = PLAN_CHECKOUT[planKey] + `&back_url=${encodeURIComponent(backUrl)}`;
+  res.json({ init_point: fallbackUrl });
 }

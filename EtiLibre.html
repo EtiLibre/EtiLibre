@@ -2207,6 +2207,7 @@ async function acceptGoogleTos() {
 
 document.addEventListener('DOMContentLoaded', () => {
   checkMpReturn();
+  checkMpRef();
 });
 
 let _googleAuthInProgress = false;
@@ -2320,6 +2321,53 @@ async function checkMpReturn() {
       localStorage.removeItem('mp_pending_plan');
     }
   } catch (_) {}
+}
+
+async function checkMpRef() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('mp_ref');
+  if (!token) return;
+
+  // Limpiar la URL
+  history.replaceState(null, '', '/');
+
+  try {
+    const res  = await fetch(`/api/mp/verify-ref?token=${token}`);
+    const data = await res.json();
+
+    if (data.status === 'activated') {
+      // Actualizar cache local
+      const users = getUsers();
+      if (users[data.username]) {
+        users[data.username].active = true;
+        users[data.username].plan   = data.planKey;
+        saveUsers(users);
+      }
+      if (_userData && _userData.username === data.username) {
+        _userData.active = true;
+        _userData.plan   = data.planKey;
+        _userData.mpPendingPlan = null;
+      }
+      localStorage.removeItem('mp_pending_username');
+      localStorage.removeItem('mp_pending_plan');
+
+      // Si el usuario ya estaba logueado, entrar a la app
+      if (currentUser === data.username) {
+        refreshTopbar();
+        updateUsageUI();
+        updateNotifBadge();
+      } else if (_getToken()) {
+        // Recuperar sesión desde token guardado
+        try {
+          const ud = await _api('/api/auth');
+          if (ud?.username === data.username) {
+            _cacheUser(ud);
+            enterApp(data.username);
+          }
+        } catch(_) {}
+      }
+    }
+  } catch(_) {}
 }
 
 async function initiateSubscription() {
