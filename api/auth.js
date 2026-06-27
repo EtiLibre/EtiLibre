@@ -62,7 +62,7 @@ export default async function handler(req, res) {
       plan: plan||'free', active: plan==='free',
       displayName: username, avatar:'👤', nameColor:'',
       invoices:[], history:[],
-      notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a EtiLibre!',
+      notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a Etify!',
         body:'Tu cuenta fue creada con éxito. ¡Empezá a combinar etiquetas!', date:now.toISOString(), read:false }],
       used:0, resetMonth: now.getFullYear()*100+now.getMonth(), createdAt: now.toISOString()
     };
@@ -97,7 +97,7 @@ export default async function handler(req, res) {
       plan: 'free', active: true,
       displayName: displayName || username, avatar:'👤', nameColor:'',
       invoices:[], history:[],
-      notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a EtiLibre!',
+      notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a Etify!',
         body:'Tu cuenta fue creada con éxito. ¡Empezá a combinar etiquetas!', date:now.toISOString(), read:false }],
       used:0, resetMonth: now.getFullYear()*100+now.getMonth(), createdAt: now.toISOString()
     };
