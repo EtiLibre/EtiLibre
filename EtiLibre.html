@@ -2189,6 +2189,7 @@ async function acceptGoogleTos() {
 
 document.addEventListener('DOMContentLoaded', () => {
   checkMpReturn();
+  _checkGoogleRedirect();
 });
 
 let _googleAuthInProgress = false;
@@ -2197,14 +2198,22 @@ async function googleAuth() {
   _googleAuthInProgress = true;
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
-    const result   = await _firebaseAuth.signInWithPopup(provider);
+    await _firebaseAuth.signInWithRedirect(provider);
+  } catch (e) {
+    alert('Error al iniciar sesión con Google:\n' + e.message);
+    _googleAuthInProgress = false;
+  }
+}
+
+async function _checkGoogleRedirect() {
+  if (!_firebaseAuth) return;
+  try {
+    const result = await _firebaseAuth.getRedirectResult();
     if (result && result.user) await _handleGoogleUser(result.user);
   } catch (e) {
-    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+    if (e.code && e.code !== 'auth/no-auth-event') {
       alert('Error al iniciar sesión con Google:\n' + e.message);
     }
-  } finally {
-    _googleAuthInProgress = false;
   }
 }
 
