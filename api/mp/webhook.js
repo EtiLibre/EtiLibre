@@ -21,9 +21,21 @@ export default async function handler(req, res) {
     });
     const sub = await mpRes.json();
 
-    const username = sub.external_reference;
-    const plan     = PLAN_MAP[sub.preapproval_plan_id];
-    if (!username || !plan) return res.status(200).end();
+    const plan = PLAN_MAP[sub.preapproval_plan_id];
+    if (!plan) return res.status(200).end();
+
+    // Identificar usuario: primero por external_reference, luego por email del pagador
+    let username = sub.external_reference || null;
+    if (!username && sub.payer_email) {
+      const snap = await db.collection('users').where('email', '==', sub.payer_email).limit(1).get();
+      if (!snap.empty) username = snap.docs[0].id;
+    }
+    // Último recurso: buscar por mpPendingPlan en Firestore
+    if (!username) {
+      const snap = await db.collection('users').where('mpPendingPlan', '==', plan).limit(1).get();
+      if (!snap.empty) username = snap.docs[0].id;
+    }
+    if (!username) return res.status(200).end();
 
     const ref = db.collection('users').doc(username);
     const doc = await ref.get();
