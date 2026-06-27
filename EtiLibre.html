@@ -2019,6 +2019,13 @@ try {
   if (FIREBASE_CONFIG.apiKey !== 'TU_API_KEY') {
     firebase.initializeApp(FIREBASE_CONFIG);
     _firebaseAuth = firebase.auth();
+    _firebaseAuth.getRedirectResult().then(result => {
+      if (result && result.user) _handleGoogleUser(result.user);
+    }).catch(e => {
+      if (e.code && e.code !== 'auth/no-auth-event') {
+        console.warn('Google redirect error:', e.message);
+      }
+    });
   }
 } catch(e) { console.warn('Firebase init error:', e); }
 
@@ -2189,7 +2196,6 @@ async function acceptGoogleTos() {
 
 document.addEventListener('DOMContentLoaded', () => {
   checkMpReturn();
-  _checkGoogleRedirect();
 });
 
 let _googleAuthInProgress = false;
