@@ -1770,7 +1770,16 @@ async function _refreshCurrentUser() {
     _cacheUser(data);
     // Si hay un pago pendiente en Firestore, verificar y activar automáticamente
     if (data.mpPendingPlan && data.mpPendingPlan !== 'free') {
-      _checkPendingMpPlan(data.username, data.email, data.mpPendingPlan).catch(() => {});
+      _api('/api/check-pending').then(r => {
+        if (r.status === 'activated' && _userData) {
+          _userData.active = true;
+          _userData.plan   = r.planKey;
+          _userData.mpPendingPlan = null;
+          refreshTopbar();
+          updateUsageUI();
+          updateNotifBadge();
+        }
+      }).catch(() => {});
     }
   } catch (_) {}
 }

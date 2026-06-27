@@ -57,13 +57,14 @@ export default async function handler(req, res) {
   const backUrl = `https://etify.com.ar?mp_ref=${token}`;
 
   // Guardar token en Firestore (expira en 2 horas)
+  const now = new Date().toISOString();
   await db.collection('mp_tokens').doc(token).set({
     username,
     planKey,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
     expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
   });
-  await db.collection('users').doc(username).update({ mpPendingPlan: planKey });
+  await db.collection('users').doc(username).update({ mpPendingPlan: planKey, mpPendingPlanAt: now });
 
   // Intentar crear preapproval via API con external_reference
   try {
