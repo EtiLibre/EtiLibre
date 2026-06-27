@@ -3269,13 +3269,18 @@ function renderVouchersTab() {
   }
   el.innerHTML = list.map((inv, i) => {
     const dateStr = new Date(inv.date).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' });
+    const isMp = inv.source === 'mercadopago';
+    const amountStr = inv.amount ? ` · ${inv.amount}/mes` : '';
     return `<div class="voucher-item">
-      <div class="voucher-icon">📄</div>
+      <div class="voucher-icon">${isMp ? '💳' : '📄'}</div>
       <div class="voucher-info">
-        <div class="voucher-name">${inv.name}</div>
-        <div class="voucher-date">Subido el ${dateStr}</div>
+        <div class="voucher-name">${inv.name}${amountStr}</div>
+        <div class="voucher-date">${isMp ? 'Pagado el' : 'Subido el'} ${dateStr}</div>
       </div>
-      <button class="btn-sa success" style="font-size:13px;padding:8px 16px" onclick="downloadMyInvoice(${i})">⬇ Descargar</button>
+      ${isMp
+        ? `<a href="${inv.url}" target="_blank" class="btn-sa success" style="font-size:13px;padding:8px 16px;text-decoration:none">🔗 Ver en MP</a>`
+        : `<button class="btn-sa success" style="font-size:13px;padding:8px 16px" onclick="downloadMyInvoice(${i})">⬇ Descargar</button>`
+      }
     </div>`;
   }).join('');
 }
