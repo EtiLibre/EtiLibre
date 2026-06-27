@@ -1,8 +1,8 @@
 const PLAN_IDS = {
-  starter:  '58467cb629d74197865cbc946f055002',
-  pro:      'f27759d82eac49ec8c1cfeef3964b94f',
-  business: '6704b497950d4634817905965b5a09a3',
-  premium:  '06d73d81f8a44a1aab3052eb1355e78c'
+  starter:  '4f3cbb4d7b7643ccac2f4c5d06353e2c',
+  pro:      '8249ed9006064842b67ece3d76b38e0a',
+  business: '472deed04ef0404682fd78048a5324e0',
+  premium:  '55add3001b744fbab79927fe89c1c28f'
 };
 
 const PLAN_MAP = Object.fromEntries(Object.entries(PLAN_IDS).map(([k,v]) => [v,k]));

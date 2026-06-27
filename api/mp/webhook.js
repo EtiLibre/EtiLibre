@@ -32,8 +32,9 @@ export default async function handler(req, res) {
     const updates = { mpSubId: sub.id, mpStatus: sub.status };
 
     if (sub.status === 'authorized') {
-      updates.plan   = plan;
-      updates.active = true;
+      updates.plan          = plan;
+      updates.active        = true;
+      updates.mpPendingPlan = null;
       const now = new Date().toISOString();
       const PLAN_PRICES = { starter: '$2.000', pro: '$3.000', business: '$4.500', premium: '$10.500' };
 

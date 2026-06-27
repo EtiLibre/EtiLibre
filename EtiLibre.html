@@ -1768,6 +1768,24 @@ async function _refreshCurrentUser() {
   try {
     const data = await _api('/api/auth');
     _cacheUser(data);
+    // Si hay un pago pendiente en Firestore, verificar y activar automáticamente
+    if (data.mpPendingPlan && data.mpPendingPlan !== 'free' && data.email) {
+      _checkPendingMpPlan(data.email, data.mpPendingPlan).catch(() => {});
+    }
+  } catch (_) {}
+}
+
+async function _checkPendingMpPlan(email, planKey) {
+  try {
+    const res  = await fetch(`/api/verify?email=${encodeURIComponent(email)}&planKey=${planKey}`);
+    const data = await res.json();
+    if (data.status === 'authorized') {
+      await _api('/api/activate', 'POST', { planKey, subId: data.subId || null });
+      if (_userData) { _userData.active = true; _userData.plan = planKey; _userData.mpPendingPlan = null; }
+      refreshTopbar();
+      updateUsageUI();
+      updateNotifBadge();
+    }
   } catch (_) {}
 }
 
@@ -2264,23 +2282,35 @@ async function checkMpReturn() {
   const planKey  = localStorage.getItem('mp_pending_plan');
   if (!username || !planKey) return;
 
-  const u = getUser(username);
-  if (!u?.email) return;
+  // Intentar obtener email desde cache localStorage primero,
+  // o recuperar la sesión desde el token JWT si está disponible
+  let email = getUsers()[username]?.email;
+  if (!email && _getToken()) {
+    try {
+      const userData = await _api('/api/auth');
+      if (userData?.email) { email = userData.email; _cacheUser(userData); }
+    } catch(_) {}
+  }
+  if (!email) return;
 
   try {
-    const res  = await fetch(`/api/verify?email=${encodeURIComponent(u.email)}&planKey=${planKey}`);
+    const res  = await fetch(`/api/verify?email=${encodeURIComponent(email)}&planKey=${planKey}`);
     const data = await res.json();
 
     if (data.status === 'authorized') {
+      // Actualizar Firestore vía API
+      try { await _api('/api/activate', 'POST', { planKey, subId: data.subId || null }); } catch(_) {}
+
+      // Actualizar cache local
       const users = getUsers();
       if (users[username]) {
-        users[username].active  = true;
-        users[username].plan    = planKey;
+        users[username].active = true;
+        users[username].plan   = planKey;
         if (data.subId) users[username].mpSubId = data.subId;
         saveUsers(users);
-        addNotification(username, '✅', '¡Plan activado!',
-          `Tu plan ${PLAN_CONFIG[planKey]?.label || planKey} fue activado correctamente. ¡Ya podés usarlo!`);
       }
+      if (_userData) { _userData.active = true; _userData.plan = planKey; }
+
       localStorage.removeItem('mp_pending_username');
       localStorage.removeItem('mp_pending_plan');
       history.replaceState(null, '', '/');
@@ -2304,13 +2334,17 @@ async function initiateSubscription() {
   btnTxt.textContent = 'Redirigiendo…';
 
   try {
-    const res  = await fetch('/api/subscribe', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ planKey })
-    });
-    const data = await res.json();
-    if (!res.ok || !data.init_point) throw new Error(data.error || 'Error');
+    const data = await _api('/api/subscribe', 'POST', { planKey });
+    // Ya tenía suscripción activa — activar directamente sin ir a MP
+    if (data.already_active) {
+      if (_userData) { _userData.active = true; _userData.plan = planKey; }
+      const users = getUsers();
+      if (users[pendingPaymentUser]) { users[pendingPaymentUser].active = true; users[pendingPaymentUser].plan = planKey; saveUsers(users); }
+      pendingPaymentUser = null;
+      enterApp(currentUser || pendingPaymentUser);
+      return;
+    }
+    if (!data.init_point) throw new Error('Sin init_point');
 
     localStorage.setItem('mp_pending_username', pendingPaymentUser);
     localStorage.setItem('mp_pending_plan',     planKey);
