@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   const invoice = {
     name:   `Suscripción ${PLAN_LABELS[planKey] || planKey} - ${new Date().toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}`,
     date:   now,
-    url:    subId ? `https://www.mercadopago.com.ar/activities/detail/${subId}` : `https://www.mercadopago.com.ar/suscripciones`,
+    url:    subId ? `https://www.mercadopago.com.ar/subscriptions/manage/${subId}` : `https://www.mercadopago.com.ar/suscripciones`,
     amount: PLAN_PRICES[planKey] || '',
     source: 'mercadopago'
   };

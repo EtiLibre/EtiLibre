@@ -80,7 +80,7 @@ export default async function handler(req, res) {
   const invoice = {
     name:   `Suscripción ${PLAN_LABELS[planKey]} - ${new Date().toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}`,
     date:   now,
-    url:    `https://www.mercadopago.com.ar/suscripciones`,
+    url:    `https://www.mercadopago.com.ar/subscriptions/manage/${subId}`,
     amount: PLAN_PRICES[planKey],
     source: 'mercadopago'
   };
