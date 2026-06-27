@@ -1769,15 +1769,15 @@ async function _refreshCurrentUser() {
     const data = await _api('/api/auth');
     _cacheUser(data);
     // Si hay un pago pendiente en Firestore, verificar y activar automáticamente
-    if (data.mpPendingPlan && data.mpPendingPlan !== 'free' && data.email) {
-      _checkPendingMpPlan(data.email, data.mpPendingPlan).catch(() => {});
+    if (data.mpPendingPlan && data.mpPendingPlan !== 'free') {
+      _checkPendingMpPlan(data.username, data.email, data.mpPendingPlan).catch(() => {});
     }
   } catch (_) {}
 }
 
-async function _checkPendingMpPlan(email, planKey) {
+async function _checkPendingMpPlan(username, email, planKey) {
   try {
-    const res  = await fetch(`/api/verify?email=${encodeURIComponent(email)}&planKey=${planKey}`);
+    const params = new URLSearchParams({ planKey }); if (username) params.set('username', username); if (email) params.set('email', email); const res = await fetch(`/api/verify?${params}`);
     const data = await res.json();
     if (data.status === 'authorized') {
       await _api('/api/activate', 'POST', { planKey, subId: data.subId || null });

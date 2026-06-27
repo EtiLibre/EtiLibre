@@ -11,35 +11,57 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method !== 'GET') return res.status(405).end();
 
-  const { email, planKey } = req.query;
-  if (!email || !planKey) return res.status(400).json({ error: 'Faltan parámetros' });
+  const { email, planKey, username } = req.query;
+  if (!planKey) return res.status(400).json({ error: 'Faltan parámetros' });
 
   const planId = PLAN_IDS[planKey?.toLowerCase()];
   if (!planId) return res.status(400).json({ error: 'Plan inválido' });
 
-  try {
-    // Buscar suscripción autorizada
-    const r = await fetch(
-      `https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(email)}&preapproval_plan_id=${planId}&status=authorized&limit=1`,
-      { headers: { 'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}` } }
-    );
-    const data = await r.json();
-    if (!r.ok) return res.status(500).json({ error: data });
+  const auth = { headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` } };
 
-    const results = data.results || [];
-    if (results.length > 0) {
-      const sub = results[0];
-      return res.json({ status: 'authorized', plan: PLAN_MAP[sub.preapproval_plan_id] || planKey, subId: sub.id });
+  try {
+    // 1. Buscar por external_reference (username) — más confiable, independiente del email
+    if (username) {
+      const r = await fetch(
+        `https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(username)}&preapproval_plan_id=${planId}&status=authorized&limit=1`,
+        auth
+      );
+      const d = await r.json();
+      if (d.results?.length > 0) {
+        const sub = d.results[0];
+        return res.json({ status: 'authorized', plan: PLAN_MAP[sub.preapproval_plan_id] || planKey, subId: sub.id });
+      }
     }
 
-    // Si no hay autorizada, buscar cualquier estado
-    const r2 = await fetch(
-      `https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(email)}&preapproval_plan_id=${planId}&limit=1`,
-      { headers: { 'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}` } }
-    );
-    const data2 = await r2.json();
-    const sub2 = (data2.results || [])[0];
-    res.json({ status: sub2?.status || 'not_found', plan: planKey, subId: sub2?.id });
+    // 2. Buscar por email del pagador
+    if (email) {
+      const r = await fetch(
+        `https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(email)}&preapproval_plan_id=${planId}&status=authorized&limit=1`,
+        auth
+      );
+      const d = await r.json();
+      if (d.results?.length > 0) {
+        const sub = d.results[0];
+        return res.json({ status: 'authorized', plan: PLAN_MAP[sub.preapproval_plan_id] || planKey, subId: sub.id });
+      }
+    }
+
+    // 3. Buscar cualquier suscripción autorizada reciente para ese plan (último recurso)
+    if (username) {
+      const r = await fetch(
+        `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${planId}&status=authorized&limit=5`,
+        auth
+      );
+      const d = await r.json();
+      // Tomar la más reciente (creada en las últimas 2 horas)
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+      const recent = (d.results || []).find(s => new Date(s.date_created) >= twoHoursAgo);
+      if (recent) {
+        return res.json({ status: 'authorized', plan: PLAN_MAP[recent.preapproval_plan_id] || planKey, subId: recent.id });
+      }
+    }
+
+    res.json({ status: 'not_found' });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
