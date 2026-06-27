@@ -2007,7 +2007,7 @@ function switchAuthTab(tab) {
 ═══════════════════════════════════════════════════════ */
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyCOPWRywhp66Lnf2pbA7iPyD0_aA8O55Yk",
-  authDomain:        "etify.com.ar",
+  authDomain:        "etilibre.firebaseapp.com",
   projectId:         "etilibre",
   storageBucket:     "etilibre.firebasestorage.app",
   messagingSenderId: "1004425799829",
@@ -2019,13 +2019,6 @@ try {
   if (FIREBASE_CONFIG.apiKey !== 'TU_API_KEY') {
     firebase.initializeApp(FIREBASE_CONFIG);
     _firebaseAuth = firebase.auth();
-    _firebaseAuth.getRedirectResult().then(result => {
-      if (result && result.user) _handleGoogleUser(result.user);
-    }).catch(e => {
-      if (e.code && e.code !== 'auth/no-auth-event') {
-        console.warn('Google redirect error:', e.message);
-      }
-    });
   }
 } catch(e) { console.warn('Firebase init error:', e); }
 
@@ -2204,22 +2197,14 @@ async function googleAuth() {
   _googleAuthInProgress = true;
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
-    await _firebaseAuth.signInWithRedirect(provider);
-  } catch (e) {
-    alert('Error al iniciar sesión con Google:\n' + e.message);
-    _googleAuthInProgress = false;
-  }
-}
-
-async function _checkGoogleRedirect() {
-  if (!_firebaseAuth) return;
-  try {
-    const result = await _firebaseAuth.getRedirectResult();
+    const result   = await _firebaseAuth.signInWithPopup(provider);
     if (result && result.user) await _handleGoogleUser(result.user);
   } catch (e) {
-    if (e.code && e.code !== 'auth/no-auth-event') {
+    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
       alert('Error al iniciar sesión con Google:\n' + e.message);
     }
+  } finally {
+    _googleAuthInProgress = false;
   }
 }
 
