@@ -2600,17 +2600,20 @@ async function enterApp(username) {
   updateNotifBadge();
   showScreen('screen-app');
   clearAll();
-  // Verificar en background si hay un pago pendiente de activar
+  // Verificar en background: pago pendiente y vencimiento de cancelación
   try {
     let data = await _api('/api/auth');
-    _cacheUser(data);
+    // Si el período ya cancelado venció, bajar a free en servidor y cache
+    if (data.mpCancelAt && new Date(data.mpCancelAt) <= new Date()) {
+      await _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
+      data = await _api('/api/auth');
+    }
+    // Si hay pago pendiente, intentar activar
     if (data.mpPendingPlan && data.mpPendingPlan !== 'free') {
       const r = await _api('/api/check-pending');
-      if (r.status === 'activated') {
-        const fresh = await _api('/api/auth');
-        _cacheUser(fresh);
-      }
+      if (r.status === 'activated') data = await _api('/api/auth');
     }
+    _cacheUser(data);
     refreshTopbar();
     updateUsageUI();
     updateNotifBadge();

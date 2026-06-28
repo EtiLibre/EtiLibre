@@ -18,9 +18,21 @@ export default async function handler(req, res) {
 
   const { mpSubId } = doc.data();
 
-  // Cancelar en MercadoPago si existe suscripción
+  // Cancelar en MercadoPago si existe suscripción y obtener fecha de fin de período
   let mpCancelled = false;
+  let cancelAt    = null;
+
   if (mpSubId) {
+    try {
+      // Obtener detalles de la suscripción para saber cuándo vence el período actual
+      const detail = await fetch(`https://api.mercadopago.com/preapproval/${mpSubId}`, {
+        headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` }
+      });
+      const subData = await detail.json();
+      // next_payment_date es cuando hubiera sido el próximo cobro = fin del período ya pago
+      cancelAt = subData.next_payment_date || null;
+    } catch (_) {}
+
     try {
       const r = await fetch(`https://api.mercadopago.com/preapproval/${mpSubId}`, {
         method: 'PUT',
@@ -34,14 +46,19 @@ export default async function handler(req, res) {
     } catch (_) {}
   }
 
-  // Actualizar Firestore
+  // Si no pudimos obtener la fecha de MP, usar fin del mes actual como fallback
+  if (!cancelAt) {
+    const now = new Date();
+    cancelAt = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+  }
+
+  // NO bajamos el plan inmediatamente — se mantiene activo hasta cancelAt
   await ref.update({
-    plan:      'free',
-    active:    true,
-    mpSubId:   null,
-    mpStatus:  'cancelled',
+    mpSubId:      null,
+    mpStatus:     'cancelled',
+    mpCancelAt:   cancelAt,
     mpPendingPlan: null
   });
 
-  res.json({ ok: true, mpCancelled });
+  res.json({ ok: true, mpCancelled, cancelAt });
 }
