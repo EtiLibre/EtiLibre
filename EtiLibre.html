@@ -2492,11 +2492,12 @@ async function initiateSubscription() {
     const data = await _api('/api/subscribe', 'POST', { planKey });
     // Ya tenía suscripción activa — activar directamente sin ir a MP
     if (data.already_active) {
+      const user = pendingPaymentUser;
       if (_userData) { _userData.active = true; _userData.plan = planKey; }
       const users = getUsers();
-      if (users[pendingPaymentUser]) { users[pendingPaymentUser].active = true; users[pendingPaymentUser].plan = planKey; saveUsers(users); }
+      if (users[user]) { users[user].active = true; users[user].plan = planKey; saveUsers(users); }
       pendingPaymentUser = null;
-      enterApp(currentUser || pendingPaymentUser);
+      enterApp(currentUser || user);
       return;
     }
     if (!data.init_point) throw new Error('Sin init_point');
