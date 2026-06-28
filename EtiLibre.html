@@ -1735,13 +1735,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
         <div class="danger-block">
           <div class="danger-block-title">Cancelar suscripción</div>
-          <p class="danger-block-desc">Pasarás al plan Free (2 hojas/mes) al final del período facturado. No perdés el historial ni tus datos personales.</p>
+          <p class="danger-block-desc">Se cancelará tu suscripción en MercadoPago y pasarás al plan Free. No perdés el historial ni tus datos personales.</p>
           <button class="btn-danger-outline" id="btn-cancel-sub" onclick="confirmCancelSubscription()">Cancelar suscripción</button>
         </div>
 
         <div class="danger-block" style="margin-top:14px">
           <div class="danger-block-title">Eliminar cuenta</div>
-          <p class="danger-block-desc">Acción permanente e irreversible. Se borrarán todos tus datos, historial y configuración.</p>
+          <p class="danger-block-desc">Acción permanente e irreversible. Se cancelará tu suscripción en MercadoPago y se borrarán todos tus datos, historial y configuración.</p>
           <button class="btn-danger-outline" onclick="confirmDeleteAccount()">Eliminar mi cuenta</button>
         </div>
       </div>
@@ -3819,7 +3819,7 @@ function confirmCancelSubscription() {
   showConfirmModal(
     '⚠️',
     'Cancelar suscripción',
-    `Tu plan ${planName} pasará a Free. También se cancelará el cobro automático en MercadoPago.`,
+    `⚠️ Se cancelará tu suscripción ${planName} en MercadoPago y dejarán de hacerte cobros automáticos. Pasarás al plan Free pero conservás todos tus datos e historial.`,
     async () => {
       try {
         await _api('/api/mp/cancel-sub', 'POST', {});
@@ -3840,7 +3840,7 @@ function confirmDeleteAccount() {
   showConfirmModal(
     '🔴',
     '¿Eliminar tu cuenta?',
-    'Esto es permanente. Se cancelará tu suscripción en MercadoPago y se borrarán todos tus datos.',
+    '⚠️ Se cancelará tu suscripción en MercadoPago y dejarán de hacerte cobros automáticos. Además se borrarán permanentemente todos tus datos, historial y configuración. Esta acción no tiene vuelta atrás.',
     async () => {
       try {
         // Cancelar suscripción MP primero
