@@ -2478,18 +2478,19 @@ async function checkMpRef() {
 }
 
 async function initiateSubscription() {
-  if (!pendingPaymentUser) return;
-  const u       = getUser(pendingPaymentUser);
-  const planKey = u?.plan || 'free';
-  if (planKey === 'free') return;
-
   const btn    = document.getElementById('btn-pay-mp');
   const btnTxt = document.getElementById('btn-pay-mp-text');
-  btn.disabled       = true;
-  btnTxt.textContent = 'Redirigiendo…';
-
   try {
+    if (!pendingPaymentUser) throw new Error('Sin usuario pendiente');
+    const u       = getUser(pendingPaymentUser);
+    const planKey = u?.plan || 'free';
+    if (planKey === 'free') throw new Error('Plan inválido (free)');
+
+    if (btn)    btn.disabled       = true;
+    if (btnTxt) btnTxt.textContent = 'Redirigiendo…';
+
     const data = await _api('/api/subscribe', 'POST', { planKey });
+
     // Ya tenía suscripción activa — activar directamente sin ir a MP
     if (data.already_active) {
       const user = pendingPaymentUser;
@@ -2500,15 +2501,14 @@ async function initiateSubscription() {
       enterApp(currentUser || user);
       return;
     }
-    if (!data.init_point) throw new Error('Sin init_point');
+    if (!data.init_point) throw new Error('MercadoPago no devolvió un link de pago');
 
     localStorage.setItem('mp_pending_username', pendingPaymentUser);
     localStorage.setItem('mp_pending_plan',     planKey);
-
     window.location.href = data.init_point;
   } catch (e) {
-    btn.disabled       = false;
-    btnTxt.textContent = 'Pagar con Mercado Pago';
+    if (btn)    btn.disabled       = false;
+    if (btnTxt) btnTxt.textContent = 'Pagar con Mercado Pago';
     alert('No se pudo conectar con Mercado Pago. Intentá de nuevo.\n' + e.message);
   }
 }
