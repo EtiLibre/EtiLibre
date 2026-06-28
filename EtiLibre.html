@@ -2339,12 +2339,14 @@ async function googleAuth() {
 ═══════════════════════════════════════════════════════ */
 const MP_PAYMENT_LINK = 'https://mpago.la/1PCBhWp';
 let pendingPaymentUser = null;
+let pendingPaymentPlan = null;
 let pendingPaymentPrevState = null; // {plan, active} del usuario antes del gate; null si es registro nuevo
 
 function showPaymentGate(username, isNewRegistration = false) {
   const u = getUser(username);
   pendingPaymentPrevState = isNewRegistration ? null : { plan: u?.plan || 'free', active: u?.active ?? false };
   const planKey = u?.plan || 'free';
+  pendingPaymentPlan = planKey;
   const pc = PLAN_CONFIG[planKey] || PLAN_CONFIG.free;
   pendingPaymentUser = username;
   const el = (id) => document.getElementById(id);
@@ -2482,9 +2484,8 @@ async function initiateSubscription() {
   const btnTxt = document.getElementById('btn-pay-mp-text');
   try {
     if (!pendingPaymentUser) throw new Error('Sin usuario pendiente');
-    const u       = getUser(pendingPaymentUser);
-    const planKey = u?.plan || 'free';
-    if (planKey === 'free') throw new Error('Plan inválido (free)');
+    const planKey = pendingPaymentPlan || getUser(pendingPaymentUser)?.plan || 'free';
+    if (planKey === 'free') throw new Error('Plan inválido: recargá la página e intentá de nuevo');
 
     if (btn)    btn.disabled       = true;
     if (btnTxt) btnTxt.textContent = 'Redirigiendo…';
