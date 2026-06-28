@@ -1282,6 +1282,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <button class="user-dropdown-item" onclick="closeUserMenu();openProfile('plan')">📦 Mi plan</button>
           <button class="user-dropdown-item" onclick="closeUserMenu();openProfile('vouchers')">🧾 Comprobantes</button>
           <button class="user-dropdown-item" onclick="closeUserMenu();openProfile('history')">📋 Historial</button>
+          <button class="user-dropdown-item" onclick="closeUserMenu();openProfile('help')">❓ Ayuda</button>
           <div class="user-dropdown-divider"></div>
           <button class="user-dropdown-item btn-theme-toggle" onclick="closeUserMenu();toggleTheme()">🌙 Cambiar tema</button>
           <div class="user-dropdown-divider"></div>
@@ -1485,6 +1486,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <button class="profile-tab"        id="ptab-btn-notifications" onclick="switchProfileTab('notifications')" style="position:relative">
         🔔 Avisos<span class="notif-badge" id="notif-badge" style="display:none"></span>
       </button>
+      <button class="profile-tab"        id="ptab-btn-help"         onclick="switchProfileTab('help')">❓ Ayuda</button>
       <button class="profile-tab"        id="ptab-btn-danger"       onclick="switchProfileTab('danger')" style="color:var(--danger)">⚠️ Cuenta</button>
     </div>
 
@@ -1592,9 +1594,58 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <!-- ══ TAB: COMPROBANTES ══ -->
     <div id="ptab-vouchers" style="display:none">
       <div class="profile-section">
-        <div class="profile-section-title"><span>🧾</span> Comprobantes de pago</div>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6">Acá encontrás las facturas que el administrador sube por cada renovación de tu suscripción.</p>
+        <div class="profile-section-title" style="justify-content:space-between;display:flex;align-items:center">
+          <span><span>🧾</span> Comprobantes de pago</span>
+          <button class="btn-sa" style="font-size:12px;padding:7px 14px" onclick="openInvoiceRequestModal()">📋 Solicitar factura</button>
+        </div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6">Acá encontrás los comprobantes de cada pago de tu suscripción.</p>
         <div id="vouchers-list"></div>
+      </div>
+    </div>
+
+    <!-- ══ MODAL: SOLICITAR FACTURA ══ -->
+    <div class="modal-overlay" id="modal-invoice-request" onclick="if(event.target===this)closeModal('modal-invoice-request')">
+      <div class="modal-box" style="max-width:480px">
+        <div class="modal-icon">📋</div>
+        <div class="modal-title">Solicitar factura</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Completá tus datos fiscales y te enviamos la factura por email.</p>
+        <div class="profile-field" style="text-align:left">
+          <label>Razón social o nombre completo</label>
+          <input type="text" id="inv-razon-social" placeholder="Ej: Juan Pérez / Mi Empresa S.A."/>
+        </div>
+        <div class="profile-field" style="text-align:left">
+          <label>CUIT / DNI</label>
+          <input type="text" id="inv-cuit" placeholder="Ej: 20-12345678-9"/>
+        </div>
+        <div class="profile-field" style="text-align:left">
+          <label>Condición frente al IVA</label>
+          <select id="inv-condicion-iva" style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit">
+            <option value="Consumidor Final">Consumidor Final</option>
+            <option value="Monotributista">Monotributista</option>
+            <option value="Responsable Inscripto">Responsable Inscripto</option>
+            <option value="Exento">Exento</option>
+          </select>
+        </div>
+        <div class="profile-field" style="text-align:left">
+          <label>Domicilio fiscal</label>
+          <input type="text" id="inv-domicilio" placeholder="Ej: Av. Corrientes 1234, CABA"/>
+        </div>
+        <div class="profile-field" style="text-align:left">
+          <label>Email para recibir la factura</label>
+          <input type="email" id="inv-email-factura" placeholder="tu@email.com"/>
+        </div>
+        <div class="profile-field" style="text-align:left">
+          <label>Número de comprobante <span style="color:var(--text3)">(opcional)</span></label>
+          <input type="text" id="inv-comprobante" placeholder="Ej: 12345678"/>
+        </div>
+        <div id="inv-req-error" class="profile-error"></div>
+        <div id="inv-req-ok" style="display:none;color:var(--success);font-size:13px;margin-top:8px;padding:10px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:var(--r-sm)">
+          ✅ Solicitud enviada. Te contactamos a la brevedad.
+        </div>
+        <div class="modal-actions">
+          <button class="btn-modal-secondary" onclick="closeModal('modal-invoice-request')">Cancelar</button>
+          <button class="btn-modal-primary" id="btn-inv-req-send" onclick="submitInvoiceRequest()">Enviar solicitud</button>
+        </div>
       </div>
     </div>
 
@@ -1636,6 +1687,54 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
 
     <!-- ══ TAB: ZONA DE PELIGRO ══ -->
+    <!-- ══ TAB: AYUDA ══ -->
+    <div id="ptab-help" style="display:none">
+      <div class="profile-section">
+        <div class="profile-section-title"><span>❓</span> Centro de ayuda</div>
+        <p style="font-size:14px;color:var(--text2);margin:0 0 20px">Contanos qué problema tenés y lo resolvemos automáticamente.</p>
+
+        <div class="profile-field">
+          <label>¿Cuál es tu problema?</label>
+          <select id="help-topic" onchange="onHelpTopicChange()" style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit">
+            <option value="">— Seleccioná una opción —</option>
+            <option value="plan_not_activated">Pagué mi plan y no se activó</option>
+            <option value="wrong_plan">Mi plan activado es incorrecto</option>
+            <option value="double_charge">Me cobraron dos veces</option>
+            <option value="other">Otro problema</option>
+          </select>
+        </div>
+
+        <!-- Pago no activado -->
+        <div id="help-plan-not-activated" style="display:none">
+          <div class="profile-field">
+            <label>Número de operación o comprobante de MP <span style="color:var(--text3)">(opcional)</span></label>
+            <input type="text" id="help-op-number" placeholder="Ej: 12345678 (podés dejarlo vacío)"/>
+          </div>
+          <div class="profile-field">
+            <label>Plan que pagaste</label>
+            <select id="help-plan-key" style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit">
+              <option value="starter">Starter — $2.000/mes</option>
+              <option value="pro">Pro — $3.000/mes</option>
+              <option value="business">Business — $4.500/mes</option>
+              <option value="premium">Premium — $10.500/mes</option>
+            </select>
+          </div>
+          <button class="btn-profile-save" id="btn-help-verify" onclick="helpVerifyPayment()">Verificar mi pago automáticamente</button>
+          <div id="help-verify-msg" style="display:none;margin-top:12px;font-size:14px;padding:12px;border-radius:var(--r-sm)"></div>
+        </div>
+
+        <!-- Otro problema -->
+        <div id="help-other" style="display:none">
+          <div class="profile-field">
+            <label>Describa el problema</label>
+            <textarea id="help-other-msg" rows="4" placeholder="Contanos qué pasó..." style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+          </div>
+          <button class="btn-profile-save" onclick="helpSendOther()">Enviar consulta</button>
+          <div id="help-other-msg-status" style="display:none;margin-top:12px;font-size:14px;padding:12px;border-radius:var(--r-sm)"></div>
+        </div>
+      </div>
+    </div>
+
     <div id="ptab-danger" style="display:none">
       <div class="profile-section" style="border-color:rgba(255,77,109,.25)">
         <div class="profile-section-title" style="color:var(--danger)"><span>⚠️</span> Zona de peligro</div>
@@ -2596,10 +2695,10 @@ async function claimAdBonus() {
   }
 }
 
-function submitContactForm(e) {
+async function submitContactForm(e) {
   e.preventDefault();
-  const err  = document.getElementById('cf-error');
-  const ok   = document.getElementById('cf-success');
+  const err = document.getElementById('cf-error');
+  const ok  = document.getElementById('cf-success');
   err.style.display = 'none'; ok.style.display = 'none';
   const rc = (typeof grecaptcha !== 'undefined' && recaptchaWidgetContact !== null)
     ? grecaptcha.getResponse(recaptchaWidgetContact) : '';
@@ -2609,11 +2708,20 @@ function submitContactForm(e) {
   const subject = document.getElementById('cf-subject').value.trim();
   const message = document.getElementById('cf-message').value.trim();
   const plan    = document.getElementById('cf-plan')?.value || '';
-  const planLine = plan ? `\nPlan de interés: ${plan}` : '';
-  window.location.href = `mailto:contacto@Etify.com?subject=${encodeURIComponent('[Etify] ' + subject)}&body=${encodeURIComponent('Nombre: ' + name + '\nEmail: ' + email + planLine + '\n\n' + message)}`;
-  ok.style.display = 'block';
-  document.getElementById('contact-form').reset();
-  if (typeof grecaptcha !== 'undefined') grecaptcha.reset(recaptchaWidgetContact);
+  const btn     = document.querySelector('.btn-contact-send');
+  btn.disabled  = true; btn.textContent = 'Enviando…';
+  try {
+    const r = await fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, subject, message, plan }) });
+    if (!r.ok) throw new Error('Error al enviar');
+    ok.style.display = 'block';
+    document.getElementById('contact-form').reset();
+    if (typeof grecaptcha !== 'undefined') grecaptcha.reset(recaptchaWidgetContact);
+  } catch(_) {
+    err.textContent = 'Error al enviar el mensaje. Intentá de nuevo.';
+    err.style.display = 'block';
+  }
+  btn.disabled = false; btn.textContent = 'Enviar mensaje';
 }
 
 function openModal(id) {
@@ -3046,7 +3154,7 @@ function populateProfileHeader() {
 }
 
 function switchProfileTab(tab) {
-  const tabs = ['personal','security','plan','vouchers','history','notifications','danger'];
+  const tabs = ['personal','security','plan','vouchers','history','notifications','help','danger'];
   tabs.forEach(t => {
     const btn = document.getElementById(`ptab-btn-${t}`);
     const pane = document.getElementById(`ptab-${t}`);
@@ -3603,6 +3711,108 @@ function renderDangerTab() {
   }
 }
 
+/* ── Ayuda ── */
+function onHelpTopicChange() {
+  const topic = document.getElementById('help-topic').value;
+  document.getElementById('help-plan-not-activated').style.display =
+    (topic === 'plan_not_activated' || topic === 'wrong_plan' || topic === 'double_charge') ? '' : 'none';
+  document.getElementById('help-other').style.display = topic === 'other' ? '' : 'none';
+  document.getElementById('help-verify-msg').style.display = 'none';
+}
+
+async function helpVerifyPayment() {
+  const btn  = document.getElementById('btn-help-verify');
+  const msg  = document.getElementById('help-verify-msg');
+  const plan = document.getElementById('help-plan-key').value;
+  btn.disabled = true; btn.textContent = 'Verificando…';
+  msg.style.display = 'none';
+
+  try {
+    // Forzar mpPendingPlan al plan elegido y correr check-pending
+    await _api('/api/help-activate', 'POST', { planKey: plan });
+    const r = await _api('/api/check-pending');
+    if (r.status === 'activated') {
+      if (_userData) { _userData.active = true; _userData.plan = plan; _userData.mpPendingPlan = null; }
+      refreshTopbar(); updateUsageUI(); updateNotifBadge();
+      msg.style.cssText = 'display:block;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:8px;color:#00c98d;padding:12px';
+      msg.textContent = '✅ ¡Pago verificado! Tu plan fue activado correctamente.';
+    } else {
+      msg.style.cssText = 'display:block;background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:8px;color:var(--danger);padding:12px';
+      msg.textContent = 'No pudimos verificar el pago automáticamente. Te contactaremos por email para resolverlo.';
+      // Enviar email de ayuda al admin
+      const u = _userData || {};
+      await fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ type:'help', name: u.displayName || currentUser, email: u.email || '',
+          subject:'Plan no activado', message:`Usuario: ${currentUser}\nPlan: ${plan}\nOp: ${document.getElementById('help-op-number').value}` }) });
+    }
+  } catch(e) {
+    msg.style.cssText = 'display:block;background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:8px;color:var(--danger);padding:12px';
+    msg.textContent = 'Error al verificar. Intentá de nuevo.';
+  }
+  btn.disabled = false; btn.textContent = 'Verificar mi pago automáticamente';
+}
+
+async function helpSendOther() {
+  const msg    = document.getElementById('help-other-msg').value.trim();
+  const status = document.getElementById('help-other-msg-status');
+  if (!msg) return;
+  const u = _userData || {};
+  try {
+    await fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'help', name: u.displayName || currentUser, email: u.email || '',
+        subject:'Consulta de usuario', message: `Usuario: ${currentUser}\n\n${msg}` }) });
+    status.style.cssText = 'display:block;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:8px;color:#00c98d;padding:12px';
+    status.textContent = '✅ Mensaje enviado. Te respondemos a la brevedad.';
+    document.getElementById('help-other-msg').value = '';
+  } catch(e) {
+    status.style.cssText = 'display:block;background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:8px;color:var(--danger);padding:12px';
+    status.textContent = 'Error al enviar. Intentá de nuevo.';
+  }
+}
+
+/* ── Solicitud de factura ── */
+function openInvoiceRequestModal() {
+  const u = _userData || {};
+  document.getElementById('inv-email-factura').value = u.email || '';
+  document.getElementById('inv-req-error').style.display = 'none';
+  document.getElementById('inv-req-ok').style.display    = 'none';
+  openModal('modal-invoice-request');
+}
+
+async function submitInvoiceRequest() {
+  const razonSocial  = document.getElementById('inv-razon-social').value.trim();
+  const cuit         = document.getElementById('inv-cuit').value.trim();
+  const condicionIVA = document.getElementById('inv-condicion-iva').value;
+  const domicilio    = document.getElementById('inv-domicilio').value.trim();
+  const emailFactura = document.getElementById('inv-email-factura').value.trim();
+  const comprobante  = document.getElementById('inv-comprobante').value.trim();
+  const err          = document.getElementById('inv-req-error');
+  const ok           = document.getElementById('inv-req-ok');
+
+  if (!razonSocial || !cuit || !domicilio || !emailFactura) {
+    err.textContent = 'Completá todos los campos obligatorios.';
+    err.style.display = 'block'; return;
+  }
+  err.style.display = 'none';
+
+  const btn = document.getElementById('btn-inv-req-send');
+  btn.disabled = true; btn.textContent = 'Enviando…';
+
+  const u = _userData || {};
+  try {
+    await fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'invoice_request', name: u.displayName || currentUser,
+        email: u.email || '', invoiceRequest: { razonSocial, cuit, condicionIVA, domicilio, emailFactura, comprobante } }) });
+    ok.style.display = 'block';
+    setTimeout(() => closeModal('modal-invoice-request'), 2500);
+  } catch(e) {
+    err.textContent = 'Error al enviar. Intentá de nuevo.';
+    err.style.display = 'block';
+  }
+  btn.disabled = false; btn.textContent = 'Enviar solicitud';
+}
+
+/* ── Cancelar suscripción / Eliminar cuenta ── */
 function confirmCancelSubscription() {
   const planKey = getUserPlan(currentUser);
   if (planKey === 'free' || planKey === 'admin') return;
@@ -3610,16 +3820,18 @@ function confirmCancelSubscription() {
   showConfirmModal(
     '⚠️',
     'Cancelar suscripción',
-    `Tu plan ${planName} pasará a Free (2 hojas/mes). Conservás todos tus datos e historial.`,
-    () => {
-      const users = getUsers();
-      users[currentUser].plan = 'free';
-      saveUsers(users);
-      populateProfileHeader();
-      refreshTopbar();
-      updateUsageUI();
-      renderDangerTab();
-      alert('Suscripción cancelada. Ahora estás en el plan Free.');
+    `Tu plan ${planName} pasará a Free. También se cancelará el cobro automático en MercadoPago.`,
+    async () => {
+      try {
+        await _api('/api/mp/cancel-sub', 'POST', {});
+        if (_userData) { _userData.plan = 'free'; _userData.mpSubId = null; }
+        const users = getUsers();
+        if (users[currentUser]) { users[currentUser].plan = 'free'; saveUsers(users); }
+        populateProfileHeader(); refreshTopbar(); updateUsageUI(); renderDangerTab();
+        addNotification(currentUser, '✅', 'Suscripción cancelada', 'Tu suscripción fue cancelada. Ahora estás en el plan Free.');
+      } catch(e) {
+        alert('Error al cancelar: ' + e.message);
+      }
     }
   );
 }
@@ -3629,13 +3841,28 @@ function confirmDeleteAccount() {
   showConfirmModal(
     '🔴',
     '¿Eliminar tu cuenta?',
-    'Esto es permanente. Todos tus datos, configuración e historial serán eliminados. No hay vuelta atrás.',
-    () => {
-      const users = getUsers();
-      delete users[currentUser];
-      saveUsers(users);
-      currentUser = null;
-      showScreen('screen-landing');
+    'Esto es permanente. Se cancelará tu suscripción en MercadoPago y se borrarán todos tus datos.',
+    async () => {
+      try {
+        // Cancelar suscripción MP primero
+        await _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
+        // Eliminar cuenta
+        await _api('/api/admin', 'DELETE', { username: currentUser }).catch(() => {});
+        const users = getUsers();
+        delete users[currentUser];
+        saveUsers(users);
+        _clearToken();
+        currentUser = null;
+        _userData   = null;
+        showScreen('screen-landing');
+      } catch(e) {
+        const users = getUsers();
+        delete users[currentUser];
+        saveUsers(users);
+        _clearToken();
+        currentUser = null; _userData = null;
+        showScreen('screen-landing');
+      }
     }
   );
 }
