@@ -2566,12 +2566,23 @@ function cancelPaymentGate() {
    ENTER APP
 ═══════════════════════════════════════════════════════ */
 function enterApp(username) {
+  // Guard: si tiene plan pago sin activar, mandar al payment gate antes de entrar
+  const u = getUser(username);
+  if (u && !u.active && u.plan && u.plan !== 'free' && u.plan !== 'admin') {
+    showPaymentGate(username, false);
+    return;
+  }
   currentUser = username;
   // Refrescar datos desde Firestore en background
   _refreshCurrentUser().then(() => {
     refreshTopbar();
     updateUsageUI();
     updateNotifBadge();
+    // Segunda verificación post-refresh: si Firestore devuelve plan inactivo, mostrar gate
+    if (_userData && !_userData.active && _userData.plan && _userData.plan !== 'free' && _userData.plan !== 'admin') {
+      currentUser = null;
+      showPaymentGate(username, false);
+    }
   });
   refreshTopbar();
   updateUsageUI();
