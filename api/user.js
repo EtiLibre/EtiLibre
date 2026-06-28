@@ -86,7 +86,8 @@ export default async function handler(req, res) {
       const VALID = ['starter','pro','business','premium'];
       const { planKey } = req.body;
       if (!VALID.includes(planKey)) return res.status(400).json({ error: 'Plan inválido' });
-      await ref.update({ plan: planKey, active: false, mpPendingPlan: planKey, mpPendingPlanAt: new Date().toISOString() });
+      // Solo marcamos el plan y active=false; mpPendingPlan se setea en /api/subscribe cuando el usuario realmente paga
+      await ref.update({ plan: planKey, active: false, mpPendingPlan: null });
       return res.json({ ok:true });
     }
     if (action === 'change-password') {
