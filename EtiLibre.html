@@ -2603,10 +2603,10 @@ async function enterApp(username) {
       try {
         const r = await _api('/api/check-pending');
         if (r.status === 'activated') {
-          data.active = true;
-          data.plan   = r.planKey;
-          data.mpPendingPlan = null;
-          _cacheUser(data);
+          // Re-fetch completo para traer la factura que check-pending creó en Firestore
+          const fresh = await _api('/api/auth');
+          _cacheUser(fresh);
+          data = fresh;
         }
       } catch (_) {}
     }
