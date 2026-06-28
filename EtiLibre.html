@@ -3969,6 +3969,29 @@ function exportTosCSV() {
   a.click();
 }
 
+function exportDeletedCSV() {
+  const users = [..._saDeletedUsersCache].sort((a, b) => new Date(b.deletedAt||0) - new Date(a.deletedAt||0));
+  const PLAN_LABELS = { free:'Free', starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' };
+  const rows = [['Usuario','Email','Plan que tenía','Fecha de baja','Tenía factura','ID suscripción MP']];
+  users.forEach(u => {
+    const deletedAt = u.deletedAt ? new Date(u.deletedAt).toLocaleDateString('es-AR') : '';
+    rows.push([
+      u.username,
+      u.email || '',
+      PLAN_LABELS[u.previousPlan || u.plan] || u.previousPlan || u.plan || '',
+      deletedAt,
+      u.hadInvoice ? 'Sí' : 'No',
+      u.mpSubId || ''
+    ]);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Etify_bajas_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
 function renderSADeletedUsers() {
   const tbody = document.getElementById('sa-deleted-tbody');
   if (!tbody) return;
@@ -4227,7 +4250,10 @@ async function saNotifyUser(username) {
 
     <!-- Bajas y eliminados -->
     <div style="margin-top:48px">
-      <p class="sa-section-title">Bajas y eliminados</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <p class="sa-section-title" style="margin:0">Bajas y eliminados</p>
+        <button class="btn-sa success" onclick="exportDeletedCSV()">⬇ Exportar CSV</button>
+      </div>
       <div class="sa-tos-table-wrap">
         <table class="sa-tos-table" id="sa-deleted-table">
           <thead>
