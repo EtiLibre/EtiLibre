@@ -2346,6 +2346,12 @@ function showPaymentGate(username, isNewRegistration = false) {
   const u = getUser(username);
   pendingPaymentPrevState = isNewRegistration ? null : { plan: u?.plan || 'free', active: u?.active ?? false };
   const planKey = u?.plan || 'free';
+  // Si el plan es free no hay nada que pagar — entrar directo
+  if (planKey === 'free') {
+    _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
+    enterApp(username);
+    return;
+  }
   pendingPaymentPlan = planKey;
   const pc = PLAN_CONFIG[planKey] || PLAN_CONFIG.free;
   pendingPaymentUser = username;
