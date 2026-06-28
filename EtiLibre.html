@@ -2279,22 +2279,15 @@ async function _handleGoogleUser(fbUser, planKey) {
   try {
     const data = await _api('/api/auth', 'POST', { action:'google', email, displayName: name });
     _setToken(data.token);
-    // Si el usuario eligió un plan pago, actualizarlo en Firestore antes de continuar
-    if (wantedPlan) {
-      await _api('/api/user', 'PUT', { action:'set-plan', planKey: wantedPlan });
-      data.user.plan   = wantedPlan;
-      data.user.active = false;
-    }
     _cacheUser(data.user);
     if (data.needsTos) {
       _pendingGoogleUsername = data.user.username;
       _pendingGooglePlan     = wantedPlan;
       showScreen('screen-landing');
       document.getElementById('modal-google-tos').style.display = 'flex';
-    } else if (wantedPlan) {
-      showPaymentGate(data.user.username, true);
     } else {
       enterApp(data.user.username);
+      if (wantedPlan) openProfile('plan');
     }
   } catch (e) {
     alert('Error al iniciar sesión con Google: ' + (e.message || 'Intentá de nuevo'));
@@ -2318,7 +2311,8 @@ async function acceptGoogleTos() {
       const plan = _pendingGooglePlan;
       _pendingGoogleUsername = null;
       _pendingGooglePlan     = null;
-      if (plan) { showPaymentGate(u, true); } else { enterApp(u); }
+      enterApp(u);
+      if (plan) openProfile('plan');
     }
   } catch(e) {
     err.textContent = 'Error al guardar. Intentá de nuevo.';
