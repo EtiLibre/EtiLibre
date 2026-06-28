@@ -1588,6 +1588,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div style="font-size:13px;color:var(--text2);margin-bottom:14px;font-weight:500">Cambiar plan:</div>
         <div class="plan-change-grid" id="plan-change-grid"></div>
         <div class="profile-success" id="plan-success" style="margin-top:14px">✅ Plan actualizado.</div>
+
+        <div id="plan-cancel-area" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <button class="btn-danger-outline" style="font-size:13px" onclick="confirmCancelSubscription()">⛔ Cancelar suscripción de MercadoPago</button>
+          <p style="font-size:12px;color:var(--text3);margin:8px 0 0">Se cancelará el cobro automático en MP y pasarás al plan Free.</p>
+        </div>
       </div>
     </div>
 
@@ -3325,34 +3330,53 @@ function renderPlanTab() {
   });
 
   document.getElementById('plan-success').style.display = 'none';
+
+  // Botón cancelar suscripción al final del tab
+  const cancelArea = document.getElementById('plan-cancel-area');
+  if (cancelArea) {
+    if (planKey !== 'free' && planKey !== 'admin') {
+      cancelArea.style.display = '';
+    } else {
+      cancelArea.style.display = 'none';
+    }
+  }
 }
 
 function changePlan(newPlan) {
   if (!currentUser || currentUser === 'admin') return;
   const oldPlan = getUserPlan(currentUser);
   if (newPlan === oldPlan) return;
-  const planCfg = PLAN_CONFIG[newPlan];
+  const planCfg    = PLAN_CONFIG[newPlan];
+  const oldPlanCfg = PLAN_CONFIG[oldPlan];
+  const isUpgrade  = newPlan !== 'free' && oldPlan !== 'free';
+  const cancelNote = isUpgrade
+    ? ' Se cancelará tu suscripción anterior en MercadoPago y se creará una nueva.'
+    : newPlan === 'free' ? ' Se cancelará tu suscripción en MercadoPago.' : '';
+
   showConfirmModal(
     '📦',
     `Cambiar a plan ${planCfg.label}`,
-    `Tu plan pasará de ${PLAN_CONFIG[oldPlan].label} a ${planCfg.label} (${planCfg.limit} hojas/mes, ${planCfg.price}).`,
-    () => {
+    `Tu plan pasará de ${oldPlanCfg.label} a ${planCfg.label} (${planCfg.limit} hojas/mes, ${planCfg.price}).${cancelNote}`,
+    async () => {
       const users = getUsers();
       if (!users[currentUser]) users[currentUser] = {};
       users[currentUser].plan = newPlan;
       if (newPlan !== 'free') {
-        // Paid upgrade → go to payment gate
+        // Cancelar suscripción MP anterior si tenía una
+        if (oldPlan !== 'free') {
+          await _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
+        }
+        // Ir al pago del nuevo plan
         users[currentUser].active = false;
         saveUsers(users);
-        if (_userData) { _userData.plan = newPlan; _userData.active = false; }
+        if (_userData) { _userData.plan = newPlan; _userData.active = false; _userData.mpSubId = null; }
         showPaymentGate(currentUser);
       } else {
-        // Downgrade to free → immediate
+        // Bajar a free → cancelar en MP y aplicar inmediatamente
+        await _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
         users[currentUser].active = true;
         saveUsers(users);
-        // Update in-memory cache so UI reflects change immediately
-        if (_userData) { _userData.plan = 'free'; _userData.active = true; }
-        // Persist to Firestore
+        if (_userData) { _userData.plan = 'free'; _userData.active = true; _userData.mpSubId = null; }
         _api('/api/user', 'PUT', { action:'cancel-plan' }).catch(() => {});
         populateProfileHeader(); refreshTopbar(); updateUsageUI(); renderPlanTab();
         const ok = document.getElementById('plan-success');
