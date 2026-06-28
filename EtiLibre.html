@@ -3945,21 +3945,37 @@ async function submitInvoiceRequest() {
 
 /* ── Cancelar suscripción / Eliminar cuenta ── */
 function confirmCancelSubscription() {
-  const planKey = getUserPlan(currentUser);
+  const planKey = _userData?.plan || getUserPlan(currentUser);
   if (planKey === 'free' || planKey === 'admin') return;
   const planName = PLAN_CONFIG[planKey]?.label || planKey;
   showConfirmModal(
     '⚠️',
     'Cancelar suscripción',
-    `⚠️ Se cancelará tu suscripción ${planName} en MercadoPago y dejarán de hacerte cobros automáticos. Pasarás al plan Free pero conservás todos tus datos e historial.`,
+    `⚠️ Se cancelará el cobro automático en MercadoPago. Seguís usando el plan ${planName} hasta que venza el período ya pagado, después pasás al plan Free automáticamente.`,
     async () => {
       try {
-        await _api('/api/mp/cancel-sub', 'POST', {});
-        if (_userData) { _userData.plan = 'free'; _userData.mpSubId = null; }
+        const result = await _api('/api/mp/cancel-sub', 'POST', {});
+        // Actualizar cache con los datos reales — el plan NO cambia todavía
+        if (_userData) {
+          _userData.mpSubId   = null;
+          _userData.mpStatus  = 'cancelled';
+          _userData.mpCancelAt = result.cancelAt || null;
+        }
         const users = getUsers();
-        if (users[currentUser]) { users[currentUser].plan = 'free'; saveUsers(users); }
-        populateProfileHeader(); refreshTopbar(); updateUsageUI(); renderDangerTab();
-        addNotification(currentUser, '✅', 'Suscripción cancelada', 'Tu suscripción fue cancelada. Ahora estás en el plan Free.');
+        if (users[currentUser]) {
+          users[currentUser].mpSubId   = null;
+          users[currentUser].mpStatus  = 'cancelled';
+          users[currentUser].mpCancelAt = result.cancelAt || null;
+          saveUsers(users);
+        }
+        populateProfileHeader(); refreshTopbar(); updateUsageUI();
+        if (document.getElementById('ptab-plan')?.style.display !== 'none') renderPlanTab();
+        renderDangerTab();
+        const fecha = result.cancelAt
+          ? new Date(result.cancelAt).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' })
+          : 'fin del período';
+        addNotification(currentUser, '✅', 'Suscripción cancelada',
+          `Tu suscripción fue cancelada. Seguís con el plan ${planName} hasta el ${fecha}.`);
       } catch(e) {
         alert('Error al cancelar: ' + e.message);
       }
