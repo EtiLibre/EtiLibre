@@ -82,6 +82,13 @@ export default async function handler(req, res) {
       await ref.update({ plan: 'free', active: true });
       return res.json({ ok:true });
     }
+    if (action === 'set-plan') {
+      const VALID = ['starter','pro','business','premium'];
+      const { planKey } = req.body;
+      if (!VALID.includes(planKey)) return res.status(400).json({ error: 'Plan inválido' });
+      await ref.update({ plan: planKey, active: false, mpPendingPlan: planKey, mpPendingPlanAt: new Date().toISOString() });
+      return res.json({ ok:true });
+    }
     if (action === 'change-password') {
       if (payload.username === 'admin') return res.status(403).end();
       const { oldPass, newPass } = req.body;
