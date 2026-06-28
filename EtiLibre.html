@@ -1594,57 +1594,52 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <!-- ══ TAB: COMPROBANTES ══ -->
     <div id="ptab-vouchers" style="display:none">
       <div class="profile-section">
-        <div class="profile-section-title" style="justify-content:space-between;display:flex;align-items:center">
-          <span><span>🧾</span> Comprobantes de pago</span>
-          <button class="btn-sa" style="font-size:12px;padding:7px 14px" onclick="openInvoiceRequestModal()">📋 Solicitar factura</button>
-        </div>
+        <div class="profile-section-title"><span>🧾</span> Comprobantes de pago</div>
         <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6">Acá encontrás los comprobantes de cada pago de tu suscripción.</p>
         <div id="vouchers-list"></div>
-      </div>
-    </div>
 
-    <!-- ══ MODAL: SOLICITAR FACTURA ══ -->
-    <div class="modal-overlay" id="modal-invoice-request" onclick="if(event.target===this)closeModal('modal-invoice-request')">
-      <div class="modal-box" style="max-width:480px">
-        <div class="modal-icon">📋</div>
-        <div class="modal-title">Solicitar factura</div>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Completá tus datos fiscales y te enviamos la factura por email.</p>
-        <div class="profile-field" style="text-align:left">
-          <label>Razón social o nombre completo</label>
-          <input type="text" id="inv-razon-social" placeholder="Ej: Juan Pérez / Mi Empresa S.A."/>
-        </div>
-        <div class="profile-field" style="text-align:left">
-          <label>CUIT / DNI</label>
-          <input type="text" id="inv-cuit" placeholder="Ej: 20-12345678-9"/>
-        </div>
-        <div class="profile-field" style="text-align:left">
-          <label>Condición frente al IVA</label>
-          <select id="inv-condicion-iva" style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit">
-            <option value="Consumidor Final">Consumidor Final</option>
-            <option value="Monotributista">Monotributista</option>
-            <option value="Responsable Inscripto">Responsable Inscripto</option>
-            <option value="Exento">Exento</option>
-          </select>
-        </div>
-        <div class="profile-field" style="text-align:left">
-          <label>Domicilio fiscal</label>
-          <input type="text" id="inv-domicilio" placeholder="Ej: Av. Corrientes 1234, CABA"/>
-        </div>
-        <div class="profile-field" style="text-align:left">
-          <label>Email para recibir la factura</label>
-          <input type="email" id="inv-email-factura" placeholder="tu@email.com"/>
-        </div>
-        <div class="profile-field" style="text-align:left">
-          <label>Número de comprobante <span style="color:var(--text3)">(opcional)</span></label>
-          <input type="text" id="inv-comprobante" placeholder="Ej: 12345678"/>
-        </div>
-        <div id="inv-req-error" class="profile-error"></div>
-        <div id="inv-req-ok" style="display:none;color:var(--success);font-size:13px;margin-top:8px;padding:10px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:var(--r-sm)">
-          ✅ Solicitud enviada. Te contactamos a la brevedad.
-        </div>
-        <div class="modal-actions">
-          <button class="btn-modal-secondary" onclick="closeModal('modal-invoice-request')">Cancelar</button>
-          <button class="btn-modal-primary" id="btn-inv-req-send" onclick="submitInvoiceRequest()">Enviar solicitud</button>
+        <!-- Solicitar factura (inline) -->
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+          <button class="btn-profile-cancel" style="margin-bottom:16px" onclick="toggleInvoiceForm()">📋 Necesito la factura</button>
+          <div id="invoice-request-form" style="display:none">
+            <div class="profile-field">
+              <label>Razón social o nombre completo</label>
+              <input type="text" id="inv-razon-social" placeholder="Ej: Juan Pérez / Mi Empresa S.A."/>
+            </div>
+            <div class="profile-field">
+              <label>CUIT / DNI</label>
+              <input type="text" id="inv-cuit" placeholder="Ej: 20-12345678-9"/>
+            </div>
+            <div class="profile-field">
+              <label>Condición frente al IVA</label>
+              <select id="inv-condicion-iva" style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit">
+                <option value="Consumidor Final">Consumidor Final</option>
+                <option value="Monotributista">Monotributista</option>
+                <option value="Responsable Inscripto">Responsable Inscripto</option>
+                <option value="Exento">Exento</option>
+              </select>
+            </div>
+            <div class="profile-field">
+              <label>Domicilio fiscal</label>
+              <input type="text" id="inv-domicilio" placeholder="Ej: Av. Corrientes 1234, CABA"/>
+            </div>
+            <div class="profile-field">
+              <label>Email para recibir la factura</label>
+              <input type="email" id="inv-email-factura" placeholder="tu@email.com"/>
+            </div>
+            <div class="profile-field">
+              <label>Número de comprobante <span style="color:var(--text3)">(opcional)</span></label>
+              <input type="text" id="inv-comprobante" placeholder="Ej: 12345678"/>
+            </div>
+            <div id="inv-req-error" class="profile-error"></div>
+            <div id="inv-req-ok" style="display:none;font-size:13px;margin-top:8px;padding:10px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:var(--r-sm);color:#00c98d">
+              ✅ Solicitud enviada. Te contactamos a la brevedad.
+            </div>
+            <div style="display:flex;gap:10px;margin-top:4px">
+              <button class="btn-profile-cancel" onclick="toggleInvoiceForm()">Cancelar</button>
+              <button class="btn-profile-save" id="btn-inv-req-send" onclick="submitInvoiceRequest()">Enviar solicitud</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1686,12 +1681,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       </div>
     </div>
 
-    <!-- ══ TAB: ZONA DE PELIGRO ══ -->
     <!-- ══ TAB: AYUDA ══ -->
     <div id="ptab-help" style="display:none">
       <div class="profile-section">
-        <div class="profile-section-title"><span>❓</span> Centro de ayuda</div>
-        <p style="font-size:14px;color:var(--text2);margin:0 0 20px">Contanos qué problema tenés y lo resolvemos automáticamente.</p>
+        <div class="profile-section-title"><span>❓</span> Ayuda</div>
+        <p style="font-size:14px;color:var(--text2);margin:0 0 20px;line-height:1.6">Contanos qué problema tenés y te ayudamos a resolverlo.</p>
 
         <div class="profile-field">
           <label>¿Cuál es tu problema?</label>
@@ -1700,16 +1694,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <option value="plan_not_activated">Pagué mi plan y no se activó</option>
             <option value="wrong_plan">Mi plan activado es incorrecto</option>
             <option value="double_charge">Me cobraron dos veces</option>
-            <option value="other">Otro problema</option>
+            <option value="other">Otro problema o consulta</option>
           </select>
         </div>
 
-        <!-- Pago no activado -->
-        <div id="help-plan-not-activated" style="display:none">
-          <div class="profile-field">
-            <label>Número de operación o comprobante de MP <span style="color:var(--text3)">(opcional)</span></label>
-            <input type="text" id="help-op-number" placeholder="Ej: 12345678 (podés dejarlo vacío)"/>
-          </div>
+        <!-- Pago no activado / plan incorrecto / doble cobro -->
+        <div id="help-payment-issue" style="display:none">
           <div class="profile-field">
             <label>Plan que pagaste</label>
             <select id="help-plan-key" style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit">
@@ -1719,6 +1709,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
               <option value="premium">Premium — $10.500/mes</option>
             </select>
           </div>
+          <div class="profile-field">
+            <label>Número de operación MP <span style="color:var(--text3)">(opcional)</span></label>
+            <input type="text" id="help-op-number" placeholder="Ej: 12345678"/>
+          </div>
           <button class="btn-profile-save" id="btn-help-verify" onclick="helpVerifyPayment()">Verificar mi pago automáticamente</button>
           <div id="help-verify-msg" style="display:none;margin-top:12px;font-size:14px;padding:12px;border-radius:var(--r-sm)"></div>
         </div>
@@ -1726,11 +1720,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <!-- Otro problema -->
         <div id="help-other" style="display:none">
           <div class="profile-field">
-            <label>Describa el problema</label>
-            <textarea id="help-other-msg" rows="4" placeholder="Contanos qué pasó..." style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+            <label>Contanos qué pasó</label>
+            <textarea id="help-other-msg" rows="4" placeholder="Describí tu problema o consulta..." style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
           </div>
           <button class="btn-profile-save" onclick="helpSendOther()">Enviar consulta</button>
-          <div id="help-other-msg-status" style="display:none;margin-top:12px;font-size:14px;padding:12px;border-radius:var(--r-sm)"></div>
+          <div id="help-other-status" style="display:none;margin-top:12px;font-size:14px;padding:12px;border-radius:var(--r-sm)"></div>
         </div>
       </div>
     </div>
@@ -3714,10 +3708,11 @@ function renderDangerTab() {
 /* ── Ayuda ── */
 function onHelpTopicChange() {
   const topic = document.getElementById('help-topic').value;
-  document.getElementById('help-plan-not-activated').style.display =
+  document.getElementById('help-payment-issue').style.display =
     (topic === 'plan_not_activated' || topic === 'wrong_plan' || topic === 'double_charge') ? '' : 'none';
   document.getElementById('help-other').style.display = topic === 'other' ? '' : 'none';
-  document.getElementById('help-verify-msg').style.display = 'none';
+  const vm = document.getElementById('help-verify-msg');
+  if (vm) vm.style.display = 'none';
 }
 
 async function helpVerifyPayment() {
@@ -3754,7 +3749,7 @@ async function helpVerifyPayment() {
 
 async function helpSendOther() {
   const msg    = document.getElementById('help-other-msg').value.trim();
-  const status = document.getElementById('help-other-msg-status');
+  const status = document.getElementById('help-other-status');
   if (!msg) return;
   const u = _userData || {};
   try {
@@ -3771,12 +3766,16 @@ async function helpSendOther() {
 }
 
 /* ── Solicitud de factura ── */
-function openInvoiceRequestModal() {
-  const u = _userData || {};
-  document.getElementById('inv-email-factura').value = u.email || '';
-  document.getElementById('inv-req-error').style.display = 'none';
-  document.getElementById('inv-req-ok').style.display    = 'none';
-  openModal('modal-invoice-request');
+function toggleInvoiceForm() {
+  const form = document.getElementById('invoice-request-form');
+  const show = form.style.display === 'none';
+  form.style.display = show ? '' : 'none';
+  if (show) {
+    const u = _userData || {};
+    document.getElementById('inv-email-factura').value = u.email || '';
+    document.getElementById('inv-req-error').style.display = 'none';
+    document.getElementById('inv-req-ok').style.display    = 'none';
+  }
 }
 
 async function submitInvoiceRequest() {
