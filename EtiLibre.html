@@ -1287,6 +1287,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <button class="user-dropdown-item btn-theme-toggle" onclick="closeUserMenu();toggleTheme()">🌙 Cambiar tema</button>
           <div class="user-dropdown-divider"></div>
           <button class="user-dropdown-item" id="udrop-cancel-sub" onclick="closeUserMenu();confirmCancelSubscription()">⛔ Darme de baja</button>
+          <div id="udrop-cancel-info" style="display:none;font-size:12px;color:var(--text2);padding:6px 16px;line-height:1.5"></div>
           <button class="user-dropdown-item danger" onclick="closeUserMenu();confirmDeleteAccount()">🗑️ Eliminar mi cuenta</button>
           <div class="user-dropdown-divider"></div>
           <button class="user-dropdown-item" onclick="closeUserMenu();doLogout()">🚪 Cerrar sesión</button>
@@ -2652,9 +2653,20 @@ function refreshTopbar() {
   if (udropName)   { udropName.textContent = displayName; udropName.style.color = nameColor; }
   if (udropEmail)  udropEmail.textContent = u?.email || '';
 
-  // Ocultar "Darme de baja" si ya es free o admin
-  const cancelBtn = document.getElementById('udrop-cancel-sub');
-  if (cancelBtn) cancelBtn.style.display = (planKey === 'free' || planKey === 'admin') ? 'none' : '';
+  // Ocultar "Darme de baja" si ya es free, admin, o la suscripción ya fue cancelada
+  const cancelBtn  = document.getElementById('udrop-cancel-sub');
+  const cancelInfo = document.getElementById('udrop-cancel-info');
+  const isCancelled = u?.mpStatus === 'cancelled' && u?.mpCancelAt && new Date(u.mpCancelAt) > new Date();
+  if (cancelBtn) cancelBtn.style.display = (planKey === 'free' || planKey === 'admin' || isCancelled) ? 'none' : '';
+  if (cancelInfo) {
+    if (isCancelled) {
+      const fecha = new Date(u.mpCancelAt).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' });
+      cancelInfo.textContent = `⏳ Plan activo hasta el ${fecha}`;
+      cancelInfo.style.display = '';
+    } else {
+      cancelInfo.style.display = 'none';
+    }
+  }
 
   // Mostrar botón de panel admin solo para admin
   const isAdmin = currentUser === 'admin';
