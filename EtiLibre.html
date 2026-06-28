@@ -2326,6 +2326,39 @@ document.addEventListener('DOMContentLoaded', () => {
   checkMpRef();
 });
 
+// Cuando el usuario vuelve a la pestaña (ej: viene de pagar en MP), verificar pago pendiente
+let _lastVisibilityCheck = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  const now = Date.now();
+  if (now - _lastVisibilityCheck < 10000) return; // evitar spam (mín 10s entre checks)
+  _lastVisibilityCheck = now;
+  checkMpRef();                    // si MP redirigió con token en la URL
+  if (currentUser && _userData?.mpPendingPlan) {
+    _tryActivatePendingPayment();  // si hay pago pendiente, intentar activar
+  }
+});
+
+async function _tryActivatePendingPayment() {
+  try {
+    const r = await _api('/api/check-pending');
+    if (r.status === 'activated' && _userData) {
+      _userData.active = true;
+      _userData.plan   = r.planKey;
+      _userData.mpPendingPlan = null;
+      refreshTopbar();
+      updateUsageUI();
+      updateNotifBadge();
+      // Si el usuario estaba en el payment gate, entrar a la app
+      if (document.getElementById('screen-payment-gate')?.classList.contains('active')) {
+        pendingPaymentUser = null;
+        pendingPaymentPlan = null;
+        enterApp(currentUser);
+      }
+    }
+  } catch (_) {}
+}
+
 let _googleAuthInProgress = false;
 async function googleAuth(planKey) {
   if (!_firebaseAuth || _googleAuthInProgress) return;
