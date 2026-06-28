@@ -2013,8 +2013,11 @@ function incrementUsage(username, count = 1) {
 
 function getUserPlan(username) {
   if (username === 'admin') return 'admin';
-  if (username === currentUser && _userData?.plan) return _userData.plan;
-  return getUsers()[username]?.plan || 'free';
+  const u = username === currentUser && _userData ? _userData : getUsers()[username];
+  if (!u) return 'free';
+  // Si el plan no está activo, tratar como free para que no usen límites de un plan no pagado
+  if (!u.active && u.plan !== 'admin') return 'free';
+  return u.plan || 'free';
 }
 
 const PDF_EXPIRY_DAYS = 7;
@@ -2182,9 +2185,6 @@ async function doLogin() {
     _setToken(data.token);
     _cacheUser(data.user);
     const u = data.user;
-    if (!u.active && u.plan !== 'free' && u.plan !== 'admin') {
-      showPaymentGate(u.username, false); return;
-    }
     enterApp(u.username);
   } catch (e) {
     err.textContent = e.message || 'Usuario o contraseña incorrectos.';
@@ -2228,7 +2228,8 @@ async function _doRegister(userField, emailField, passField, passConfirmField, p
     _setToken(data.token);
     _cacheUser(data.user);
     if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) grecaptcha.reset(recaptchaWidgetId);
-    if (plan !== 'free') { showPaymentGate(user, true); } else { enterApp(user); }
+    enterApp(user);
+    if (plan !== 'free') openProfile('plan');
   } catch (e) {
     err.textContent = e.message || 'Error al registrar. Intentá de nuevo.';
     err.style.display = 'block';
@@ -2594,34 +2595,26 @@ function cancelPaymentGate() {
 ═══════════════════════════════════════════════════════ */
 async function enterApp(username) {
   currentUser = username;
-  // Refrescar datos desde Firestore y verificar pago pendiente antes de mostrar la app
-  try {
-    const data = await _api('/api/auth');
-    _cacheUser(data);
-    // Si tiene plan pago pendiente de activar, intentar check-pending primero
-    if (data.mpPendingPlan && data.mpPendingPlan !== 'free') {
-      try {
-        const r = await _api('/api/check-pending');
-        if (r.status === 'activated') {
-          // Re-fetch completo para traer la factura que check-pending creó en Firestore
-          const fresh = await _api('/api/auth');
-          _cacheUser(fresh);
-          data = fresh;
-        }
-      } catch (_) {}
-    }
-    // Si después de todo sigue inactivo con plan pago, mostrar payment gate
-    if (!data.active && data.plan && data.plan !== 'free' && data.plan !== 'admin') {
-      currentUser = null;
-      showPaymentGate(username, false);
-      return;
-    }
-  } catch (_) {}
   refreshTopbar();
   updateUsageUI();
   updateNotifBadge();
   showScreen('screen-app');
   clearAll();
+  // Verificar en background si hay un pago pendiente de activar
+  try {
+    let data = await _api('/api/auth');
+    _cacheUser(data);
+    if (data.mpPendingPlan && data.mpPendingPlan !== 'free') {
+      const r = await _api('/api/check-pending');
+      if (r.status === 'activated') {
+        const fresh = await _api('/api/auth');
+        _cacheUser(fresh);
+      }
+    }
+    refreshTopbar();
+    updateUsageUI();
+    updateNotifBadge();
+  } catch (_) {}
 }
 
 function refreshTopbar() {
