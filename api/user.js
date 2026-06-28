@@ -85,12 +85,17 @@ export default async function handler(req, res) {
     if (action === 'change-password') {
       if (payload.username === 'admin') return res.status(403).end();
       const { oldPass, newPass } = req.body;
-      if (!oldPass || !newPass || newPass.length < 8) return res.status(400).json({ error: 'Datos inválidos' });
+      if (!newPass || newPass.length < 8) return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres.' });
       const doc = await ref.get();
-      if (!await bcrypt.compare(oldPass, doc.data().pass))
-        return res.status(401).json({ error: 'La contraseña actual es incorrecta.' });
-      await ref.update({ pass: await bcrypt.hash(newPass, 12) });
-      return res.json({ ok:true });
+      const ud = doc.data();
+      // Usuarios de Google pueden crear contraseña sin verificar la actual
+      if (!ud.googleAuth) {
+        if (!oldPass) return res.status(400).json({ error: 'Ingresá tu contraseña actual.' });
+        if (!await bcrypt.compare(oldPass, ud.pass))
+          return res.status(401).json({ error: 'La contraseña actual es incorrecta.' });
+      }
+      await ref.update({ pass: await bcrypt.hash(newPass, 12), googleAuth: false });
+      return res.json({ ok: true });
     }
     return res.status(400).json({ error: 'Acción inválida' });
   }

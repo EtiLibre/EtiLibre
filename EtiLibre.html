@@ -1539,8 +1539,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <!-- ══ TAB: SEGURIDAD ══ -->
     <div id="ptab-security" style="display:none">
       <div class="profile-section">
-        <div class="profile-section-title"><span>🔑</span> Cambiar contraseña</div>
-        <div class="profile-field">
+        <div class="profile-section-title"><span>🔑</span> <span id="pass-section-title">Cambiar contraseña</span></div>
+        <p id="pass-google-notice" style="display:none;font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">Iniciaste sesión con Google. Podés crear una contraseña para poder ingresar también con tu usuario y contraseña.</p>
+        <div class="profile-field" id="pf-pass-old-wrap">
           <label>Contraseña actual</label>
           <div class="pass-wrap"><input type="password" id="pf-pass-old" placeholder="••••••••"/><button type="button" class="btn-show-pass" onclick="togglePass('pf-pass-old',this)" tabindex="-1">👁</button></div>
         </div>
@@ -1553,7 +1554,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div class="pass-wrap"><input type="password" id="pf-pass-confirm" placeholder="Repetí la nueva contraseña"/><button type="button" class="btn-show-pass" onclick="togglePass('pf-pass-confirm',this)" tabindex="-1">👁</button></div>
         </div>
         <div class="profile-actions">
-          <button class="btn-profile-save" onclick="changePassword()">Cambiar contraseña</button>
+          <button class="btn-profile-save" id="btn-change-pass" onclick="changePassword()">Cambiar contraseña</button>
         </div>
         <div class="profile-success" id="pass-success">✅ Contraseña actualizada correctamente.</div>
         <div class="profile-error"   id="pass-error"></div>
@@ -3173,6 +3174,7 @@ function switchProfileTab(tab) {
     if (pane) pane.style.display = t === tab ? '' : 'none';
   });
   if (tab === 'personal')      renderPersonalTab();
+  if (tab === 'security')      renderSecurityTab();
   if (tab === 'plan')          renderPlanTab();
   if (tab === 'vouchers')      renderVouchersTab();
   if (tab === 'history')       renderHistoryTab();
@@ -3277,8 +3279,21 @@ async function saveNameColor() {
 }
 
 /* ── TAB: SEGURIDAD ── */
+function renderSecurityTab() {
+  const isGoogle = !!_userData?.googleAuth;
+  const oldWrap  = document.getElementById('pf-pass-old-wrap');
+  const notice   = document.getElementById('pass-google-notice');
+  const title    = document.getElementById('pass-section-title');
+  const btn      = document.getElementById('btn-change-pass');
+  if (oldWrap) oldWrap.style.display = isGoogle ? 'none' : '';
+  if (notice)  notice.style.display  = isGoogle ? 'block' : 'none';
+  if (title)   title.textContent     = isGoogle ? 'Crear contraseña' : 'Cambiar contraseña';
+  if (btn)     btn.textContent       = isGoogle ? 'Crear contraseña' : 'Cambiar contraseña';
+}
+
 async function changePassword() {
   if (!currentUser || currentUser === 'admin') return;
+  const isGoogle = !!_userData?.googleAuth;
   const oldP  = document.getElementById('pf-pass-old').value;
   const newP  = document.getElementById('pf-pass-new').value;
   const confP = document.getElementById('pf-pass-confirm').value;
@@ -3290,12 +3305,15 @@ async function changePassword() {
   if (newP !== confP)  { err.textContent='Las contraseñas no coinciden.'; err.style.display='block'; return; }
 
   try {
-    await _api('/api/user', 'PUT', { action:'change-password', oldPass: oldP, newPass: newP });
-    document.getElementById('pf-pass-old').value = '';
-    document.getElementById('pf-pass-new').value = '';
+    await _api('/api/user', 'PUT', { action:'change-password', oldPass: isGoogle ? '' : oldP, newPass: newP });
+    document.getElementById('pf-pass-old').value     = '';
+    document.getElementById('pf-pass-new').value     = '';
     document.getElementById('pf-pass-confirm').value = '';
     ok.style.display = 'block';
     setTimeout(() => ok.style.display='none', 3500);
+    // Ya no es Google-only: actualizar cache y form
+    if (_userData) _userData.googleAuth = false;
+    renderSecurityTab();
   } catch (e) {
     err.textContent = e.message || 'Error al cambiar contraseña.';
     err.style.display = 'block';
