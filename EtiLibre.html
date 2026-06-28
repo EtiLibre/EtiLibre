@@ -2373,9 +2373,13 @@ function updateGatePlan(newPlan) {
     users[pendingPaymentUser].plan   = 'free';
     users[pendingPaymentUser].active = true;
     saveUsers(users);
+    if (_userData) { _userData.plan = 'free'; _userData.active = true; }
     const u = pendingPaymentUser;
     pendingPaymentUser      = null;
+    pendingPaymentPlan      = null;
     pendingPaymentPrevState = null;
+    // Actualizar Firestore para que el próximo login no vuelva al payment gate
+    _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
     enterApp(u);
     return;
   }
