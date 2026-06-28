@@ -1590,9 +1590,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div class="plan-change-grid" id="plan-change-grid"></div>
         <div class="profile-success" id="plan-success" style="margin-top:14px">✅ Plan actualizado.</div>
 
+        <div id="plan-cancel-notice" style="display:none;margin-top:20px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;color:var(--text2);line-height:1.6"></div>
+
         <div id="plan-cancel-area" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
           <button class="btn-danger-outline" style="font-size:13px" onclick="confirmCancelSubscription()">⛔ Cancelar suscripción de MercadoPago</button>
-          <p style="font-size:12px;color:var(--text3);margin:8px 0 0">Se cancelará el cobro automático en MP y pasarás al plan Free.</p>
+          <p style="font-size:12px;color:var(--text3);margin:8px 0 0">Se cancelará el cobro automático en MP. Tu plan seguirá activo hasta fin del período ya pagado.</p>
         </div>
       </div>
     </div>
@@ -3415,14 +3417,24 @@ function renderPlanTab() {
 
   document.getElementById('plan-success').style.display = 'none';
 
+  // Aviso de cancelación pendiente (plan activo hasta fecha X)
+  const cancelNotice = document.getElementById('plan-cancel-notice');
+  const ud = _userData;
+  if (cancelNotice) {
+    if (ud?.mpCancelAt && ud?.mpStatus === 'cancelled' && new Date(ud.mpCancelAt) > new Date()) {
+      const fecha = new Date(ud.mpCancelAt).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' });
+      cancelNotice.innerHTML = `⏳ Tu suscripción fue cancelada. Podés seguir usando el plan <strong>${PLAN_CONFIG[ud.plan]?.label || ud.plan}</strong> hasta el <strong>${fecha}</strong>, después pasará automáticamente a Free.`;
+      cancelNotice.style.display = '';
+    } else {
+      cancelNotice.style.display = 'none';
+    }
+  }
+
   // Botón cancelar suscripción al final del tab
   const cancelArea = document.getElementById('plan-cancel-area');
   if (cancelArea) {
-    if (planKey !== 'free' && planKey !== 'admin') {
-      cancelArea.style.display = '';
-    } else {
-      cancelArea.style.display = 'none';
-    }
+    const isCancelled = ud?.mpStatus === 'cancelled';
+    cancelArea.style.display = (planKey !== 'free' && planKey !== 'admin' && !isCancelled) ? '' : 'none';
   }
 }
 
