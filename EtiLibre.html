@@ -2592,25 +2592,31 @@ function cancelPaymentGate() {
 /* ═══════════════════════════════════════════════════════
    ENTER APP
 ═══════════════════════════════════════════════════════ */
-function enterApp(username) {
-  // Guard: si tiene plan pago sin activar, mandar al payment gate antes de entrar
-  const u = getUser(username);
-  if (u && !u.active && u.plan && u.plan !== 'free' && u.plan !== 'admin') {
-    showPaymentGate(username, false);
-    return;
-  }
+async function enterApp(username) {
   currentUser = username;
-  // Refrescar datos desde Firestore en background
-  _refreshCurrentUser().then(() => {
-    refreshTopbar();
-    updateUsageUI();
-    updateNotifBadge();
-    // Segunda verificación post-refresh: si Firestore devuelve plan inactivo, mostrar gate
-    if (_userData && !_userData.active && _userData.plan && _userData.plan !== 'free' && _userData.plan !== 'admin') {
+  // Refrescar datos desde Firestore y verificar pago pendiente antes de mostrar la app
+  try {
+    const data = await _api('/api/auth');
+    _cacheUser(data);
+    // Si tiene plan pago pendiente de activar, intentar check-pending primero
+    if (data.mpPendingPlan && data.mpPendingPlan !== 'free') {
+      try {
+        const r = await _api('/api/check-pending');
+        if (r.status === 'activated') {
+          data.active = true;
+          data.plan   = r.planKey;
+          data.mpPendingPlan = null;
+          _cacheUser(data);
+        }
+      } catch (_) {}
+    }
+    // Si después de todo sigue inactivo con plan pago, mostrar payment gate
+    if (!data.active && data.plan && data.plan !== 'free' && data.plan !== 'admin') {
       currentUser = null;
       showPaymentGate(username, false);
+      return;
     }
-  });
+  } catch (_) {}
   refreshTopbar();
   updateUsageUI();
   updateNotifBadge();
