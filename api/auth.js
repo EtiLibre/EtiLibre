@@ -1,7 +1,24 @@
-import { db }        from './_lib/firebase.js';
-import { signToken } from './_lib/auth.js';
-import { requireAuth } from './_lib/auth.js';
-import bcrypt        from 'bcryptjs';
+import { db }          from './_lib/firebase.js';
+import { signToken, requireAuth } from './_lib/auth.js';
+import bcrypt          from 'bcryptjs';
+import { randomBytes } from 'crypto';
+
+async function sendVerificationEmail(email, username, token) {
+  const link = `https://etify.com.ar/api/verify-email?token=${token}`;
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from:    'Etify <noreply@etify.com.ar>',
+      to:      [email],
+      subject: '[Etify] Verificá tu cuenta',
+      html:    `<h2>¡Bienvenido a Etify, ${username}!</h2>
+                <p>Hacé click en el siguiente botón para verificar tu cuenta y empezar a usarla:</p>
+                <a href="${link}" style="display:inline-block;background:#3D8BFF;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Verificar mi cuenta</a>
+                <p style="color:#888;font-size:12px;margin-top:16px">Si no creaste una cuenta en Etify, ignorá este mensaje.</p>`
+    })
+  });
+}
 
 const ADMIN_HASH = process.env.ADMIN_PASS_HASH;
 
@@ -57,19 +74,23 @@ export default async function handler(req, res) {
     if (!(await db.collection('users').where('email','==',email).limit(1).get()).empty)
       return res.status(400).json({ error: 'Ese email ya está registrado.' });
     const now = new Date();
+    const verifyToken = randomBytes(24).toString('hex');
     const userData = {
       username, email, pass: await bcrypt.hash(pass, 12),
       plan: plan||'free', active: plan==='free',
+      emailVerified: false, emailVerifyToken: verifyToken,
       displayName: username, avatar:'👤', nameColor:'',
       invoices:[], history:[],
       notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a Etify!',
-        body:'Tu cuenta fue creada con éxito. ¡Empezá a combinar etiquetas!', date:now.toISOString(), read:false }],
+        body:'Tu cuenta fue creada con éxito. Verificá tu email para empezar.', date:now.toISOString(), read:false }],
       used:0, resetMonth: now.getFullYear()*100+now.getMonth(), createdAt: now.toISOString()
     };
     await db.collection('users').doc(username).set(userData);
-    const token = signToken({ username, role:'user' });
-    const { pass:_, ...safe } = userData;
-    return res.json({ token, user: safe });
+    // Enviar email de verificación (no bloquear si falla)
+    sendVerificationEmail(email, username, verifyToken).catch(() => {});
+    const jwtToken = signToken({ username, role:'user' });
+    const { pass:_, emailVerifyToken:__, ...safe } = userData;
+    return res.json({ token: jwtToken, user: safe });
   }
 
   // POST /api/auth  action=google
@@ -94,6 +115,7 @@ export default async function handler(req, res) {
     const userData = {
       username, email, pass: await bcrypt.hash('__google__', 12),
       googleAuth: true, tosAccepted: false,
+      emailVerified: true, // Google ya verificó el email
       plan: 'free', active: true,
       displayName: displayName || username, avatar:'👤', nameColor:'',
       invoices:[], history:[],
