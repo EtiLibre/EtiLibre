@@ -1,6 +1,7 @@
-import { db }          from './_lib/firebase.js';
-import { requireAuth } from './_lib/auth.js';
-import bcrypt          from 'bcryptjs';
+import { db }             from './_lib/firebase.js';
+import { FieldValue }     from 'firebase-admin/firestore';
+import { requireAuth }    from './_lib/auth.js';
+import bcrypt             from 'bcryptjs';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -60,13 +61,19 @@ export default async function handler(req, res) {
     }
     if (action === 'increment-usage') {
       const { count } = req.body;
-      const doc = await ref.get();
-      const d = doc.data();
       const now = new Date();
       const curMonth = now.getFullYear() * 100 + now.getMonth();
-      const used = d.resetMonth !== curMonth ? (count||1) : (d.used||0) + (count||1);
-      await ref.update({ used, resetMonth: curMonth });
-      return res.json({ ok:true, used });
+      const doc = await ref.get();
+      const d = doc.data();
+      if (d.resetMonth !== curMonth) {
+        // Nuevo mes: resetear contador
+        await ref.update({ used: count || 1, resetMonth: curMonth, adExtensions: 0 });
+        return res.json({ ok:true, used: count || 1 });
+      }
+      // Mismo mes: usar FieldValue.increment para evitar race condition
+      await ref.update({ used: FieldValue.increment(count || 1) });
+      const updated = await ref.get();
+      return res.json({ ok:true, used: updated.data().used });
     }
     if (action === 'watch-ad') {
       const doc = await ref.get();

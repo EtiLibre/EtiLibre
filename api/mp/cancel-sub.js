@@ -52,9 +52,10 @@ export default async function handler(req, res) {
     cancelAt = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
   }
 
-  // NO bajamos el plan inmediatamente — se mantiene activo hasta cancelAt
+  // Solo nullear mpSubId si la cancelación en MP fue exitosa
+  // Si falló, conservarlo para poder reintentarlo después
   await ref.update({
-    mpSubId:      null,
+    ...(mpCancelled ? { mpSubId: null } : {}),
     mpStatus:     'cancelled',
     mpCancelAt:   cancelAt,
     mpPendingPlan: null

@@ -123,8 +123,10 @@ export default async function handler(req, res) {
       }, ...(prev.notifications || [])].slice(0, 50);
 
     } else if (sub.status === 'cancelled' || sub.status === 'paused') {
-      updates.active = false;
       const prev = doc.data();
+      // Si el usuario canceló manualmente y tiene mpCancelAt vigente, respetar ese período
+      const hasActivePeriod = prev.mpCancelAt && new Date(prev.mpCancelAt) > new Date();
+      if (!hasActivePeriod) updates.active = false;
       updates.notifications = [{
         id: Date.now().toString(), icon: '⚠️',
         title: sub.status === 'cancelled' ? 'Suscripción cancelada' : 'Suscripción pausada',

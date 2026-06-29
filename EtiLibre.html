@@ -2353,10 +2353,10 @@ document.addEventListener('visibilitychange', () => {
 async function _tryActivatePendingPayment() {
   try {
     const r = await _api('/api/check-pending');
-    if (r.status === 'activated' && _userData) {
-      _userData.active = true;
-      _userData.plan   = r.planKey;
-      _userData.mpPendingPlan = null;
+    if (r.status === 'activated') {
+      // Re-fetch completo para incluir factura y datos actualizados
+      const fresh = await _api('/api/auth');
+      _cacheUser(fresh);
       refreshTopbar();
       updateUsageUI();
       updateNotifBadge();
@@ -2500,14 +2500,13 @@ async function checkMpRef() {
   const token  = params.get('mp_ref');
   if (!token) return;
 
-  // Limpiar la URL
-  history.replaceState(null, '', '/');
-
   try {
     const res  = await fetch(`/api/mp/verify-ref?token=${token}`);
     const data = await res.json();
 
     if (data.status === 'activated') {
+      // Limpiar URL solo cuando se confirmó la activación exitosa
+      history.replaceState(null, '', '/');
       // Actualizar cache local
       const users = getUsers();
       if (users[data.username]) {
@@ -2595,7 +2594,8 @@ function cancelPaymentGate() {
       }
     }
   }
-  pendingPaymentUser     = null;
+  pendingPaymentUser      = null;
+  pendingPaymentPlan      = null;
   pendingPaymentPrevState = null;
   showScreen('screen-landing');
 }
@@ -2613,15 +2613,15 @@ async function enterApp(username) {
   // Verificar en background: pago pendiente y vencimiento de cancelación
   try {
     let data = await _api('/api/auth');
-    // Si el período ya cancelado venció, bajar a free en servidor y cache
-    if (data.mpCancelAt && new Date(data.mpCancelAt) <= new Date()) {
-      await _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
-      data = await _api('/api/auth');
-    }
-    // Si hay pago pendiente, intentar activar
+    // 1. Primero activar pago pendiente (antes de cualquier otra operación)
     if (data.mpPendingPlan && data.mpPendingPlan !== 'free') {
       const r = await _api('/api/check-pending');
       if (r.status === 'activated') data = await _api('/api/auth');
+    }
+    // 2. Si el período ya cancelado venció, bajar a free
+    if (data.mpCancelAt && new Date(data.mpCancelAt) <= new Date() && !data.mpPendingPlan) {
+      await _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
+      data = await _api('/api/auth');
     }
     _cacheUser(data);
     refreshTopbar();
