@@ -3207,6 +3207,14 @@ const NAME_COLORS = [
   { hex:'#c084ff', label:'Violeta' },
   { hex:'#ffb347', label:'Naranja' },
   { hex:'#00d4ff', label:'Celeste' },
+  { hex:'#ff8fab', label:'Rosa' },
+  { hex:'#7cffb2', label:'Menta' },
+  { hex:'#ffd166', label:'Dorado' },
+  { hex:'#a0c4ff', label:'Lavanda' },
+  { hex:'#ef476f', label:'Fucsia' },
+  { hex:'#06d6a0', label:'Turquesa' },
+  { hex:'#bdb2ff', label:'Lila' },
+  { hex:'#f4a261', label:'Durazno' },
 ];
 
 let profileSelectedAvatar = '👤';
@@ -3320,6 +3328,7 @@ async function savePersonal() {
   errEl.style.display = 'none'; okEl.style.display = 'none';
   try {
     await _api('/api/user', 'PUT', { action:'update', displayName: displayName || currentUser });
+    if (_userData) _userData.displayName = displayName || currentUser;
     const users = getUsers();
     if (users[currentUser]) { users[currentUser].displayName = displayName || currentUser; saveUsers(users); }
     populateProfileHeader(); refreshTopbar();
@@ -3332,6 +3341,7 @@ async function saveAvatar() {
   if (!currentUser || currentUser === 'admin') return;
   try {
     await _api('/api/user', 'PUT', { action:'update', avatar: profileSelectedAvatar });
+    if (_userData) _userData.avatar = profileSelectedAvatar;
     const users = getUsers();
     if (users[currentUser]) { users[currentUser].avatar = profileSelectedAvatar; saveUsers(users); }
     document.getElementById('profile-avatar-emoji').textContent = profileSelectedAvatar;
@@ -3345,6 +3355,7 @@ async function saveNameColor() {
   if (!currentUser || currentUser === 'admin') return;
   try {
     await _api('/api/user', 'PUT', { action:'update', nameColor: profileSelectedColor });
+    if (_userData) _userData.nameColor = profileSelectedColor;
     const users = getUsers();
     if (users[currentUser]) { users[currentUser].nameColor = profileSelectedColor; saveUsers(users); }
     populateProfileHeader(); refreshTopbar();
