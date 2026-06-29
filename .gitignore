@@ -1,1 +1,4 @@
 .vercel
+.firebase/
+firebase.json
+public/
