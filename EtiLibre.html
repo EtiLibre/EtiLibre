@@ -2708,7 +2708,7 @@ async function resendVerificationEmail() {
   const status = document.getElementById('resend-status');
   if (status) status.textContent = 'Enviando…';
   try {
-    await _api('/api/resend-verify', 'POST', {});
+    await _api('/api/email-verify', 'POST', {});
     if (status) status.textContent = '✅ Email enviado. Revisá tu casilla.';
   } catch (e) {
     if (status) status.textContent = '❌ ' + (e.message || 'Error al enviar');
@@ -3922,7 +3922,7 @@ async function helpVerifyPayment() {
 
   try {
     // Forzar mpPendingPlan al plan elegido y correr check-pending
-    await _api('/api/help-activate', 'POST', { planKey: plan });
+    await _api('/api/user', 'PUT', { action: 'help-activate', planKey: plan });
     const r = await _api('/api/check-pending');
     if (r.status === 'activated') {
       if (_userData) { _userData.active = true; _userData.plan = plan; _userData.mpPendingPlan = null; }

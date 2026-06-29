@@ -3,22 +3,7 @@ import { signToken, requireAuth } from './_lib/auth.js';
 import bcrypt          from 'bcryptjs';
 import { randomBytes } from 'crypto';
 
-async function sendVerificationEmail(email, username, token) {
-  const link = `https://etify.com.ar/api/verify-email?token=${token}`;
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from:    'Etify <noreply@etify.com.ar>',
-      to:      [email],
-      subject: '[Etify] Verificá tu cuenta',
-      html:    `<h2>¡Bienvenido a Etify, ${username}!</h2>
-                <p>Hacé click en el siguiente botón para verificar tu cuenta y empezar a usarla:</p>
-                <a href="${link}" style="display:inline-block;background:#3D8BFF;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Verificar mi cuenta</a>
-                <p style="color:#888;font-size:12px;margin-top:16px">Si no creaste una cuenta en Etify, ignorá este mensaje.</p>`
-    })
-  });
-}
+import { sendVerificationEmail } from './email-verify.js';
 
 const ADMIN_HASH = process.env.ADMIN_PASS_HASH;
 

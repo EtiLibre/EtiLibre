@@ -85,6 +85,16 @@ export default async function handler(req, res) {
       await ref.update({ adExtensions: adExts + 1 });
       return res.json({ ok:true, adExtensions: adExts + 1 });
     }
+    if (action === 'help-activate') {
+      const VALID_PLANS = ['starter','pro','business','premium'];
+      const { planKey } = req.body;
+      if (!VALID_PLANS.includes(planKey)) return res.status(400).json({ error: 'Plan inválido' });
+      await ref.update({
+        mpPendingPlan:   planKey,
+        mpPendingPlanAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
+      });
+      return res.json({ ok: true });
+    }
     if (action === 'cancel-plan') {
       await ref.update({ plan: 'free', active: true });
       return res.json({ ok:true });
