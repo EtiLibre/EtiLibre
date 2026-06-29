@@ -74,6 +74,17 @@ export default async function handler(req, res) {
     if (!(await db.collection('users').where('email','==',email).limit(1).get()).empty)
       return res.status(400).json({ error: 'Ese email ya está registrado.' });
     const now = new Date();
+    const curMonth = now.getFullYear() * 100 + now.getMonth();
+
+    // Verificar si el email tuvo cuenta eliminada anteriormente para heredar uso del mes
+    let inheritedUsed = 0;
+    const deletedSnap = await db.collection('deleted_users').where('email', '==', email).limit(1).get();
+    if (!deletedSnap.empty) {
+      const prev = deletedSnap.docs[0].data();
+      // Si la cuenta eliminada era del mismo mes, heredar los usos gastados
+      if (prev.resetMonth === curMonth) inheritedUsed = prev.used || 0;
+    }
+
     const verifyToken = randomBytes(24).toString('hex');
     const userData = {
       username, email, pass: await bcrypt.hash(pass, 12),
@@ -83,7 +94,7 @@ export default async function handler(req, res) {
       invoices:[], history:[],
       notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a Etify!',
         body:'Tu cuenta fue creada con éxito. Verificá tu email para empezar.', date:now.toISOString(), read:false }],
-      used:0, resetMonth: now.getFullYear()*100+now.getMonth(), createdAt: now.toISOString()
+      used: inheritedUsed, resetMonth: curMonth, createdAt: now.toISOString()
     };
     await db.collection('users').doc(username).set(userData);
     // Enviar email de verificación (no bloquear si falla)
@@ -112,6 +123,16 @@ export default async function handler(req, res) {
       ? safeUser + '_' + Date.now().toString().slice(-4)
       : safeUser;
     const now = new Date();
+    const curMonth = now.getFullYear() * 100 + now.getMonth();
+
+    // Heredar uso del mes si el email tuvo cuenta eliminada
+    let inheritedUsed = 0;
+    const deletedSnap = await db.collection('deleted_users').where('email', '==', email).limit(1).get();
+    if (!deletedSnap.empty) {
+      const prev = deletedSnap.docs[0].data();
+      if (prev.resetMonth === curMonth) inheritedUsed = prev.used || 0;
+    }
+
     const userData = {
       username, email, pass: await bcrypt.hash('__google__', 12),
       googleAuth: true, tosAccepted: false,
@@ -121,7 +142,7 @@ export default async function handler(req, res) {
       invoices:[], history:[],
       notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a Etify!',
         body:'Tu cuenta fue creada con éxito. ¡Empezá a combinar etiquetas!', date:now.toISOString(), read:false }],
-      used:0, resetMonth: now.getFullYear()*100+now.getMonth(), createdAt: now.toISOString()
+      used: inheritedUsed, resetMonth: curMonth, createdAt: now.toISOString()
     };
     await db.collection('users').doc(username).set(userData);
     const token = signToken({ username, role:'user' });
