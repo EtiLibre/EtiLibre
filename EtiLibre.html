@@ -3595,7 +3595,6 @@ function renderPlanTab() {
 
   // Aviso de cancelación pendiente (plan activo hasta fecha X)
   const cancelNotice = document.getElementById('plan-cancel-notice');
-  const ud = _userData;
   if (cancelNotice) {
     if (ud?.mpCancelAt && ud?.mpStatus === 'cancelled' && new Date(ud.mpCancelAt) > new Date()) {
       const fecha = new Date(ud.mpCancelAt).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' });
