@@ -46,7 +46,8 @@
       "Bash(node --input-type=module --eval \"import { FieldValue } from 'firebase-admin/firestore'; console.log\\('OK'\\)\")",
       "Bash(node --input-type=module --eval ' *)",
       "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('vercel.json','utf8'\\)\\); console.log\\('vercel.json OK'\\)\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(git rm *)"
     ]
   }
 }

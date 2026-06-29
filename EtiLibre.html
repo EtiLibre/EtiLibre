@@ -1175,6 +1175,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div class="field"><label>Contraseña</label><div class="pass-wrap"><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/><button type="button" class="btn-show-pass" onclick="togglePass('login-pass',this)" tabindex="-1">👁</button></div></div>
         <button class="btn-auth" onclick="doLogin()">Ingresar</button>
         <div class="auth-error" id="login-error">Usuario o contraseña incorrectos.</div>
+        <p class="auth-hint"><button class="auth-link" onclick="openForgotPassword()">¿Olvidaste tu contraseña?</button></p>
         <p class="auth-hint">¿No tenés cuenta? <button class="auth-link" onclick="switchAuthTab('register')">Registrate gratis</button></p>
       </div>
 
@@ -1445,6 +1446,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="forgot-modal" style="display:none">
+  <div class="modal-card" style="max-width:400px">
+    <div class="modal-icon">🔑</div>
+    <h3 id="forgot-modal-title">Recuperar contraseña</h3>
+    <p id="forgot-modal-desc" style="font-size:13px;color:var(--text2);margin-bottom:16px">Ingresá tu email y te enviamos un link para restablecer tu contraseña.</p>
+    <div id="forgot-email-wrap">
+      <input type="email" id="forgot-email" placeholder="tu@email.com" style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:11px 14px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box;margin-bottom:12px"/>
+      <button class="btn-modal-primary" style="width:100%" onclick="submitForgotPassword()">Enviar link</button>
+    </div>
+    <div id="forgot-new-pass-wrap" style="display:none">
+      <div class="pass-wrap" style="margin-bottom:12px"><input type="password" id="forgot-new-pass" placeholder="Nueva contraseña (mín. 8 caracteres)"/><button type="button" class="btn-show-pass" onclick="togglePass('forgot-new-pass',this)" tabindex="-1">👁</button></div>
+      <div class="pass-wrap" style="margin-bottom:12px"><input type="password" id="forgot-confirm-pass" placeholder="Repetí la contraseña"/><button type="button" class="btn-show-pass" onclick="togglePass('forgot-confirm-pass',this)" tabindex="-1">👁</button></div>
+      <button class="btn-modal-primary" style="width:100%" onclick="submitResetPassword()">Cambiar contraseña</button>
+    </div>
+    <div class="auth-error" id="forgot-error" style="margin-top:10px"></div>
+    <button class="btn-modal-ghost" onclick="closeModal('forgot-modal')" style="margin-top:10px;width:100%">Cancelar</button>
+  </div>
+</div>
+
 <!-- CONFIRM MODAL (baja de cuenta) -->
 <div class="modal-overlay" id="confirm-modal" style="display:none">
   <div class="modal-card">
@@ -1604,6 +1625,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div class="plan-change-grid" id="plan-change-grid"></div>
         <div class="profile-success" id="plan-success" style="margin-top:14px">✅ Plan actualizado.</div>
 
+        <div id="plan-pending-notice" style="display:none;margin-top:12px;padding:14px 16px;background:rgba(255,230,0,.08);border:1px solid rgba(255,230,0,.25);border-radius:var(--r-sm);font-size:13px;color:var(--accent);line-height:1.6"></div>
         <div id="plan-cancel-notice" style="display:none;margin-top:20px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;color:var(--text2);line-height:1.6"></div>
 
         <div id="plan-cancel-area" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
@@ -2341,8 +2363,22 @@ async function acceptGoogleTos() {
 document.addEventListener('DOMContentLoaded', () => {
   checkMpReturn();
   checkMpRef();
-  // Mostrar mensaje si viene del link de verificación de email
   const params = new URLSearchParams(window.location.search);
+
+  // Link de recuperación de contraseña
+  const resetToken = params.get('reset_token');
+  if (resetToken) {
+    history.replaceState(null, '', '/');
+    _resetToken = resetToken;
+    document.getElementById('forgot-modal-title').textContent = 'Nueva contraseña';
+    document.getElementById('forgot-modal-desc').textContent = 'Ingresá tu nueva contraseña.';
+    document.getElementById('forgot-email-wrap').style.display = 'none';
+    document.getElementById('forgot-new-pass-wrap').style.display = '';
+    document.getElementById('forgot-error').style.display = 'none';
+    document.getElementById('forgot-modal').style.display = 'flex';
+  }
+
+  // Mostrar mensaje si viene del link de verificación de email
   if (params.get('email_verified') === '1') {
     history.replaceState(null, '', '/');
     if (_userData) { _userData.emailVerified = true; _cacheUser(_userData); }
@@ -2712,6 +2748,55 @@ async function resendVerificationEmail() {
     if (status) status.textContent = '✅ Email enviado. Revisá tu casilla.';
   } catch (e) {
     if (status) status.textContent = '❌ ' + (e.message || 'Error al enviar');
+  }
+}
+
+let _resetToken = null;
+
+function openForgotPassword() {
+  _resetToken = null;
+  document.getElementById('forgot-modal-title').textContent = 'Recuperar contraseña';
+  document.getElementById('forgot-modal-desc').textContent = 'Ingresá tu email y te enviamos un link para restablecer tu contraseña.';
+  document.getElementById('forgot-email-wrap').style.display = '';
+  document.getElementById('forgot-new-pass-wrap').style.display = 'none';
+  document.getElementById('forgot-email').value = '';
+  document.getElementById('forgot-error').style.display = 'none';
+  document.getElementById('forgot-modal').style.display = 'flex';
+}
+
+async function submitForgotPassword() {
+  const email = document.getElementById('forgot-email').value.trim();
+  const err   = document.getElementById('forgot-error');
+  err.style.display = 'none';
+  if (!email) { err.textContent = 'Ingresá tu email.'; err.style.display = 'block'; return; }
+  try {
+    await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'forgot-password', email }) });
+    document.getElementById('forgot-modal-title').textContent = '✅ Email enviado';
+    document.getElementById('forgot-modal-desc').textContent = 'Si el email está registrado, te llegará un link para restablecer tu contraseña. Revisá tu casilla.';
+    document.getElementById('forgot-email-wrap').style.display = 'none';
+  } catch(e) {
+    err.textContent = 'Error al enviar. Intentá de nuevo.';
+    err.style.display = 'block';
+  }
+}
+
+async function submitResetPassword() {
+  const newPass  = document.getElementById('forgot-new-pass').value;
+  const confirm  = document.getElementById('forgot-confirm-pass').value;
+  const err      = document.getElementById('forgot-error');
+  err.style.display = 'none';
+  if (newPass.length < 8) { err.textContent = 'La contraseña debe tener al menos 8 caracteres.'; err.style.display='block'; return; }
+  if (newPass !== confirm) { err.textContent = 'Las contraseñas no coinciden.'; err.style.display='block'; return; }
+  try {
+    await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'reset-password', token: _resetToken, newPass }) });
+    document.getElementById('forgot-modal-title').textContent = '✅ Contraseña actualizada';
+    document.getElementById('forgot-modal-desc').textContent = 'Tu contraseña fue cambiada. Ya podés iniciar sesión.';
+    document.getElementById('forgot-new-pass-wrap').style.display = 'none';
+  } catch(e) {
+    err.textContent = e.message || 'Link inválido o expirado.';
+    err.style.display = 'block';
   }
 }
 
@@ -3494,6 +3579,19 @@ function renderPlanTab() {
   });
 
   document.getElementById('plan-success').style.display = 'none';
+
+  // Aviso si tiene un plan elegido pero pendiente de pago
+  const ud = _userData;
+  const pendingNotice = document.getElementById('plan-pending-notice');
+  if (pendingNotice) {
+    if (ud && !ud.active && ud.plan && ud.plan !== 'free') {
+      const pendingLabel = PLAN_CONFIG[ud.plan]?.label || ud.plan;
+      pendingNotice.innerHTML = `⚠️ Seleccionaste el plan <strong>${pendingLabel}</strong> pero aún no completaste el pago. Tu cuenta está en <strong>Free</strong> hasta que realices el pago.`;
+      pendingNotice.style.display = '';
+    } else {
+      pendingNotice.style.display = 'none';
+    }
+  }
 
   // Aviso de cancelación pendiente (plan activo hasta fecha X)
   const cancelNotice = document.getElementById('plan-cancel-notice');

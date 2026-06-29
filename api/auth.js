@@ -135,5 +135,49 @@ export default async function handler(req, res) {
     return res.json({ token, user: safe, needsTos: true });
   }
 
+  // POST /api/auth  action=forgot-password
+  if (action === 'forgot-password') {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Falta email' });
+    const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+    if (snap.empty) return res.json({ ok: true }); // no revelar si el email existe
+    const ud  = snap.docs[0].data();
+    const token = (await import('crypto')).randomBytes(24).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hora
+    await snap.docs[0].ref.update({ resetToken: token, resetTokenExp: expires });
+    const link = `https://etify.com.ar/?reset_token=${token}`;
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from:    'Etify <noreply@etify.com.ar>',
+        to:      [email],
+        subject: '[Etify] Recuperá tu contraseña',
+        html:    `<h2>Recuperar contraseña</h2>
+                  <p>Hola ${ud.displayName || ud.username}, recibimos una solicitud para restablecer tu contraseña.</p>
+                  <a href="${link}" style="display:inline-block;background:#3D8BFF;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Restablecer contraseña</a>
+                  <p style="color:#888;font-size:12px;margin-top:16px">Este link expira en 1 hora. Si no solicitaste esto, ignorá este mensaje.</p>`
+      })
+    }).catch(() => {});
+    return res.json({ ok: true });
+  }
+
+  // POST /api/auth  action=reset-password
+  if (action === 'reset-password') {
+    const { token, newPass } = req.body;
+    if (!token || !newPass || newPass.length < 8) return res.status(400).json({ error: 'Datos inválidos' });
+    const snap = await db.collection('users').where('resetToken', '==', token).limit(1).get();
+    if (snap.empty) return res.status(400).json({ error: 'Link inválido o expirado.' });
+    const ud = snap.docs[0].data();
+    if (!ud.resetTokenExp || new Date(ud.resetTokenExp) < new Date())
+      return res.status(400).json({ error: 'El link expiró. Solicitá uno nuevo.' });
+    await snap.docs[0].ref.update({
+      pass: await bcrypt.hash(newPass, 12),
+      resetToken: null,
+      resetTokenExp: null
+    });
+    return res.json({ ok: true });
+  }
+
   res.status(400).json({ error: 'Acción inválida' });
 }
