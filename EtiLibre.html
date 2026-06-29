@@ -1424,14 +1424,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="modal-icon">📺</div>
     <h3>Mirá este anuncio</h3>
     <p style="font-size:13px;color:var(--text2)">Vas a obtener 1 uso extra al finalizar.</p>
-    <div style="margin:16px 0;min-height:100px;overflow:hidden">
+    <div style="margin:16px 0;min-height:100px;overflow:hidden" id="ad-slot-wrap">
       <ins class="adsbygoogle"
-           style="display:block"
+           id="ad-slot-ins"
+           style="display:block;width:100%;min-height:100px"
            data-ad-client="ca-pub-6394476482927745"
            data-ad-slot="4333262139"
            data-ad-format="auto"
            data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
     <div id="ad-countdown" style="font-size:22px;font-weight:800;color:var(--accent);margin-bottom:12px">5</div>
     <button class="btn-modal-primary" id="btn-ad-claim" style="display:none;width:100%" onclick="claimAdBonus()">✅ Obtener uso extra</button>
@@ -2744,10 +2744,18 @@ function showLimitModal(isUpgradePrompt = false) {
 function closeLimitModal() { document.getElementById('limit-modal').style.display = 'none'; }
 
 let _adTimer = null;
+let _adPushed = false;
 function openAdModal() {
   closeLimitModal();
   document.getElementById('ad-modal').style.display = 'flex';
   document.getElementById('btn-ad-claim').style.display = 'none';
+  // Inicializar AdSense recién cuando el modal es visible (evita error availableWidth=0)
+  if (!_adPushed) {
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      _adPushed = true;
+    } catch (_) {}
+  }
   let secs = 5;
   document.getElementById('ad-countdown').style.display = 'block';
   document.getElementById('ad-countdown').textContent = secs;
