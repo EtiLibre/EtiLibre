@@ -1949,8 +1949,6 @@ async function hashPassword(pass) {
 }
 
 // Hash del admin calculado al inicio
-let _adminPassHash = '';
-(async () => { _adminPassHash = await hashPassword('gonza4321'); })();
 
 // Obfuscación XOR + base64 para localStorage (impide lectura casual)
 function _obf(str) {
