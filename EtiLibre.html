@@ -2753,7 +2753,8 @@ async function resendVerificationEmail() {
 let _resetToken = null;
 
 function closeForgotModal() {
-  closeModal('forgot-modal');
+  document.getElementById('forgot-modal').style.display = 'none';
+  document.body.style.overflow = '';
   showScreen('screen-login');
 }
 
