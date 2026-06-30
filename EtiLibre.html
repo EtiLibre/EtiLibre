@@ -2647,11 +2647,30 @@ async function enterApp(username) {
   // Verificar en background: pago pendiente y vencimiento de cancelación
   try {
     let data = await _api('/api/auth');
-    // 1. Primero activar pago pendiente (antes de cualquier otra operación)
+
+    // 1. Si hay pago pendiente, reintentar hasta 3 veces con espera entre intentos
+    // (MP puede tardar unos segundos en confirmar el pago)
     if (data.mpPendingPlan && data.mpPendingPlan !== 'free') {
-      const r = await _api('/api/check-pending');
-      if (r.status === 'activated') data = await _api('/api/auth');
+      let activated = false;
+      const delays = [0, 6000, 15000]; // intento inmediato, luego 6s, luego 15s
+      for (const delay of delays) {
+        if (delay) await new Promise(r => setTimeout(r, delay));
+        try {
+          const r = await _api('/api/check-pending');
+          if (r.status === 'activated') {
+            data = await _api('/api/auth');
+            activated = true;
+            break;
+          }
+        } catch (_) {}
+      }
+      // Si después de 3 intentos no se activó, mostrar sugerencia de Ayuda
+      if (!activated) {
+        const notif = document.getElementById('notif-badge-top');
+        showToast('⚠️ Si ya pagaste tu plan y no se activó, andá a tu Perfil → Ayuda para verificarlo.');
+      }
     }
+
     // 2. Si el período ya cancelado venció, bajar a free
     if (data.mpCancelAt && new Date(data.mpCancelAt) <= new Date() && !data.mpPendingPlan) {
       await _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
@@ -2778,6 +2797,20 @@ async function submitResetPassword() {
     err.textContent = e.message || 'Link inválido o expirado.';
     err.style.display = 'block';
   }
+}
+
+function showToast(msg, duration = 6000) {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 20px;font-size:13px;color:var(--text);z-index:9999;max-width:420px;text-align:center;box-shadow:var(--card-shadow);line-height:1.5';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.display = 'none'; }, duration);
 }
 
 function doLogout() {
