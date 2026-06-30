@@ -1444,7 +1444,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <button class="btn-modal-primary" style="width:100%" onclick="submitResetPassword()">Cambiar contraseña</button>
     </div>
     <div class="auth-error" id="forgot-error" style="margin-top:10px"></div>
-    <button class="btn-modal-ghost" onclick="closeModal('forgot-modal')" style="margin-top:10px;width:100%">Cancelar</button>
+    <button id="btn-forgot-close" class="btn-modal-ghost" onclick="closeForgotModal()" style="margin-top:10px;width:100%">Cancelar</button>
   </div>
 </div>
 
@@ -2752,6 +2752,11 @@ async function resendVerificationEmail() {
 
 let _resetToken = null;
 
+function closeForgotModal() {
+  closeModal('forgot-modal');
+  showScreen('screen-login');
+}
+
 function openForgotPassword() {
   _resetToken = null;
   document.getElementById('forgot-modal-title').textContent = 'Recuperar contraseña';
@@ -2793,6 +2798,8 @@ async function submitResetPassword() {
     document.getElementById('forgot-modal-title').textContent = '✅ Contraseña actualizada';
     document.getElementById('forgot-modal-desc').textContent = 'Tu contraseña fue cambiada. Ya podés iniciar sesión.';
     document.getElementById('forgot-new-pass-wrap').style.display = 'none';
+    const closeBtn = document.getElementById('btn-forgot-close');
+    if (closeBtn) { closeBtn.textContent = '→ Ir al login'; closeBtn.className = 'btn-modal-primary'; }
   } catch(e) {
     err.textContent = e.message || 'Link inválido o expirado.';
     err.style.display = 'block';
