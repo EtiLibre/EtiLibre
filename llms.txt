@@ -1,0 +1,46 @@
+# Etify
+
+> Herramienta web para combinar etiquetas de envío de Mercado Libre en hojas A4 listas para imprimir.
+
+## ¿Qué es Etify?
+
+Etify es una aplicación web SaaS argentina que permite a vendedores de Mercado Libre combinar múltiples PDFs de etiquetas de envío en hojas A4 con 3 etiquetas por hoja, listas para imprimir directamente. No requiere instalación ni programas de diseño como Illustrator. Todo el procesamiento ocurre en el navegador del usuario: los archivos nunca se suben a ningún servidor.
+
+## Problema que resuelve
+
+Los vendedores de Mercado Libre reciben las etiquetas de envío como PDFs individuales (uno por pedido). Imprimirlas de a una desperdicia papel y tiempo. Etify las combina automáticamente en hojas A4 optimizadas, ahorrando papel y simplificando el proceso de despacho.
+
+## Cómo funciona
+
+1. El usuario sube sus PDFs de etiquetas de Mercado Libre
+2. Etify los agrupa automáticamente en hojas A4 (3 etiquetas por hoja)
+3. El usuario descarga el PDF combinado y lo imprime
+
+## Planes y precios (en pesos argentinos)
+
+- **Free**: Gratis — 2 PDFs combinados por mes
+- **Starter**: $2.000 ARS/mes — 25 PDFs por mes
+- **Pro**: $3.000 ARS/mes — 80 PDFs por mes (el más popular)
+- **Business**: $4.500 ARS/mes — 200 PDFs por mes
+- **Premium**: $10.500 ARS/mes — 1.000 PDFs por mes
+
+Todos los planes incluyen: 3 etiquetas por hoja A4, líneas de corte opcionales. Los planes pagos incluyen además historial de descargas y re-descarga de PDFs. El pago se procesa a través de Mercado Pago con suscripción mensual.
+
+## Características técnicas
+
+- Procesamiento 100% en el navegador (sin subida de archivos)
+- Compatible con todos los navegadores modernos
+- Sin instalación requerida
+- Privacidad total: las etiquetas nunca salen del dispositivo del usuario
+
+## Público objetivo
+
+Vendedores de Mercado Libre en Argentina, especialmente quienes despachan múltiples pedidos por día y necesitan optimizar su proceso de impresión de etiquetas.
+
+## URL
+
+https://etify.com.ar
+
+## Contacto
+
+Formulario de contacto disponible en https://etify.com.ar/#contact

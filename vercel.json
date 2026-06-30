@@ -4,6 +4,11 @@
     { "source": "/__/auth/(.*)", "destination": "https://etilibre.firebaseapp.com/__/auth/$1" },
     { "source": "/",             "destination": "/EtiLibre.html" }
   ],
+  "routes": [
+    { "src": "/robots.txt",  "dest": "/public/robots.txt" },
+    { "src": "/sitemap.xml", "dest": "/public/sitemap.xml" },
+    { "src": "/llms.txt",    "dest": "/public/llms.txt" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://etify.com.ar/sitemap.xml
