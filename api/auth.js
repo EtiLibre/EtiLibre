@@ -1,5 +1,6 @@
 import { db }          from './_lib/firebase.js';
 import { signToken, requireAuth } from './_lib/auth.js';
+import { rateLimit, getIp } from './_lib/rateLimit.js';
 import bcrypt          from 'bcryptjs';
 import { randomBytes } from 'crypto';
 
@@ -33,6 +34,9 @@ export default async function handler(req, res) {
   if (action === 'login') {
     const { user, pass } = req.body;
     if (!user || !pass) return res.status(400).json({ error: 'Faltan datos' });
+    const ip = getIp(req);
+    const rl = await rateLimit(`login:${ip}`, 10, 15 * 60 * 1000); // 10 intentos / 15 min
+    if (!rl.allowed) return res.status(429).json({ error: `Demasiados intentos. Esperá ${Math.ceil(rl.retryAfter / 60)} minutos e intentá de nuevo.` });
     if (user === 'admin' || user === 'admin@etilibre.com') {
       const ok = await bcrypt.compare(pass, ADMIN_HASH);
       if (!ok) return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
@@ -53,6 +57,9 @@ export default async function handler(req, res) {
   if (action === 'register') {
     const { username, email, pass, plan } = req.body;
     if (!username || !email || !pass || !plan) return res.status(400).json({ error: 'Faltan datos' });
+    const ip = getIp(req);
+    const rl = await rateLimit(`register:${ip}`, 5, 60 * 60 * 1000); // 5 registros / hora por IP
+    if (!rl.allowed) return res.status(429).json({ error: `Demasiados registros desde esta red. Esperá ${Math.ceil(rl.retryAfter / 60)} minutos.` });
     if (username === 'admin') return res.status(400).json({ error: 'Ese nombre de usuario ya está en uso.' });
     if (!(await db.collection('users').where('username','==',username).limit(1).get()).empty)
       return res.status(400).json({ error: 'Ese nombre de usuario ya está en uso.' });
@@ -139,6 +146,9 @@ export default async function handler(req, res) {
   if (action === 'forgot-password') {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Falta email' });
+    const ip = getIp(req);
+    const rl = await rateLimit(`forgot:${ip}`, 3, 60 * 60 * 1000); // 3 intentos / hora
+    if (!rl.allowed) return res.status(429).json({ error: `Demasiados intentos. Esperá ${Math.ceil(rl.retryAfter / 60)} minutos e intentá de nuevo.` });
     const snap = await db.collection('users').where('email', '==', email).limit(1).get();
     if (snap.empty) return res.json({ ok: true }); // no revelar si el email existe
     const ud  = snap.docs[0].data();
