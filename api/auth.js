@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const doc = await db.collection('users').doc(payload.username).get();
     if (!doc.exists) return res.status(404).json({ error: 'Usuario no encontrado' });
     const { pass:_, ...safe } = doc.data();
-    return res.json(safe);
+    return res.json({ googleAuth: false, ...safe }); // googleAuth:false por defecto para usuarios de form
   }
 
   if (req.method !== 'POST') return res.status(405).end();
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     if (!await bcrypt.compare(pass, ud.pass)) return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
     const token = signToken({ username: ud.username, role:'user' });
     const { pass:_, ...safe } = ud;
-    return res.json({ token, user: safe });
+    return res.json({ token, user: { googleAuth: false, ...safe } });
   }
 
   // POST /api/auth  action=register
