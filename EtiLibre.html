@@ -2265,7 +2265,7 @@ async function _doRegister(userField, emailField, passField, passConfirmField, p
     _cacheUser(data.user);
     if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) grecaptcha.reset(recaptchaWidgetId);
     enterApp(user);
-    if (plan !== 'free') openProfile('plan');
+    openProfile('plan');
   } catch (e) {
     err.textContent = e.message || 'Error al registrar. Intentá de nuevo.';
     err.style.display = 'block';

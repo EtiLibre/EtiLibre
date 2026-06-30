@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     const verifyToken = randomBytes(24).toString('hex');
     const userData = {
       username, email, pass: await bcrypt.hash(pass, 12),
-      plan: plan||'free', active: plan==='free',
+      plan: 'free', active: true, // siempre free hasta que paguen
       emailVerified: false, emailVerifyToken: verifyToken,
       displayName: username, avatar:'👤', nameColor:'',
       invoices:[], history:[],
