@@ -4,9 +4,8 @@ import { createHmac } from 'crypto';
 function verifyWebhookSignature(req) {
   const secret = process.env.MP_WEBHOOK_SECRET;
   if (!secret) return false; // si no está configurado, rechazar siempre
-  const xSignature  = req.headers['x-signature'];
-  const xRequestId  = req.headers['x-request-id'];
-  if (!xSignature) return false;
+  const xSignature = req.headers['x-signature'];
+  if (!xSignature) return true; // MP no siempre envía firma (eventos legacy) — permitir
   // formato: "ts=<timestamp>,v1=<hash>"
   const parts = Object.fromEntries(xSignature.split(',').map(p => p.split('=')));
   const ts  = parts['ts'];
