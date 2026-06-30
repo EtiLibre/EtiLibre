@@ -1,5 +1,4 @@
-// Envío de emails con Resend (o nodemailer como fallback)
-// Requiere env var RESEND_API_KEY
+import { rateLimit, getIp } from './_lib/rateLimit.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -7,6 +6,10 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
+
+  const ip = getIp(req);
+  const rl = await rateLimit(`contact:${ip}`, 5, 60 * 60 * 1000); // 5 mensajes / hora
+  if (!rl.allowed) return res.status(429).json({ error: 'Demasiados mensajes. Esperá un momento e intentá de nuevo.' });
 
   const { type, name, email, subject, message, plan, invoiceRequest } = req.body;
   if (!email || (!message && !invoiceRequest)) return res.status(400).json({ error: 'Faltan datos' });

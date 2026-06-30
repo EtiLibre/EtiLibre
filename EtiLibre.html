@@ -1905,7 +1905,7 @@ async function _refreshCurrentUser() {
 
 async function _checkPendingMpPlan(username, email, planKey) {
   try {
-    const params = new URLSearchParams({ planKey }); if (username) params.set('username', username); if (email) params.set('email', email); const res = await fetch(`/api/verify?${params}`);
+    const params = new URLSearchParams({ planKey }); if (email) params.set('email', email); const res = await _api(`/api/verify?${params}`);
     const data = await res.json();
     if (data.status === 'authorized') {
       await _api('/api/activate', 'POST', { planKey, subId: data.subId || null });
@@ -2501,7 +2501,7 @@ async function checkMpReturn() {
   if (!email) return;
 
   try {
-    const res  = await fetch(`/api/verify?email=${encodeURIComponent(email)}&planKey=${planKey}`);
+    const res  = await _api(`/api/verify?email=${encodeURIComponent(email)}&planKey=${planKey}`);
     const data = await res.json();
 
     if (data.status === 'authorized') {

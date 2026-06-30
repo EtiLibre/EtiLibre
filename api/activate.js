@@ -1,6 +1,12 @@
 import { db } from './_lib/firebase.js';
 import { requireAuth } from './_lib/auth.js';
 
+const PLAN_IDS = {
+  starter:  '4f3cbb4d7b7643ccac2f4c5d06353e2c',
+  pro:      '8249ed9006064842b67ece3d76b38e0a',
+  business: '472deed04ef0404682fd78048a5324e0',
+  premium:  '55add3001b744fbab79927fe89c1c28f'
+};
 const PLAN_LABELS = { starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' };
 const PLAN_PRICES = { starter:'$2.000', pro:'$3.000', business:'$4.500', premium:'$10.500' };
 
@@ -16,6 +22,22 @@ export default async function handler(req, res) {
 
   const { planKey, subId } = req.body;
   if (!planKey) return res.status(400).json({ error: 'Falta planKey' });
+  if (!PLAN_IDS[planKey]) return res.status(400).json({ error: 'Plan inválido' });
+
+  // Verificar con MercadoPago que la suscripción realmente existe y está autorizada
+  if (!subId) return res.status(400).json({ error: 'Falta subId' });
+  try {
+    const mpRes = await fetch(`https://api.mercadopago.com/preapproval/${subId}`, {
+      headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` }
+    });
+    if (!mpRes.ok) return res.status(400).json({ error: 'Suscripción no encontrada en MercadoPago' });
+    const sub = await mpRes.json();
+    // Verificar que la suscripción está autorizada y corresponde al plan correcto
+    if (sub.status !== 'authorized') return res.status(400).json({ error: 'La suscripción no está autorizada' });
+    if (sub.preapproval_plan_id !== PLAN_IDS[planKey]) return res.status(400).json({ error: 'El plan no coincide con la suscripción' });
+  } catch (e) {
+    return res.status(500).json({ error: 'No se pudo verificar con MercadoPago' });
+  }
 
   const ref = db.collection('users').doc(payload.username);
   const doc = await ref.get();

@@ -1,3 +1,6 @@
+import { requireAuth } from './_lib/auth.js';
+import { rateLimit, getIp } from './_lib/rateLimit.js';
+
 const PLAN_IDS = {
   starter:  '4f3cbb4d7b7643ccac2f4c5d06353e2c',
   pro:      '8249ed9006064842b67ece3d76b38e0a',
@@ -9,9 +12,19 @@ const PLAN_MAP = Object.fromEntries(Object.entries(PLAN_IDS).map(([k,v]) => [v,k
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method !== 'GET') return res.status(405).end();
 
-  const { email, planKey, username } = req.query;
+  const payload = requireAuth(req, res);
+  if (!payload) return;
+
+  const ip = getIp(req);
+  const rl = await rateLimit(`verify:${ip}`, 20, 10 * 60 * 1000); // 20 verificaciones / 10 min
+  if (!rl.allowed) return res.status(429).json({ error: 'Demasiados intentos. Esperá unos minutos.' });
+
+  const { planKey } = req.query;
+  const username = payload.username; // tomar del JWT, no del query (evita spoofing)
+  const email    = req.query.email;  // email del pago MP (puede ser distinto)
   if (!planKey) return res.status(400).json({ error: 'Faltan parámetros' });
 
   const planId = PLAN_IDS[planKey?.toLowerCase()];
