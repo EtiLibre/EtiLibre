@@ -1,4 +1,22 @@
-import { db } from '../_lib/firebase.js';
+import { db }         from '../_lib/firebase.js';
+import { createHmac } from 'crypto';
+
+function verifyWebhookSignature(req) {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) return true; // si no está configurado, no bloquear (backward compat)
+  const xSignature  = req.headers['x-signature'];
+  const xRequestId  = req.headers['x-request-id'];
+  if (!xSignature) return false;
+  // formato: "ts=<timestamp>,v1=<hash>"
+  const parts = Object.fromEntries(xSignature.split(',').map(p => p.split('=')));
+  const ts  = parts['ts'];
+  const v1  = parts['v1'];
+  if (!ts || !v1) return false;
+  const dataId  = req.body?.data?.id || '';
+  const manifest = `id:${dataId};request-date:${ts};`;
+  const expected = createHmac('sha256', secret).update(manifest).digest('hex');
+  return expected === v1;
+}
 
 const PLAN_MAP = {
   '4f3cbb4d7b7643ccac2f4c5d06353e2c': 'starter',
@@ -22,6 +40,7 @@ async function resolveUsername(sub) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+  if (!verifyWebhookSignature(req)) return res.status(401).end();
 
   try {
     const { type, data } = req.body;

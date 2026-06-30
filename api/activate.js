@@ -35,7 +35,15 @@ export default async function handler(req, res) {
     // Verificar que la suscripción está autorizada y corresponde al plan correcto
     if (sub.status !== 'authorized') return res.status(400).json({ error: 'La suscripción no está autorizada' });
     if (sub.preapproval_plan_id !== PLAN_IDS[planKey]) return res.status(400).json({ error: 'El plan no coincide con la suscripción' });
+    // Verificar ownership: external_reference debe ser el usuario, o el email del pagador debe coincidir
+    const userDoc = await db.collection('users').doc(payload.username).get();
+    const userEmail = userDoc.exists ? userDoc.data().email : null;
+    const subEmail  = sub.payer_email || sub.payer?.email;
+    const ownsRef   = sub.external_reference === payload.username;
+    const ownsEmail = userEmail && subEmail && subEmail.toLowerCase() === userEmail.toLowerCase();
+    if (!ownsRef && !ownsEmail) return res.status(403).json({ error: 'Esta suscripción no pertenece a tu cuenta' });
   } catch (e) {
+    if (e.message?.includes('pertenece')) return res.status(403).json({ error: e.message });
     return res.status(500).json({ error: 'No se pudo verificar con MercadoPago' });
   }
 

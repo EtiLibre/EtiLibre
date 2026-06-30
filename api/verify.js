@@ -59,16 +59,20 @@ export default async function handler(req, res) {
       }
     }
 
-    // 3. Buscar cualquier suscripción autorizada reciente para ese plan (último recurso)
+    // 3. Buscar suscripciones recientes del plan — solo las que pertenezcan al usuario (por external_reference o email)
     if (username) {
       const r = await fetch(
-        `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${planId}&status=authorized&limit=5`,
+        `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${planId}&status=authorized&limit=10`,
         auth
       );
       const d = await r.json();
-      // Tomar la más reciente (creada en las últimas 2 horas)
       const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
-      const recent = (d.results || []).find(s => new Date(s.date_created) >= twoHoursAgo);
+      const recent = (d.results || []).find(s => {
+        if (new Date(s.date_created) < twoHoursAgo) return false;
+        if (s.external_reference === username) return true;
+        const subEmail = s.payer_email || s.payer?.email;
+        return email && subEmail && subEmail.toLowerCase() === email.toLowerCase();
+      });
       if (recent) {
         return res.json({ status: 'authorized', plan: PLAN_MAP[recent.preapproval_plan_id] || planKey, subId: recent.id });
       }

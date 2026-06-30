@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     } catch (_) {}
   }
 
-  // 3. Buscar cualquier suscripción autorizada para este plan creada después de que el usuario inició el pago
+  // 3. Buscar suscripciones recientes del plan, filtrando por ownership (external_reference o email del pagador)
   if (!subId) {
     try {
       const r = await fetch(
@@ -68,7 +68,13 @@ export default async function handler(req, res) {
         auth
       );
       const d = await r.json();
-      const match = (d.results || []).find(s => new Date(s.date_created) >= since);
+      const match = (d.results || []).find(s => {
+        if (new Date(s.date_created) < since) return false;
+        // Solo aceptar si la suscripción pertenece a este usuario
+        if (s.external_reference === username) return true;
+        const subEmail = s.payer_email || s.payer?.email;
+        return subEmail && user.email && subEmail.toLowerCase() === user.email.toLowerCase();
+      });
       subId = match?.id || null;
     } catch (_) {}
   }
