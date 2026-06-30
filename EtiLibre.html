@@ -2296,7 +2296,8 @@ async function _handleGoogleUser(fbUser, planKey) {
   const VALID_PLANS = ['starter','pro','business','premium'];
   const wantedPlan  = VALID_PLANS.includes(planKey) ? planKey : null;
   try {
-    const data = await _api('/api/auth', 'POST', { action:'google', email, displayName: name });
+    const idToken = await fbUser.getIdToken(); // token verificable server-side
+    const data = await _api('/api/auth', 'POST', { action:'google', idToken, displayName: name });
     _setToken(data.token);
     _cacheUser(data.user);
     if (data.needsTos) {

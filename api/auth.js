@@ -1,4 +1,4 @@
-import { db }          from './_lib/firebase.js';
+import { db, adminAuth } from './_lib/firebase.js';
 import { signToken, requireAuth } from './_lib/auth.js';
 import { rateLimit, getIp } from './_lib/rateLimit.js';
 import bcrypt          from 'bcryptjs';
@@ -98,11 +98,20 @@ export default async function handler(req, res) {
 
   // POST /api/auth  action=google
   if (action === 'google') {
-    const { email, displayName } = req.body;
-    if (!email) return res.status(400).json({ error: 'Faltan datos' });
+    const { idToken, displayName } = req.body;
+    if (!idToken) return res.status(400).json({ error: 'Faltan datos' });
     const ip = getIp(req);
     const rl = await rateLimit(`google:${ip}`, 15, 15 * 60 * 1000); // 15 intentos / 15 min
     if (!rl.allowed) return res.status(429).json({ error: `Demasiados intentos. Esperá ${Math.ceil(rl.retryAfter / 60)} minutos.` });
+    // Verificar idToken con Firebase Admin — garantiza que el email es real y pertenece al solicitante
+    let email;
+    try {
+      const decoded = await adminAuth.verifyIdToken(idToken);
+      email = decoded.email;
+      if (!email) return res.status(400).json({ error: 'No se pudo obtener el email de Google' });
+    } catch (_) {
+      return res.status(401).json({ error: 'Token de Google inválido o expirado' });
+    }
     // Buscar usuario por email
     const snap = await db.collection('users').where('email','==',email).limit(1).get();
     if (!snap.empty) {
@@ -167,7 +176,7 @@ export default async function handler(req, res) {
         to:      [email],
         subject: '[Etify] Recuperá tu contraseña',
         html:    `<h2>Recuperar contraseña</h2>
-                  <p>Hola ${ud.displayName || ud.username}, recibimos una solicitud para restablecer tu contraseña.</p>
+                  <p>Hola ${(ud.displayName || ud.username).replace(/</g,'&lt;').replace(/>/g,'&gt;')}, recibimos una solicitud para restablecer tu contraseña.</p>
                   <a href="${link}" style="display:inline-block;background:#3D8BFF;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Restablecer contraseña</a>
                   <p style="color:#888;font-size:12px;margin-top:16px">Este link expira en 1 hora. Si no solicitaste esto, ignorá este mensaje.</p>`
       })

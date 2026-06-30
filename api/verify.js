@@ -1,3 +1,4 @@
+import { db }          from './_lib/firebase.js';
 import { requireAuth } from './_lib/auth.js';
 import { rateLimit, getIp } from './_lib/rateLimit.js';
 
@@ -23,9 +24,11 @@ export default async function handler(req, res) {
   if (!rl.allowed) return res.status(429).json({ error: 'Demasiados intentos. Esperá unos minutos.' });
 
   const { planKey } = req.query;
-  const username = payload.username; // tomar del JWT, no del query (evita spoofing)
-  const email    = req.query.email;  // email del pago MP (puede ser distinto)
+  const username = payload.username;
   if (!planKey) return res.status(400).json({ error: 'Faltan parámetros' });
+  // Obtener el email real del usuario desde Firestore (no confiar en query param)
+  const userDoc = await db.collection('users').doc(username).get();
+  const email   = userDoc.exists ? userDoc.data().email : null;
 
   const planId = PLAN_IDS[planKey?.toLowerCase()];
   if (!planId) return res.status(400).json({ error: 'Plan inválido' });
@@ -80,6 +83,7 @@ export default async function handler(req, res) {
 
     res.json({ status: 'not_found' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('verify error:', e.message);
+    res.status(500).json({ error: 'Error interno al verificar suscripción' });
   }
 }

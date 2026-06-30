@@ -1,5 +1,7 @@
 import { rateLimit, getIp } from './_lib/rateLimit.js';
 
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -17,29 +19,29 @@ export default async function handler(req, res) {
   let emailSubject, emailBody;
 
   if (type === 'invoice_request') {
-    emailSubject = `[Etify] Solicitud de factura - ${email}`;
+    emailSubject = `[Etify] Solicitud de factura - ${esc(email)}`;
     emailBody = `
 <h2>Solicitud de Factura</h2>
-<p><strong>Usuario:</strong> ${name}</p>
-<p><strong>Email de la cuenta:</strong> ${email}</p>
+<p><strong>Usuario:</strong> ${esc(name)}</p>
+<p><strong>Email de la cuenta:</strong> ${esc(email)}</p>
 <hr/>
 <h3>Datos de facturación</h3>
-<p><strong>Razón social / Nombre:</strong> ${invoiceRequest.razonSocial}</p>
-<p><strong>CUIT:</strong> ${invoiceRequest.cuit}</p>
-<p><strong>Condición IVA:</strong> ${invoiceRequest.condicionIVA}</p>
-<p><strong>Domicilio:</strong> ${invoiceRequest.domicilio}</p>
-<p><strong>Email para la factura:</strong> ${invoiceRequest.emailFactura}</p>
-${invoiceRequest.comprobante ? `<p><strong>Comprobante:</strong> ${invoiceRequest.comprobante}</p>` : ''}
+<p><strong>Razón social / Nombre:</strong> ${esc(invoiceRequest?.razonSocial)}</p>
+<p><strong>CUIT:</strong> ${esc(invoiceRequest?.cuit)}</p>
+<p><strong>Condición IVA:</strong> ${esc(invoiceRequest?.condicionIVA)}</p>
+<p><strong>Domicilio:</strong> ${esc(invoiceRequest?.domicilio)}</p>
+<p><strong>Email para la factura:</strong> ${esc(invoiceRequest?.emailFactura)}</p>
+${invoiceRequest?.comprobante ? `<p><strong>Comprobante:</strong> ${esc(invoiceRequest.comprobante)}</p>` : ''}
     `.trim();
   } else {
-    emailSubject = `[Etify] ${subject || 'Consulta'} - ${name}`;
+    emailSubject = `[Etify] ${esc(subject || 'Consulta')} - ${esc(name)}`;
     emailBody = `
 <h2>Nuevo mensaje de contacto</h2>
-<p><strong>Nombre:</strong> ${name}</p>
-<p><strong>Email:</strong> ${email}</p>
-${plan ? `<p><strong>Plan de interés:</strong> ${plan}</p>` : ''}
+<p><strong>Nombre:</strong> ${esc(name)}</p>
+<p><strong>Email:</strong> ${esc(email)}</p>
+${plan ? `<p><strong>Plan de interés:</strong> ${esc(plan)}</p>` : ''}
 <hr/>
-<p>${message.replace(/\n/g, '<br/>')}</p>
+<p>${esc(message).replace(/\n/g, '<br/>')}</p>
     `.trim();
   }
 

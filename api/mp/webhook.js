@@ -3,7 +3,7 @@ import { createHmac } from 'crypto';
 
 function verifyWebhookSignature(req) {
   const secret = process.env.MP_WEBHOOK_SECRET;
-  if (!secret) return true; // si no está configurado, no bloquear (backward compat)
+  if (!secret) return false; // si no está configurado, rechazar siempre
   const xSignature  = req.headers['x-signature'];
   const xRequestId  = req.headers['x-request-id'];
   if (!xSignature) return false;
