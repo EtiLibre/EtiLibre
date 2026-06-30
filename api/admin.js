@@ -30,9 +30,22 @@ export default async function handler(req, res) {
   if (req.method === 'PUT') {
     const { username, ...body } = req.body;
     if (!username) return res.status(400).json({ error: 'Falta username' });
-    const allowed = ['plan','active','paymentRef','nameColor','displayName','avatar','notifications','mpSubId','mpStatus'];
+    const VALID_PLANS = ['free','starter','pro','business','premium'];
     const updates = {};
-    for (const k of allowed) if (body[k] !== undefined) updates[k] = body[k];
+    if (body.plan        !== undefined) updates.plan        = VALID_PLANS.includes(body.plan) ? body.plan : undefined;
+    if (body.active      !== undefined) updates.active      = Boolean(body.active);
+    if (body.paymentRef  !== undefined) updates.paymentRef  = String(body.paymentRef).slice(0, 200);
+    if (body.nameColor   !== undefined) updates.nameColor   = /^#[0-9a-fA-F]{3,6}$/.test(body.nameColor) ? body.nameColor : '';
+    if (body.displayName !== undefined) updates.displayName = String(body.displayName).slice(0, 60);
+    if (body.avatar      !== undefined) updates.avatar      = String(body.avatar).slice(0, 10);
+    if (body.mpSubId     !== undefined) updates.mpSubId     = String(body.mpSubId).slice(0, 100);
+    if (body.mpStatus    !== undefined) updates.mpStatus    = String(body.mpStatus).slice(0, 50);
+    if (body.notifications !== undefined && Array.isArray(body.notifications)) {
+      updates.notifications = body.notifications.slice(0, 50);
+    }
+    // Eliminar claves con valor undefined para no escribirlas en Firestore
+    for (const k of Object.keys(updates)) if (updates[k] === undefined) delete updates[k];
+    if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'Sin campos válidos' });
     await ref.doc(username).update(updates);
     return res.json({ ok:true });
   }

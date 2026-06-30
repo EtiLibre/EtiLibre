@@ -36,12 +36,10 @@ export async function rateLimit(key, max, windowMs) {
 }
 
 export function getIp(req) {
-  // En Vercel, x-vercel-forwarded-for es la IP real del cliente (no falsificable por el cliente)
-  // x-forwarded-for puede ser manipulado, así que tomamos el último valor (agregado por Vercel)
-  const xff = req.headers['x-forwarded-for'];
-  if (xff) {
-    const ips = xff.split(',').map(s => s.trim());
-    return ips[ips.length - 1] || 'unknown'; // el último lo agrega Vercel, no el cliente
-  }
-  return req.headers['x-vercel-forwarded-for'] || req.headers['x-real-ip'] || req.socket?.remoteAddress || 'unknown';
+  // x-vercel-forwarded-for es la IP del cliente tal como la ve el edge de Vercel (no falsificable)
+  // x-forwarded-for puede ser inyectado por el cliente — no usar para rate limiting
+  return req.headers['x-vercel-forwarded-for']
+    || req.headers['x-real-ip']
+    || req.socket?.remoteAddress
+    || 'unknown';
 }

@@ -1,6 +1,7 @@
 import { db }             from './_lib/firebase.js';
 import { FieldValue }     from 'firebase-admin/firestore';
 import { requireAuth }    from './_lib/auth.js';
+import { rateLimit, getIp } from './_lib/rateLimit.js';
 import bcrypt             from 'bcryptjs';
 
 export default async function handler(req, res) {
@@ -102,6 +103,9 @@ export default async function handler(req, res) {
       const VALID_PLANS = ['starter','pro','business','premium'];
       const { planKey } = req.body;
       if (!VALID_PLANS.includes(planKey)) return res.status(400).json({ error: 'Plan inválido' });
+      const ip = getIp(req);
+      const rl = await rateLimit(`help-activate:${ip}`, 5, 60 * 60 * 1000); // 5/hora
+      if (!rl.allowed) return res.status(429).json({ error: 'Demasiados intentos. Esperá unos minutos.' });
       await ref.update({
         mpPendingPlan:   planKey,
         mpPendingPlanAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
