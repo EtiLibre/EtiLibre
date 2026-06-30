@@ -15,6 +15,7 @@ export default async function handler(req, res) {
 
   const { type, name, email, subject, message, plan, invoiceRequest } = req.body;
   if (!email || (!message && !invoiceRequest)) return res.status(400).json({ error: 'Faltan datos' });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Email inválido.' });
 
   let emailSubject, emailBody;
 

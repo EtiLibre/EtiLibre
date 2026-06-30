@@ -27,16 +27,23 @@ export default async function handler(req, res) {
     const { action } = req.body;
     if (action === 'add-notification') {
       const { icon, title, body } = req.body;
-      const notif = { id:Date.now().toString(), icon, title, body, date:new Date().toISOString(), read:false };
+      if (!title || !body) return res.status(400).json({ error: 'Faltan datos' });
+      const notif = { id:Date.now().toString(), icon:String(icon||'').slice(0,10), title:String(title).slice(0,200), body:String(body).slice(0,500), date:new Date().toISOString(), read:false };
       const doc = await ref.get();
       const list = [notif, ...(doc.data()?.notifications||[])].slice(0,50);
       await ref.update({ notifications: list });
       return res.json({ ok:true });
     }
     if (action === 'add-history') {
-      const { pdfData:_, ...meta } = req.body;
+      // Solo permitir campos conocidos para evitar inyección de campos arbitrarios en Firestore
+      const { labels, count, date, name, pages } = req.body;
+      const entry = { date: date || new Date().toISOString() };
+      if (labels !== undefined) entry.labels = Number(labels) || 0;
+      if (count  !== undefined) entry.count  = Number(count)  || 0;
+      if (pages  !== undefined) entry.pages  = Number(pages)  || 0;
+      if (name   !== undefined) entry.name   = String(name).slice(0, 200);
       const doc = await ref.get();
-      const list = [{ ...meta, date: meta.date||new Date().toISOString() }, ...(doc.data()?.history||[])].slice(0,100);
+      const list = [entry, ...(doc.data()?.history||[])].slice(0,100);
       await ref.update({ history: list });
       return res.json({ ok:true });
     }
@@ -60,30 +67,33 @@ export default async function handler(req, res) {
       return res.json({ ok:true });
     }
     if (action === 'increment-usage') {
-      const { count } = req.body;
+      const count = Math.max(1, Math.min(100, parseInt(req.body.count) || 1)); // entre 1 y 100
       const now = new Date();
       const curMonth = now.getFullYear() * 100 + now.getMonth();
       const doc = await ref.get();
       const d = doc.data();
       if (d.resetMonth !== curMonth) {
-        // Nuevo mes: resetear contador
-        await ref.update({ used: count || 1, resetMonth: curMonth, adExtensions: 0 });
-        return res.json({ ok:true, used: count || 1 });
+        await ref.update({ used: count, resetMonth: curMonth, adExtensions: 0 });
+        return res.json({ ok:true, used: count });
       }
-      // Mismo mes: usar FieldValue.increment para evitar race condition
-      await ref.update({ used: FieldValue.increment(count || 1) });
+      await ref.update({ used: FieldValue.increment(count) });
       const updated = await ref.get();
       return res.json({ ok:true, used: updated.data().used });
     }
     if (action === 'watch-ad') {
-      const doc = await ref.get();
-      const d = doc.data();
-      const now = new Date();
-      const curMonth = now.getFullYear() * 100 + now.getMonth();
-      const adExts = d.resetMonth !== curMonth ? 0 : (d.adExtensions || 0);
-      if (adExts >= 2) return res.status(400).json({ error: 'Límite de anuncios alcanzado' });
-      await ref.update({ adExtensions: adExts + 1 });
-      return res.json({ ok:true, adExtensions: adExts + 1 });
+      // Usar transacción para evitar race condition
+      const newExts = await db.runTransaction(async tx => {
+        const doc = await tx.get(ref);
+        const d = doc.data();
+        const now = new Date();
+        const curMonth = now.getFullYear() * 100 + now.getMonth();
+        const adExts = d.resetMonth !== curMonth ? 0 : (d.adExtensions || 0);
+        if (adExts >= 2) throw new Error('LIMIT');
+        tx.update(ref, { adExtensions: adExts + 1 });
+        return adExts + 1;
+      }).catch(e => { if (e.message === 'LIMIT') return null; throw e; });
+      if (newExts === null) return res.status(400).json({ error: 'Límite de anuncios alcanzado' });
+      return res.json({ ok:true, adExtensions: newExts });
     }
     if (action === 'help-activate') {
       const VALID_PLANS = ['starter','pro','business','premium'];

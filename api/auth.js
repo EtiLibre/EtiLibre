@@ -57,6 +57,9 @@ export default async function handler(req, res) {
   if (action === 'register') {
     const { username, email, pass, plan } = req.body;
     if (!username || !email || !pass || !plan) return res.status(400).json({ error: 'Faltan datos' });
+    if (pass.length < 8) return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres.' });
+    if (username.length > 30) return res.status(400).json({ error: 'El nombre de usuario no puede superar 30 caracteres.' });
+    if (email.length > 200) return res.status(400).json({ error: 'Email inválido.' });
     const ip = getIp(req);
     const rl = await rateLimit(`register:${ip}`, 5, 60 * 60 * 1000); // 5 registros / hora por IP
     if (!rl.allowed) return res.status(429).json({ error: `Demasiados registros desde esta red. Esperá ${Math.ceil(rl.retryAfter / 60)} minutos.` });
@@ -188,6 +191,9 @@ export default async function handler(req, res) {
   if (action === 'reset-password') {
     const { token, newPass } = req.body;
     if (!token || !newPass || newPass.length < 8) return res.status(400).json({ error: 'Datos inválidos' });
+    const ip = getIp(req);
+    const rl = await rateLimit(`reset:${ip}`, 5, 15 * 60 * 1000); // 5 intentos / 15 min
+    if (!rl.allowed) return res.status(429).json({ error: 'Demasiados intentos. Esperá unos minutos.' });
     const snap = await db.collection('users').where('resetToken', '==', token).limit(1).get();
     if (snap.empty) return res.status(400).json({ error: 'Link inválido o expirado.' });
     const ud = snap.docs[0].data();
