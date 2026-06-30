@@ -12,7 +12,7 @@ const PLAN_IDS = {
 const PLAN_MAP = Object.fromEntries(Object.entries(PLAN_IDS).map(([k,v]) => [v,k]));
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://etify.com.ar');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method !== 'GET') return res.status(405).end();
 

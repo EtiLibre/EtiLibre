@@ -17,7 +17,7 @@ const PLAN_CHECKOUT = {
 };
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://etify.com.ar');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       { headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` } }
     );
     const searchData = await searchRes.json();
-    const existing = (searchData.results || []).find(s => s.external_reference === username);
+    const existing = (searchData.results || []).find(s => s.external_reference === username && s.status === 'authorized');
     if (existing) {
       await db.collection('users').doc(username).update({ plan: planKey, active: true, mpSubId: existing.id, mpPendingPlan: null });
       return res.json({ already_active: true });

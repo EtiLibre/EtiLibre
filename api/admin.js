@@ -4,7 +4,7 @@ import { requireAdmin } from './_lib/auth.js';
 const PLAN_LABELS = { starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' };
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://etify.com.ar');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -66,7 +66,9 @@ export default async function handler(req, res) {
     if (action === 'add-invoice') {
       const { name, data, date } = req.body;
       if (!name || !data) return res.status(400).json({ error: 'Faltan datos' });
-      const list   = [{ name, data, date: date||new Date().toISOString() }, ...(doc.data().invoices||[])];
+      if (String(name).length > 200) return res.status(400).json({ error: 'Nombre demasiado largo' });
+      if (String(data).length > 500000) return res.status(400).json({ error: 'Archivo demasiado grande' });
+      const list   = [{ name: String(name).slice(0,200), data, date: date||new Date().toISOString() }, ...(doc.data().invoices||[])];
       const notifs = [
         { id:Date.now().toString(), icon:'🧾', title:'Nueva factura disponible',
           body:'Tu comprobante está disponible. Podés descargarlo desde la sección Comprobantes en tu perfil.',

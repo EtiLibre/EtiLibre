@@ -4,7 +4,7 @@ import { requireAuth }    from './_lib/auth.js';
 import bcrypt             from 'bcryptjs';
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://etify.com.ar');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -60,9 +60,12 @@ export default async function handler(req, res) {
   if (req.method === 'PUT') {
     const { action } = req.body;
     if (action === 'update') {
-      const allowed = ['displayName','avatar','nameColor','tosAccepted'];
       const updates = {};
-      for (const k of allowed) if (req.body[k] !== undefined) updates[k] = req.body[k];
+      if (req.body.displayName !== undefined) updates.displayName = String(req.body.displayName).slice(0, 60);
+      if (req.body.avatar      !== undefined) updates.avatar      = String(req.body.avatar).slice(0, 10);
+      if (req.body.nameColor   !== undefined) updates.nameColor   = /^#[0-9a-fA-F]{3,6}$/.test(req.body.nameColor) ? req.body.nameColor : '';
+      if (req.body.tosAccepted !== undefined) updates.tosAccepted = Boolean(req.body.tosAccepted);
+      if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'Sin campos válidos' });
       await ref.update(updates);
       return res.json({ ok:true });
     }

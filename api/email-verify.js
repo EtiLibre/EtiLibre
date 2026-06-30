@@ -11,7 +11,7 @@ async function sendVerificationEmail(email, username, token) {
       from:    'Etify <noreply@etify.com.ar>',
       to:      [email],
       subject: '[Etify] Verificá tu cuenta',
-      html:    `<h2>¡Bienvenido a Etify, ${username}!</h2>
+      html:    `<h2>¡Bienvenido a Etify, ${username.replace(/</g,'&lt;').replace(/>/g,'&gt;')}!</h2>
                 <p>Hacé click en el siguiente botón para verificar tu cuenta:</p>
                 <a href="${link}" style="display:inline-block;background:#3D8BFF;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Verificar mi cuenta</a>
                 <p style="color:#888;font-size:12px;margin-top:16px">Si no creaste una cuenta en Etify, ignorá este mensaje.</p>`
@@ -22,7 +22,7 @@ async function sendVerificationEmail(email, username, token) {
 export { sendVerificationEmail };
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://etify.com.ar');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();

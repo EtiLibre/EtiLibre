@@ -11,7 +11,7 @@ const PLAN_IDS = {
 };
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://etify.com.ar');
   if (req.method !== 'GET') return res.status(405).end();
 
   const { token } = req.query;
@@ -38,15 +38,22 @@ export default async function handler(req, res) {
     const d = await r.json();
     subId = d.results?.[0]?.id || null;
 
-    // Si no hay external_reference, buscar por plan reciente (creado en las últimas 2 horas)
+    // Si no hay external_reference, buscar por plan reciente filtrando por ownership
     if (!subId) {
+      const userDoc = await db.collection('users').doc(username).get();
+      const userEmail = userDoc.exists ? userDoc.data().email : null;
       const r2 = await fetch(
         `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${planId}&status=authorized&limit=10`,
         { headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` } }
       );
       const d2 = await r2.json();
       const tokenCreatedAt = new Date(tokenDoc.data().createdAt);
-      const recent = (d2.results || []).find(s => new Date(s.date_created) >= tokenCreatedAt);
+      const recent = (d2.results || []).find(s => {
+        if (new Date(s.date_created) < tokenCreatedAt) return false;
+        if (s.external_reference === username) return true;
+        const subEmail = s.payer_email || s.payer?.email;
+        return userEmail && subEmail && subEmail.toLowerCase() === userEmail.toLowerCase();
+      });
       subId = recent?.id || null;
     }
   } catch (_) {}

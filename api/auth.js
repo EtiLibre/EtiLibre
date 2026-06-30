@@ -9,7 +9,7 @@ import { sendVerificationEmail } from './email-verify.js';
 const ADMIN_HASH = process.env.ADMIN_PASS_HASH;
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://etify.com.ar');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -125,10 +125,11 @@ export default async function handler(req, res) {
       return res.json({ token, user: safe, needsTos: !ud.tosAccepted });
     }
     // Usuario nuevo — registrar
-    const safeUser = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '.');
-    const username = (await db.collection('users').doc(safeUser).get()).exists
-      ? safeUser + '_' + Date.now().toString().slice(-4)
-      : safeUser;
+    const safeUser = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '.').slice(0, 25);
+    const baseUser = safeUser === 'admin' ? 'user_' + safeUser : safeUser;
+    const username = (await db.collection('users').doc(baseUser).get()).exists
+      ? baseUser + '_' + Date.now().toString().slice(-6)
+      : baseUser;
     const now = new Date();
     const curMonth = now.getFullYear() * 100 + now.getMonth();
 
