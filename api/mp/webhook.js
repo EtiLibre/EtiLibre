@@ -124,9 +124,29 @@ export default async function handler(req, res) {
 
     } else if (sub.status === 'cancelled' || sub.status === 'paused') {
       const prev = doc.data();
-      // Si el usuario canceló manualmente y tiene mpCancelAt vigente, respetar ese período
+      // Si ya tiene mpCancelAt vigente (canceló desde la plataforma), respetarlo
       const hasActivePeriod = prev.mpCancelAt && new Date(prev.mpCancelAt) > new Date();
-      if (!hasActivePeriod) updates.active = false;
+      if (hasActivePeriod) {
+        // nada — ya está configurado el período de gracia
+      } else {
+        // Canceló directo desde app de MP — buscar next_payment_date para período de gracia
+        let cancelAt = sub.next_payment_date || null;
+        if (!cancelAt) {
+          // fallback: fin del mes actual
+          const now = new Date();
+          cancelAt = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+        }
+        const cancelAtDate = new Date(cancelAt);
+        if (cancelAtDate > new Date()) {
+          // Aún dentro del período pagado — mantener activo hasta cancelAt
+          updates.mpCancelAt = cancelAt;
+          updates.mpStatus   = 'cancelled';
+        } else {
+          // Período ya vencido — bajar inmediatamente
+          updates.active   = false;
+          updates.mpCancelAt = cancelAt;
+        }
+      }
       updates.notifications = [{
         id: Date.now().toString(), icon: '⚠️',
         title: sub.status === 'cancelled' ? 'Suscripción cancelada' : 'Suscripción pausada',
