@@ -16,7 +16,36 @@ export default async function handler(req, res) {
   const doc = await ref.get();
   if (!doc.exists) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-  const { mpSubId } = doc.data();
+  const ud = doc.data();
+  let { mpSubId } = ud;
+
+  // Si no hay mpSubId guardado, buscarlo en MP por email o external_reference
+  if (!mpSubId && ud.plan && ud.plan !== 'free') {
+    const auth = { headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` } };
+    const PLAN_IDS = {
+      starter: '4f3cbb4d7b7643ccac2f4c5d06353e2c',
+      pro:     '8249ed9006064842b67ece3d76b38e0a',
+      business:'472deed04ef0404682fd78048a5324e0',
+      premium: '55add3001b744fbab79927fe89c1c28f'
+    };
+    const planId = PLAN_IDS[ud.plan];
+    if (planId) {
+      // Buscar por external_reference (username)
+      try {
+        const r = await fetch(`https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(username)}&status=authorized&limit=1`, auth);
+        const d = await r.json();
+        mpSubId = d.results?.[0]?.id || null;
+      } catch (_) {}
+      // Buscar por email si no se encontró
+      if (!mpSubId && ud.email) {
+        try {
+          const r = await fetch(`https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(ud.email)}&preapproval_plan_id=${planId}&status=authorized&limit=1`, auth);
+          const d = await r.json();
+          mpSubId = d.results?.[0]?.id || null;
+        } catch (_) {}
+      }
+    }
+  }
 
   // Cancelar en MercadoPago si existe suscripción y obtener fecha de fin de período
   let mpCancelled = false;

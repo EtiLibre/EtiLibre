@@ -3997,12 +3997,13 @@ function markAllNotifsRead() {
 
 /* ── TAB: ZONA DE PELIGRO ── */
 function renderDangerTab() {
-  const planKey = getUserPlan(currentUser);
+  const planKey     = getUserPlan(currentUser);
+  const isCancelled = _userData?.mpStatus === 'cancelled';
   const btn = document.getElementById('btn-cancel-sub');
   if (!btn) return;
-  if (planKey === 'free' || planKey === 'admin') {
+  if (planKey === 'free' || planKey === 'admin' || isCancelled) {
     btn.disabled = true;
-    btn.textContent = 'Sin suscripción activa';
+    btn.textContent = isCancelled ? '✅ Suscripción cancelada' : 'Sin suscripción activa';
     btn.style.opacity = '0.4';
     btn.style.cursor  = 'not-allowed';
   } else {
