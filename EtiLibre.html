@@ -1649,11 +1649,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <span style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px">¿Querés cambiar de plan?</span>
         <select id="gate-plan-select" onchange="updateGatePlan(this.value)">
           <option value="">— Mantener plan actual —</option>
-          <option value="free">Free — Gratis (2 hojas/mes)</option>
-          <option value="starter">Starter — $2.000/mes (25 hojas/mes)</option>
-          <option value="pro">Pro — $3.000/mes (80 hojas/mes)</option>
-          <option value="business">Business — $4.500/mes (200 hojas/mes)</option>
-          <option value="premium">Premium — $10.500/mes (1.000 hojas/mes)</option>
         </select>
       </div>
       <button class="btn-pay-mp" id="btn-pay-mp" onclick="initiateSubscription()">
@@ -2442,10 +2437,31 @@ function setGateBilling(mode) {
   // Recalcular planKey según billing
   if (!pendingPaymentUser) return;
   const u = getUser(pendingPaymentUser);
-  const basePlan = (u?.plan || 'free').replace('-anual', '');
+  const basePlan = (pendingPaymentPlan || u?.plan || 'free').replace('-anual', '');
   if (basePlan === 'free') return;
   const newPlanKey = isAnnual ? basePlan + '-anual' : basePlan;
   _applyGatePlan(newPlanKey);
+  _updateGateDropdown(isAnnual);
+}
+
+function _updateGateDropdown(isAnnual) {
+  const sel = document.getElementById('gate-plan-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Mantener plan actual —</option>';
+  if (isAnnual) {
+    sel.innerHTML += '<option value="free">Free — Gratis (2 hojas/mes)</option>';
+    sel.innerHTML += '<option value="starter-anual">Starter Anual — $24.000/año (25 hojas/mes)</option>';
+    sel.innerHTML += '<option value="pro-anual">Pro Anual — $36.000/año (80 hojas/mes)</option>';
+    sel.innerHTML += '<option value="business-anual">Business Anual — $43.200/año 🔥 (200 hojas/mes)</option>';
+    sel.innerHTML += '<option value="premium-anual">Premium Anual — $126.000/año (1.000 hojas/mes)</option>';
+  } else {
+    sel.innerHTML += '<option value="free">Free — Gratis (2 hojas/mes)</option>';
+    sel.innerHTML += '<option value="starter">Starter — $2.000/mes (25 hojas/mes)</option>';
+    sel.innerHTML += '<option value="pro">Pro — $3.000/mes (80 hojas/mes)</option>';
+    sel.innerHTML += '<option value="business">Business — $4.500/mes (200 hojas/mes)</option>';
+    sel.innerHTML += '<option value="premium">Premium — $10.500/mes (1.000 hojas/mes)</option>';
+  }
+  sel.value = '';
 }
 function _applyGatePlan(planKey) {
   const pc = PLAN_CONFIG[planKey];
@@ -2837,8 +2853,7 @@ function showPaymentGate(username, isNewRegistration = false) {
   if (btn) { btn.disabled = false; }
   const btnTxt = el('btn-pay-mp-text');
   if (btnTxt) btnTxt.textContent = 'Pagar con Mercado Pago';
-  const planSel = el('gate-plan-select');
-  if (planSel) planSel.value = '';
+  _updateGateDropdown(false); // mensual por defecto al abrir
   showScreen('screen-payment-gate');
 }
 
@@ -3058,10 +3073,16 @@ function cancelPaymentGate() {
       }
     }
   }
+  const wasLoggedIn = !!pendingPaymentPrevState;
+  const userToReturn = pendingPaymentUser;
   pendingPaymentUser      = null;
   pendingPaymentPlan      = null;
   pendingPaymentPrevState = null;
-  showScreen('screen-landing');
+  if (wasLoggedIn && userToReturn) {
+    enterApp(userToReturn);
+  } else {
+    showScreen('screen-landing');
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
