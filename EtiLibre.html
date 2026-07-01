@@ -1627,15 +1627,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="payment-gate-card">
       <div class="payment-gate-icon">💳</div>
       <h2>Activá tu plan</h2>
-      <p>Tu cuenta fue creada con éxito. Para usar el plan <strong id="gate-plan-name">Pro</strong>, completá el pago a través de Mercado Pago. Una vez procesado, hacé clic en "Ya pagué" para ingresar.</p>
-      <!-- Toggle mensual/anual en pasarela -->
-      <div class="billing-toggle" style="justify-content:center;margin:0 0 16px">
-        <span class="billing-label active" id="gate-lbl-monthly" onclick="setGateBilling('monthly')">Mensual</span>
-        <div class="billing-toggle-track" id="gate-billing-track" onclick="toggleGateBilling()">
-          <div class="billing-toggle-thumb"></div>
-        </div>
-        <span class="billing-label" id="gate-lbl-annual" onclick="setGateBilling('annual')">Anual <span class="billing-save-badge">Business 20% OFF</span></span>
-      </div>
+      <p>Completá el pago de tu plan <strong id="gate-plan-name">Pro</strong> a través de Mercado Pago. Una vez procesado tu plan se activará automáticamente.</p>
 
       <div class="payment-gate-plan-box">
         <div>
@@ -1644,12 +1636,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div class="payment-gate-plan-limit" id="gate-plan-limit">80 hojas por mes</div>
         </div>
         <span class="plan-badge pro" id="gate-plan-badge">Pro</span>
-      </div>
-      <div class="gate-plan-selector">
-        <span style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px">¿Querés cambiar de plan?</span>
-        <select id="gate-plan-select" onchange="updateGatePlan(this.value)">
-          <option value="">— Mantener plan actual —</option>
-        </select>
       </div>
       <button class="btn-pay-mp" id="btn-pay-mp" onclick="initiateSubscription()">
         <svg width="22" height="22" viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#fff"/><text x="24" y="31" text-anchor="middle" font-size="18" fill="#009ee3" font-weight="900">MP</text></svg>
@@ -1672,7 +1658,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div id="promo-code-msg" style="display:none;font-size:13px;margin-top:8px;border-radius:6px;padding:8px 12px"></div>
       </div>
 
-      <button class="btn-gate-back" onclick="cancelPaymentGate()">← Volver al inicio</button>
+      <button class="btn-gate-back" onclick="cancelPaymentGate()">← Volver atrás</button>
       <p class="payment-gate-note">🔒 El pago es procesado de forma segura por Mercado Pago. Etify nunca almacena tus datos de tarjeta.<br>Serás redirigido al checkout de MP y al volver tu plan se activará automáticamente.</p>
     </div>
   </div>
