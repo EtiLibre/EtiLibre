@@ -3432,7 +3432,7 @@ async function combineLabels() {
     // Incrementar uso POR HOJA
     if (currentUser) {
       incrementUsage(currentUser, totalSheets);
-      // Convertir PDF a base64 para re-descarga (se elimina a los 10 días)
+      // Convertir PDF a base64 para re-descarga (se elimina a los 7 días)
       let pdfBase64 = null;
       try {
         const reader = new FileReader();
@@ -4742,7 +4742,7 @@ async function saNotifyUser(username) {
     <h2 style="margin:0 0 8px">Antes de continuar</h2>
     <p style="font-size:14px;color:var(--text2);margin:0 0 20px;line-height:1.6">Para usar Etify necesitás aceptar nuestros Términos y Condiciones y la Política de Privacidad.</p>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px;margin-bottom:20px;max-height:180px;overflow-y:auto;font-size:12px;color:var(--text2);line-height:1.7">
-      Al usar Etify aceptás que: la plataforma reorganiza etiquetas sin alterar su contenido; sos responsable de los archivos que subís; los PDFs generados se eliminan a los 10 días; Etify no está afiliada a Mercado Libre, Mercado Pago ni ninguna empresa de logística. Los datos de tu cuenta se almacenan de forma segura conforme a la Ley 25.326.
+      Al usar Etify aceptás que: la plataforma reorganiza etiquetas sin alterar su contenido; sos responsable de los archivos que subís; los PDFs generados se eliminan a los 7 días; Etify no está afiliada a Mercado Libre, Mercado Pago ni ninguna empresa de logística. Los datos de tu cuenta se almacenan de forma segura conforme a la Ley 25.326.
     </div>
     <label class="tos-check" style="margin-bottom:16px">
       <input type="checkbox" id="google-tos-check">
