@@ -604,6 +604,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .plan-option-price{font-size:12px;color:var(--text2);margin-bottom:6px}
 .plan-option-limit{font-size:11px;color:var(--text3)}
 .plan-option.current-plan .plan-option-name{color:var(--accent)}
+.plan-option.plan-option-deal{border-color:#c084ff;background:rgba(192,132,255,.07)}
 
 /* History */
 .history-empty{text-align:center;padding:40px 20px;color:var(--text2)}
@@ -1885,6 +1886,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </div>
 
         <div style="font-size:13px;color:var(--text2);margin-bottom:14px;font-weight:500">Cambiar plan:</div>
+
+        <!-- Toggle mensual / anual en perfil -->
+        <div class="billing-toggle" style="justify-content:flex-start;margin-bottom:16px;margin-top:0">
+          <span class="billing-label active" id="profile-lbl-monthly" onclick="setProfileBilling('monthly')">Mensual</span>
+          <div class="billing-toggle-track" id="profile-billing-track" onclick="toggleProfileBilling()">
+            <div class="billing-toggle-thumb"></div>
+          </div>
+          <span class="billing-label" id="profile-lbl-annual" onclick="setProfileBilling('annual')">Anual <span class="billing-save-badge">Business 20% OFF</span></span>
+        </div>
+
         <div class="plan-change-grid" id="plan-change-grid"></div>
         <div class="profile-success" id="plan-success" style="margin-top:14px">✅ Plan actualizado.</div>
 
@@ -2405,6 +2416,18 @@ function scrollToPricing() {
 }
 
 /* billing toggle */
+function toggleProfileBilling() {
+  const track = document.getElementById('profile-billing-track');
+  setProfileBilling(track.classList.contains('on') ? 'monthly' : 'annual');
+}
+function setProfileBilling(mode) {
+  const isAnnual = mode === 'annual';
+  document.getElementById('profile-billing-track').classList.toggle('on', isAnnual);
+  document.getElementById('profile-lbl-monthly').classList.toggle('active', !isAnnual);
+  document.getElementById('profile-lbl-annual').classList.toggle('active', isAnnual);
+  // Re-renderizar el grid con el nuevo modo
+  renderPlanTab();
+}
 function toggleBilling() {
   const track = document.getElementById('billing-track');
   setBilling(track.classList.contains('on') ? 'monthly' : 'annual');
@@ -3941,19 +3964,30 @@ function renderPlanTab() {
   // Grid de planes
   const grid = document.getElementById('plan-change-grid');
   grid.innerHTML = '';
+  const isAnnualProfile = document.getElementById('profile-billing-track')?.classList.contains('on');
+  const ANNUAL_PRICES = { free:'Gratis', starter:'$24.000/año', pro:'$36.000/año', business:'$43.200/año', premium:'$126.000/año' };
+  const ANNUAL_ORIGINAL = { business:'$54.000' };
   const planKeys = ['free','starter','pro','business','premium'];
   planKeys.forEach(pk => {
     const pc  = PLAN_CONFIG[pk];
     const div = document.createElement('div');
     const isCurrent = pk === planKey;
-    div.className = 'plan-option' + (isCurrent ? ' current-plan' : '');
+    const isBusinessDeal = isAnnualProfile && pk === 'business';
+    div.className = 'plan-option' + (isCurrent ? ' current-plan' : '') + (isBusinessDeal ? ' plan-option-deal' : '');
+    const priceHtml = isAnnualProfile
+      ? (isBusinessDeal
+          ? `<span style="font-size:11px;color:var(--text3);text-decoration:line-through;margin-right:2px">${ANNUAL_ORIGINAL.business}</span><span>${ANNUAL_PRICES[pk]}</span>`
+          : `<span>${ANNUAL_PRICES[pk]}</span>`)
+      : pc.price;
     div.innerHTML = `
-      <div class="plan-option-name">${pc.label}</div>
-      <div class="plan-option-price">${pc.price}</div>
+      <div class="plan-option-name">${pc.label}${isBusinessDeal ? ' <span style="font-size:9px;background:linear-gradient(135deg,#c084ff,#9b59f5);color:#fff;padding:2px 6px;border-radius:10px;font-weight:800;vertical-align:middle">20% OFF</span>' : ''}</div>
+      <div class="plan-option-price">${priceHtml}</div>
       <div class="plan-option-limit">${pc.limit} hojas/mes</div>
       ${isCurrent
         ? '<div style="font-size:11px;color:var(--accent);margin-top:6px;font-weight:700">Plan actual</div>'
-        : `<button class="btn-profile-save" style="width:100%;margin-top:8px;font-size:12px;padding:7px" onclick="changePlan('${pk}')">Elegir</button>`}`;
+        : isAnnualProfile && pk !== 'free'
+          ? `<button class="btn-profile-save" style="width:100%;margin-top:8px;font-size:12px;padding:7px${isBusinessDeal ? ';background:linear-gradient(135deg,#c084ff,#9b59f5);border-color:#c084ff' : ''}" onclick="contactAnnual('${pc.label} anual — ${ANNUAL_PRICES[pk]}')">Elegir</button>`
+          : `<button class="btn-profile-save" style="width:100%;margin-top:8px;font-size:12px;padding:7px" onclick="changePlan('${pk}')">Elegir</button>`}`;
     grid.appendChild(div);
   });
 
