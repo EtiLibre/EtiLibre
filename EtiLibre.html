@@ -2652,45 +2652,49 @@ async function checkMpRef() {
   const token  = params.get('mp_ref');
   if (!token) return;
 
-  try {
-    const res  = await fetch(`/api/mp/verify-ref?token=${token}`);
-    const data = await res.json();
+  // MP puede tardar varios segundos en confirmar el pago — reintentar con delays
+  const delays = [0, 4000, 10000, 20000]; // 0s, 4s, 10s, 20s
+  for (const delay of delays) {
+    if (delay) await new Promise(r => setTimeout(r, delay));
+    try {
+      const res  = await fetch(`/api/mp/verify-ref?token=${token}`);
+      const data = await res.json();
 
-    if (data.status === 'activated') {
-      // Limpiar URL solo cuando se confirmó la activación exitosa
-      history.replaceState(null, '', '/');
-      // Actualizar cache local
-      const users = getUsers();
-      if (users[data.username]) {
-        users[data.username].active = true;
-        users[data.username].plan   = data.planKey;
-        saveUsers(users);
-      }
-      if (_userData && _userData.username === data.username) {
-        _userData.active = true;
-        _userData.plan   = data.planKey;
-        _userData.mpPendingPlan = null;
-      }
-      localStorage.removeItem('mp_pending_username');
-      localStorage.removeItem('mp_pending_plan');
+      if (data.status === 'activated') {
+        history.replaceState(null, '', '/');
+        const users = getUsers();
+        if (users[data.username]) {
+          users[data.username].active = true;
+          users[data.username].plan   = data.planKey;
+          saveUsers(users);
+        }
+        if (_userData && _userData.username === data.username) {
+          _userData.active = true;
+          _userData.plan   = data.planKey;
+          _userData.mpPendingPlan = null;
+        }
+        localStorage.removeItem('mp_pending_username');
+        localStorage.removeItem('mp_pending_plan');
 
-      // Si el usuario ya estaba logueado, entrar a la app
-      if (currentUser === data.username) {
-        refreshTopbar();
-        updateUsageUI();
-        updateNotifBadge();
-      } else if (_getToken()) {
-        // Recuperar sesión desde token guardado
-        try {
-          const ud = await _api('/api/auth');
-          if (ud?.username === data.username) {
-            _cacheUser(ud);
-            enterApp(data.username);
-          }
-        } catch(_) {}
+        if (currentUser === data.username) {
+          refreshTopbar();
+          updateUsageUI();
+          updateNotifBadge();
+        } else if (_getToken()) {
+          try {
+            const ud = await _api('/api/auth');
+            if (ud?.username === data.username) {
+              _cacheUser(ud);
+              enterApp(data.username);
+            }
+          } catch(_) {}
+        }
+        return; // activado, salir del loop
       }
-    }
-  } catch(_) {}
+
+      if (data.status === 'expired' || res.status === 404 || res.status === 410) return; // token inválido, no reintentar
+    } catch(_) {}
+  }
 }
 
 async function initiateSubscription() {
