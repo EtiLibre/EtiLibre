@@ -1503,6 +1503,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <span id="btn-pay-mp-text">Pagar con Mercado Pago</span>
       </button>
       <div class="gate-pay-hint" id="gate-pay-hint" style="display:none"></div>
+
+      <!-- Código promocional -->
+      <div style="margin:4px 0 8px;border-top:1px solid var(--border);padding-top:16px">
+        <p style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin:0 0 10px">¿Tenés un código promocional?</p>
+        <div style="display:flex;gap:8px">
+          <input id="promo-code-input" type="text" placeholder="Ingresá tu código" maxlength="30"
+            style="flex:1;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;text-transform:uppercase;letter-spacing:1px"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')"
+            onkeydown="if(event.key==='Enter')applyPromoCode()">
+          <button onclick="applyPromoCode()" id="btn-apply-promo"
+            style="background:var(--accent);color:#080b14;border:none;border-radius:var(--r-sm);font-family:inherit;font-size:13px;font-weight:800;padding:10px 16px;cursor:pointer;white-space:nowrap;transition:opacity .2s"
+            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Aplicar</button>
+        </div>
+        <div id="promo-code-msg" style="display:none;font-size:13px;margin-top:8px;border-radius:6px;padding:8px 12px"></div>
+      </div>
+
       <button class="btn-gate-back" onclick="cancelPaymentGate()">← Volver al inicio</button>
       <p class="payment-gate-note">🔒 El pago es procesado de forma segura por Mercado Pago. Etify nunca almacena tus datos de tarjeta.<br>Serás redirigido al checkout de MP y al volver tu plan se activará automáticamente.</p>
     </div>
@@ -2709,6 +2725,34 @@ async function _tryVerifyMpRef(token) {
     if (res.status === 404 || res.status === 410) return true;
   } catch(_) {}
   return false;
+}
+
+async function applyPromoCode() {
+  const input = document.getElementById('promo-code-input');
+  const msg   = document.getElementById('promo-code-msg');
+  const btn   = document.getElementById('btn-apply-promo');
+  const code  = input?.value?.trim();
+  if (!code) return;
+  btn.disabled = true; btn.textContent = '…';
+  msg.style.display = 'none';
+  try {
+    const r = await _api('/api/user', 'PUT', { action: 'redeem-promo', code });
+    if (r.ok) {
+      msg.style.cssText = 'display:block;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:6px;padding:8px 12px;font-size:13px;color:#00c98d';
+      const PLAN_LABELS = { starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' };
+      msg.textContent = `✅ ¡Código aplicado! Plan ${PLAN_LABELS[r.plan] || r.plan} activado.`;
+      if (_userData) { _userData.active = true; _userData.plan = r.plan; _userData.mpPendingPlan = null; }
+      setTimeout(async () => {
+        const fresh = await _api('/api/auth');
+        _cacheUser(fresh);
+        enterApp(fresh.username);
+      }, 1200);
+    }
+  } catch(e) {
+    msg.style.cssText = 'display:block;background:rgba(255,72,72,.08);border:1px solid rgba(255,72,72,.2);border-radius:6px;padding:8px 12px;font-size:13px;color:var(--danger)';
+    msg.textContent = '✗ ' + (e.message || 'Código inválido.');
+    btn.disabled = false; btn.textContent = 'Aplicar';
+  }
 }
 
 async function initiateSubscription() {
@@ -4345,6 +4389,7 @@ let _saDeletedUsersCache = [];
 async function _refreshSAUsers() {
   try { _saUsersCache = await _api('/api/admin'); } catch (_) {}
   try { _saDeletedUsersCache = await _api('/api/admin?type=deleted'); } catch (_) {}
+  _refreshSAPromos();
 }
 
 async function openSuperAdmin() {
@@ -4385,6 +4430,82 @@ function renderSATosTable() {
       <td>${tos}</td>
     </tr>`;
   }).join('');
+}
+
+/* ── PROMO CODES ADMIN ── */
+let _saPromosCache = [];
+
+function togglePromoForm() {
+  const f = document.getElementById('promo-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('promo-form-msg').style.display = 'none';
+}
+
+async function _refreshSAPromos() {
+  try { _saPromosCache = await _api('/api/admin?type=promos'); } catch(_) { _saPromosCache = []; }
+  renderSAPromos();
+}
+
+function renderSAPromos() {
+  const tbody = document.getElementById('sa-promos-tbody');
+  if (!tbody) return;
+  const PLAN_LABELS = { starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' };
+  const PLAN_COLORS = { starter:'blue', pro:'accent', business:'purple', premium:'gold' };
+  if (!_saPromosCache.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Sin códigos creados</td></tr>';
+    return;
+  }
+  tbody.innerHTML = _saPromosCache.map(p => {
+    const duracion = p.durationDays > 0 ? `${p.durationDays} días` : 'Permanente';
+    const estado   = p.active ? '<span style="color:#00c98d;font-weight:700">Activo</span>' : '<span style="color:var(--danger);font-weight:700">Pausado</span>';
+    const fecha    = p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-AR') : '—';
+    return `<tr>
+      <td style="font-family:monospace;font-weight:700;letter-spacing:1px">${p.id}</td>
+      <td><span class="plan-badge ${PLAN_COLORS[p.plan]||''}">${PLAN_LABELS[p.plan]||p.plan}</span></td>
+      <td>${p.usedCount} / ${p.maxUses}</td>
+      <td>${duracion}</td>
+      <td>${estado}</td>
+      <td>${fecha}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-sa" style="font-size:11px;padding:5px 10px" onclick="saTogglePromo('${p.id}',${!p.active})">${p.active ? 'Pausar' : 'Activar'}</button>
+        <button class="btn-sa danger" style="font-size:11px;padding:5px 10px" onclick="saDeletePromo('${p.id}')">Eliminar</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function saCreatePromo() {
+  const code    = document.getElementById('pf-code')?.value?.trim();
+  const plan    = document.getElementById('pf-plan')?.value;
+  const maxUses = document.getElementById('pf-maxuses')?.value;
+  const days    = document.getElementById('pf-days')?.value;
+  const msg     = document.getElementById('promo-form-msg');
+  if (!code) { msg.style.cssText='display:block;color:var(--danger)'; msg.textContent='Ingresá un código.'; return; }
+  try {
+    await _api('/api/admin', 'POST', { action:'create-promo', code, plan, maxUses: parseInt(maxUses)||1, durationDays: parseInt(days)||30 });
+    msg.style.cssText = 'display:block;color:#00c98d';
+    msg.textContent   = `✅ Código "${code.toUpperCase()}" creado correctamente.`;
+    document.getElementById('pf-code').value = '';
+    await _refreshSAPromos();
+  } catch(e) {
+    msg.style.cssText = 'display:block;color:var(--danger)';
+    msg.textContent   = '✗ ' + (e.message || 'Error al crear el código.');
+  }
+}
+
+async function saTogglePromo(code, active) {
+  try {
+    await _api('/api/admin', 'POST', { action:'toggle-promo', code, active });
+    await _refreshSAPromos();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function saDeletePromo(code) {
+  if (!confirm(`¿Eliminar el código "${code}"? Esta acción no se puede deshacer.`)) return;
+  try {
+    await _api('/api/admin', 'POST', { action:'delete-promo', code });
+    await _refreshSAPromos();
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 function exportTosCSV() {
@@ -4700,6 +4821,56 @@ async function saNotifyUser(username) {
             </tr>
           </thead>
           <tbody id="sa-deleted-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Códigos Promocionales -->
+    <div style="margin-top:48px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <p class="sa-section-title" style="margin:0">🎟️ Códigos Promocionales</p>
+        <button class="btn-sa success" onclick="togglePromoForm()">+ Nuevo código</button>
+      </div>
+      <!-- Formulario crear código -->
+      <div id="promo-form" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:20px;margin-bottom:20px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Código</label>
+            <input id="pf-code" type="text" placeholder="ETIFY2026" maxlength="30"
+              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box;text-transform:uppercase;letter-spacing:1px"
+              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Plan</label>
+            <select id="pf-plan" style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+              <option value="starter">Starter</option>
+              <option value="pro">Pro</option>
+              <option value="business">Business</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Máx. usos</label>
+            <input id="pf-maxuses" type="number" min="1" max="10000" value="1" placeholder="1"
+              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Duración (días, 0=permanente)</label>
+            <input id="pf-days" type="number" min="0" value="30" placeholder="30"
+              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sa success" onclick="saCreatePromo()">Crear código</button>
+          <button class="btn-sa" onclick="togglePromoForm()">Cancelar</button>
+        </div>
+        <div id="promo-form-msg" style="display:none;margin-top:10px;font-size:13px;border-radius:6px;padding:8px 12px"></div>
+      </div>
+      <!-- Tabla de códigos -->
+      <div class="sa-table-wrap">
+        <table class="sa-table" id="sa-promos-table">
+          <thead><tr><th>Código</th><th>Plan</th><th>Usos</th><th>Duración</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+          <tbody id="sa-promos-tbody"></tbody>
         </table>
       </div>
     </div>

@@ -23,7 +23,14 @@ export default async function handler(req, res) {
     }
     const doc = await db.collection('users').doc(payload.username).get();
     if (!doc.exists) return res.status(404).json({ error: 'Usuario no encontrado' });
-    const { pass:_, ...safe } = doc.data();
+    let ud = doc.data();
+    // Si el promo venció, bajar a free automáticamente
+    if (ud.promoExpiresAt && new Date(ud.promoExpiresAt) <= new Date()) {
+      const downgrade = { plan: 'free', active: true, promoCode: null, promoExpiresAt: null, mpSubId: null };
+      await db.collection('users').doc(payload.username).update(downgrade);
+      ud = { ...ud, ...downgrade };
+    }
+    const { pass:_, ...safe } = ud;
     return res.json({ googleAuth: false, ...safe }); // googleAuth:false por defecto para usuarios de form
   }
 

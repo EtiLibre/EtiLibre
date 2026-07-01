@@ -124,6 +124,56 @@ export default async function handler(req, res) {
       await ref.update({ plan: planKey, active: false, mpPendingPlan: null });
       return res.json({ ok:true });
     }
+    if (action === 'redeem-promo') {
+      const PLAN_LABELS = { starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' };
+      const { code } = req.body;
+      if (!code) return res.status(400).json({ error: 'Ingresá un código' });
+      const safeCode = String(code).toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 30);
+      const ERROR_MSGS = { INVALID:'El código no existe.', INACTIVE:'El código está desactivado.', EXHAUSTED:'El código ya alcanzó su límite de usos.', ALREADY_USED:'Ya usaste este código.', NOT_FOUND:'Usuario no encontrado.' };
+      try {
+        const result = await db.runTransaction(async tx => {
+          const codeRef = db.collection('promo_codes').doc(safeCode);
+          const codeDoc = await tx.get(codeRef);
+          if (!codeDoc.exists) throw new Error('INVALID');
+          const cd = codeDoc.data();
+          if (!cd.active) throw new Error('INACTIVE');
+          if (cd.usedCount >= cd.maxUses) throw new Error('EXHAUSTED');
+          if ((cd.usedBy || []).includes(payload.username)) throw new Error('ALREADY_USED');
+          const userDoc = await tx.get(ref);
+          if (!userDoc.exists) throw new Error('NOT_FOUND');
+          const ud = userDoc.data();
+          const now = new Date();
+          const promoExpiresAt = cd.durationDays > 0 ? new Date(now.getTime() + cd.durationDays * 24 * 60 * 60 * 1000).toISOString() : null;
+          const invoice = {
+            name:   `Código Promocional — Plan ${PLAN_LABELS[cd.plan] || cd.plan}${cd.durationDays > 0 ? ` (${cd.durationDays} días)` : ' (permanente)'}`,
+            date:   now.toISOString(),
+            url:    null,
+            amount: '$0,00',
+            source: 'promo',
+            code:   safeCode
+          };
+          const notif = {
+            id: Date.now().toString(), icon: '🎉',
+            title: '¡Código aplicado!',
+            body:  `Tu plan ${PLAN_LABELS[cd.plan] || cd.plan} fue activado con el código ${safeCode}.${promoExpiresAt ? ' Vence el ' + new Date(promoExpiresAt).toLocaleDateString('es-AR') + '.' : ''}`,
+            date:  now.toISOString(), read: false
+          };
+          tx.update(ref, {
+            plan: cd.plan, active: true, mpSubId: null, mpPendingPlan: null,
+            promoCode: safeCode, promoExpiresAt,
+            invoices:      [invoice, ...(ud.invoices      || [])].slice(0, 50),
+            notifications: [notif,   ...(ud.notifications || [])].slice(0, 50)
+          });
+          tx.update(codeRef, { usedCount: cd.usedCount + 1, usedBy: [...(cd.usedBy || []), payload.username] });
+          return { plan: cd.plan, promoExpiresAt };
+        });
+        return res.json({ ok: true, ...result });
+      } catch(e) {
+        const msg = ERROR_MSGS[e.message] || 'Error al aplicar el código.';
+        return res.status(400).json({ error: msg });
+      }
+    }
+
     if (action === 'change-password') {
       if (payload.username === 'admin') return res.status(403).end();
       const { oldPass, newPass } = req.body;
