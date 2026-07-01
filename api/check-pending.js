@@ -45,56 +45,76 @@ export default async function handler(req, res) {
   if (!doc.exists) return res.status(404).json({ error: 'Usuario no encontrado' });
 
   const user = doc.data();
-  const planKey = user.mpPendingPlan;
-  if (!planKey) return res.json({ status: 'none' });
-
-  const planId = PLAN_IDS[planKey];
-  if (!planId) return res.json({ status: 'none' });
-
-  const since = user.mpPendingPlanAt ? new Date(user.mpPendingPlanAt) : new Date(Date.now() - 24 * 60 * 60 * 1000);
   const auth  = { headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` } };
+  let planKey = user.mpPendingPlan;
+  let subId   = null;
 
-  let subId = null;
+  if (planKey && PLAN_IDS[planKey]) {
+    // Flujo normal: hay plan pendiente → buscar en ese plan específico
+    const planId = PLAN_IDS[planKey];
+    const since  = user.mpPendingPlanAt ? new Date(user.mpPendingPlanAt) : new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-  // 1. Buscar por external_reference (si la suscripción fue creada vía API)
-  try {
-    const r = await fetch(
-      `https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(username)}&preapproval_plan_id=${planId}&status=authorized&limit=1`,
-      auth
-    );
-    const d = await r.json();
-    subId = d.results?.[0]?.id || null;
-  } catch (_) {}
-
-  // 2. Buscar por email registrado en Etify
-  if (!subId && user.email) {
+    // 1. Buscar por external_reference + plan
     try {
-      const r = await fetch(
-        `https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(user.email)}&preapproval_plan_id=${planId}&status=authorized&limit=1`,
-        auth
-      );
+      const r = await fetch(`https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(username)}&preapproval_plan_id=${planId}&status=authorized&limit=1`, auth);
       const d = await r.json();
       subId = d.results?.[0]?.id || null;
     } catch (_) {}
-  }
 
-  // 3. Buscar suscripciones recientes del plan, filtrando por ownership (external_reference o email del pagador)
-  if (!subId) {
-    try {
-      const r = await fetch(
-        `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${planId}&status=authorized&limit=20`,
-        auth
-      );
-      const d = await r.json();
-      const match = (d.results || []).find(s => {
-        if (new Date(s.date_created) < since) return false;
-        // Solo aceptar si la suscripción pertenece a este usuario
-        if (s.external_reference === username) return true;
-        const subEmail = s.payer_email || s.payer?.email;
-        return subEmail && user.email && subEmail.toLowerCase() === user.email.toLowerCase();
-      });
-      subId = match?.id || null;
-    } catch (_) {}
+    // 2. Buscar por email + plan
+    if (!subId && user.email) {
+      try {
+        const r = await fetch(`https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(user.email)}&preapproval_plan_id=${planId}&status=authorized&limit=1`, auth);
+        const d = await r.json();
+        subId = d.results?.[0]?.id || null;
+      } catch (_) {}
+    }
+
+    // 3. Buscar en el plan sin filtrar por usuario, validando ownership
+    if (!subId) {
+      try {
+        const r = await fetch(`https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${planId}&status=authorized&limit=20`, auth);
+        const d = await r.json();
+        const match = (d.results || []).find(s => {
+          if (new Date(s.date_created) < since) return false;
+          if (s.external_reference === username) return true;
+          const subEmail = s.payer_email || s.payer?.email;
+          return subEmail && user.email && subEmail.toLowerCase() === user.email.toLowerCase();
+        });
+        subId = match?.id || null;
+      } catch (_) {}
+    }
+  } else {
+    // Sin mpPendingPlan: buscar en TODOS los planes por external_reference o email
+    // Cubre el caso donde el usuario pagó sin pasar por la pasarela o volvió manualmente
+    const allPlanIds = Object.values(PLAN_IDS);
+    for (const pid of allPlanIds) {
+      if (subId) break;
+      try {
+        const r = await fetch(`https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(username)}&preapproval_plan_id=${pid}&status=authorized&limit=1`, auth);
+        const d = await r.json();
+        if (d.results?.[0]) {
+          subId   = d.results[0].id;
+          // Determinar qué planKey corresponde a este plan ID
+          planKey = Object.keys(PLAN_IDS).find(k => PLAN_IDS[k] === pid) || null;
+        }
+      } catch (_) {}
+    }
+    // Si no encontró por external_reference, buscar por email
+    if (!subId && user.email) {
+      for (const pid of allPlanIds) {
+        if (subId) break;
+        try {
+          const r = await fetch(`https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(user.email)}&preapproval_plan_id=${pid}&status=authorized&limit=1`, auth);
+          const d = await r.json();
+          if (d.results?.[0]) {
+            subId   = d.results[0].id;
+            planKey = Object.keys(PLAN_IDS).find(k => PLAN_IDS[k] === pid) || null;
+          }
+        } catch (_) {}
+      }
+    }
+    if (!subId) return res.json({ status: 'none' });
   }
 
   if (!subId) return res.json({ status: 'not_found' });

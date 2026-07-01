@@ -3085,9 +3085,10 @@ async function enterApp(username) {
   try {
     let data = await _api('/api/auth');
 
-    // 1. Si hay pago pendiente, reintentar hasta 3 veces con espera entre intentos
-    // (MP puede tardar unos segundos en confirmar el pago)
-    if (data.mpPendingPlan && data.mpPendingPlan !== 'free') {
+    // 1. Verificar pago pendiente al entrar — también aplica si el usuario pagó y volvió manualmente
+    // check-pending busca en todos los planes si no hay mpPendingPlan
+    const shouldCheck = (data.mpPendingPlan && data.mpPendingPlan !== 'free') || (!data.active && data.plan && data.plan !== 'free');
+    if (shouldCheck) {
       let activated = false;
       const delays = [0, 6000, 15000]; // intento inmediato, luego 6s, luego 15s
       for (const delay of delays) {
@@ -3101,9 +3102,7 @@ async function enterApp(username) {
           }
         } catch (_) {}
       }
-      // Si después de 3 intentos no se activó, mostrar sugerencia de Ayuda
       if (!activated) {
-        const notif = document.getElementById('notif-badge-top');
         showToast('⚠️ Si ya pagaste tu plan y no se activó, andá a tu Perfil → Ayuda para verificarlo.');
       }
     }
