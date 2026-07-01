@@ -2647,54 +2647,68 @@ async function checkMpReturn() {
   } catch (_) {}
 }
 
+let _mpRefPollingTimer = null;
+
 async function checkMpRef() {
   const params = new URLSearchParams(window.location.search);
   const token  = params.get('mp_ref');
   if (!token) return;
 
-  // MP puede tardar varios segundos en confirmar el pago — reintentar con delays
-  const delays = [0, 4000, 10000, 20000]; // 0s, 4s, 10s, 20s
-  for (const delay of delays) {
+  // Intentos rápidos al volver de MP: 0s, 4s, 10s, 20s
+  const quickDelays = [0, 4000, 10000, 20000];
+  for (const delay of quickDelays) {
     if (delay) await new Promise(r => setTimeout(r, delay));
-    try {
-      const res  = await fetch(`/api/mp/verify-ref?token=${token}`);
-      const data = await res.json();
-
-      if (data.status === 'activated') {
-        history.replaceState(null, '', '/');
-        const users = getUsers();
-        if (users[data.username]) {
-          users[data.username].active = true;
-          users[data.username].plan   = data.planKey;
-          saveUsers(users);
-        }
-        if (_userData && _userData.username === data.username) {
-          _userData.active = true;
-          _userData.plan   = data.planKey;
-          _userData.mpPendingPlan = null;
-        }
-        localStorage.removeItem('mp_pending_username');
-        localStorage.removeItem('mp_pending_plan');
-
-        if (currentUser === data.username) {
-          refreshTopbar();
-          updateUsageUI();
-          updateNotifBadge();
-        } else if (_getToken()) {
-          try {
-            const ud = await _api('/api/auth');
-            if (ud?.username === data.username) {
-              _cacheUser(ud);
-              enterApp(data.username);
-            }
-          } catch(_) {}
-        }
-        return; // activado, salir del loop
-      }
-
-      if (data.status === 'expired' || res.status === 404 || res.status === 410) return; // token inválido, no reintentar
-    } catch(_) {}
+    const done = await _tryVerifyMpRef(token);
+    if (done) return;
   }
+
+  // Si MP todavía no confirmó, polling cada 30s hasta 5 minutos
+  const deadline = Date.now() + 5 * 60 * 1000;
+  _mpRefPollingTimer = setInterval(async () => {
+    if (Date.now() > deadline) { clearInterval(_mpRefPollingTimer); return; }
+    const done = await _tryVerifyMpRef(token);
+    if (done) clearInterval(_mpRefPollingTimer);
+  }, 30000);
+}
+
+async function _tryVerifyMpRef(token) {
+  try {
+    const res  = await fetch(`/api/mp/verify-ref?token=${token}`);
+    const data = await res.json();
+
+    if (data.status === 'activated') {
+      history.replaceState(null, '', '/');
+      const users = getUsers();
+      if (users[data.username]) {
+        users[data.username].active = true;
+        users[data.username].plan   = data.planKey;
+        saveUsers(users);
+      }
+      if (_userData && _userData.username === data.username) {
+        _userData.active = true;
+        _userData.plan   = data.planKey;
+        _userData.mpPendingPlan = null;
+      }
+      localStorage.removeItem('mp_pending_username');
+      localStorage.removeItem('mp_pending_plan');
+
+      if (currentUser === data.username) {
+        refreshTopbar();
+        updateUsageUI();
+        updateNotifBadge();
+      } else if (_getToken()) {
+        try {
+          const ud = await _api('/api/auth');
+          if (ud?.username === data.username) { _cacheUser(ud); enterApp(data.username); }
+        } catch(_) {}
+      }
+      return true;
+    }
+
+    // Token inválido o expirado — no tiene sentido seguir
+    if (res.status === 404 || res.status === 410) return true;
+  } catch(_) {}
+  return false;
 }
 
 async function initiateSubscription() {
