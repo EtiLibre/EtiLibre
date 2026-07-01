@@ -1,13 +1,29 @@
 import { db } from '../_lib/firebase.js';
 
-const PLAN_LABELS = { starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' };
-const PLAN_PRICES = { starter:'$2.000', pro:'$3.000', business:'$4.500', premium:'$10.500' };
+const PLAN_LABELS = {
+  starter:'Starter', pro:'Pro', business:'Business', premium:'Premium',
+  'starter-anual':'Starter Anual', 'pro-anual':'Pro Anual',
+  'business-anual':'Business Anual', 'premium-anual':'Premium Anual'
+};
+const PLAN_PRICES = {
+  starter:'$2.000', pro:'$3.000', business:'$4.500', premium:'$10.500',
+  'starter-anual':'$24.000', 'pro-anual':'$36.000',
+  'business-anual':'$43.200', 'premium-anual':'$126.000'
+};
+const ANNUAL_TO_BASE = {
+  'starter-anual':'starter', 'pro-anual':'pro',
+  'business-anual':'business', 'premium-anual':'premium'
+};
 
 const PLAN_IDS = {
-  starter:  '4f3cbb4d7b7643ccac2f4c5d06353e2c',
-  pro:      '8249ed9006064842b67ece3d76b38e0a',
-  business: '472deed04ef0404682fd78048a5324e0',
-  premium:  '55add3001b744fbab79927fe89c1c28f'
+  starter:          '4f3cbb4d7b7643ccac2f4c5d06353e2c',
+  pro:              '8249ed9006064842b67ece3d76b38e0a',
+  business:         '472deed04ef0404682fd78048a5324e0',
+  premium:          '55add3001b744fbab79927fe89c1c28f',
+  'starter-anual':  '6cb2fc66d5354ac5a771ca0244f290b5',
+  'pro-anual':      '6e1a6a2e820c492fae62a60cbee873d6',
+  'business-anual': '83c5dfb9f53142d782295066589ac3be',
+  'premium-anual':  '8684980e1e9444f1aa051314f9e57b4d'
 };
 
 export default async function handler(req, res) {
@@ -65,6 +81,9 @@ export default async function handler(req, res) {
   const doc = await ref.get();
   if (!doc.exists) return res.status(404).json({ error: 'Usuario no encontrado' });
 
+  const isAnnual    = !!ANNUAL_TO_BASE[planKey];
+  const basePlanKey = ANNUAL_TO_BASE[planKey] || planKey;
+
   const now     = new Date().toISOString();
   const invoice = {
     name:   `Suscripción ${PLAN_LABELS[planKey]} - ${new Date().toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}`,
@@ -82,16 +101,18 @@ export default async function handler(req, res) {
   };
 
   await ref.update({
-    plan:           planKey,
-    active:         true,
-    mpSubId:        subId,
-    mpPendingPlan:  null,
-    invoices:       [invoice, ...(prev.invoices || [])].slice(0, 50),
-    notifications:  [notif,   ...(prev.notifications || [])].slice(0, 50)
+    plan:            basePlanKey,
+    active:          true,
+    mpSubId:         subId,
+    mpPendingPlan:   null,
+    mpPendingPlanAt: null,
+    ...(isAnnual ? { billing: 'annual' } : { billing: null }),
+    invoices:        [invoice, ...(prev.invoices || [])].slice(0, 50),
+    notifications:   [notif,   ...(prev.notifications || [])].slice(0, 50)
   });
 
   // Eliminar token usado
   await db.collection('mp_tokens').doc(token).delete();
 
-  res.json({ status: 'activated', username, planKey });
+  res.json({ status: 'activated', username, planKey: basePlanKey });
 }
