@@ -18,8 +18,8 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const payload = requireAuth(req, res);
     if (!payload) return;
-    if (payload.username === 'patron') {
-      return res.json({ username:'patron', role:'admin', displayName:'Administrador', avatar:'⚙️', nameColor:'#FFE600', plan:'admin', active:true });
+    if (payload.username === 'admin') {
+      return res.json({ username:'admin', role:'admin', displayName:'Administrador', avatar:'⚙️', nameColor:'#FFE600', plan:'admin', active:true });
     }
     const doc = await db.collection('users').doc(payload.username).get();
     if (!doc.exists) return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -44,11 +44,11 @@ export default async function handler(req, res) {
     const ip = getIp(req);
     const rl = await rateLimit(`login:${ip}`, 10, 15 * 60 * 1000); // 10 intentos / 15 min
     if (!rl.allowed) return res.status(429).json({ error: `Demasiados intentos. Esperá ${Math.ceil(rl.retryAfter / 60)} minutos e intentá de nuevo.` });
-    if (user === 'patron' || user === 'admin@etilibre.com') {
+    if (user === 'admin' || user === 'admin@etilibre.com') {
       const ok = await bcrypt.compare(pass, ADMIN_HASH);
       if (!ok) return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
-      const token = signToken({ username:'patron', role:'admin' });
-      return res.json({ token, user:{ username:'patron', role:'admin', displayName:'Administrador', avatar:'⚙️', nameColor:'#FFE600', plan:'admin', active:true } });
+      const token = signToken({ username:'admin', role:'admin' });
+      return res.json({ token, user:{ username:'admin', role:'admin', displayName:'Administrador', avatar:'⚙️', nameColor:'#FFE600', plan:'admin', active:true } });
     }
     let snap = await db.collection('users').where('username','==',user).limit(1).get();
     if (snap.empty) snap = await db.collection('users').where('email','==',user).limit(1).get();
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     const ip = getIp(req);
     const rl = await rateLimit(`register:${ip}`, 5, 60 * 60 * 1000); // 5 registros / hora por IP
     if (!rl.allowed) return res.status(429).json({ error: `Demasiados registros desde esta red. Esperá ${Math.ceil(rl.retryAfter / 60)} minutos.` });
-    if (username === 'patron') return res.status(400).json({ error: 'Ese nombre de usuario ya está en uso.' });
+    if (username === 'admin') return res.status(400).json({ error: 'Ese nombre de usuario ya está en uso.' });
     if (!(await db.collection('users').where('username','==',username).limit(1).get()).empty)
       return res.status(400).json({ error: 'Ese nombre de usuario ya está en uso.' });
     if (!(await db.collection('users').where('email','==',email).limit(1).get()).empty)
@@ -133,7 +133,7 @@ export default async function handler(req, res) {
     }
     // Usuario nuevo — registrar
     const safeUser = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '.').slice(0, 25);
-    const baseUser = safeUser === 'patron' ? 'user_' + safeUser : safeUser;
+    const baseUser = safeUser === 'admin' ? 'user_' + safeUser : safeUser;
     const username = (await db.collection('users').doc(baseUser).get()).exists
       ? baseUser + '_' + Date.now().toString().slice(-6)
       : baseUser;

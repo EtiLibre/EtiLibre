@@ -57,7 +57,7 @@ export default async function handler(req, res) {
   // DELETE — soft-delete: mover a deleted_users
   if (req.method === 'DELETE') {
     const { username } = req.body;
-    if (!username || username === 'patron') return res.status(400).json({ error: 'Usuario inválido' });
+    if (!username || username === 'admin') return res.status(400).json({ error: 'Usuario inválido' });
     const doc = await ref.doc(username).get();
     if (doc.exists) {
       const { pass:_, ...ud } = doc.data();

@@ -1976,7 +1976,7 @@ const PLAN_CONFIG = {
    { username, email, pass, plan, used, resetMonth,
      displayName, avatar, nameColor, cards:[], history:[] }
 ═══════════════════════════════════════════════════════ */
-const ADMIN = { username:'patron', email:'admin@etilibre.com', plan:'admin',
+const ADMIN = { username:'admin', email:'admin@etilibre.com', plan:'admin',
                 displayName:'Administrador', avatar:'⚙️', nameColor:'#FFE600', cards:[], history:[] };
 
 /* ═══════════════════════════════════════════════════════
@@ -2111,14 +2111,14 @@ function saveUsers(u) {
 /* ── Nota: al entregar este archivo, localStorage se inicia vacío.
    Admin es hardcodeado y nunca se almacena en localStorage. ── */
 function getUser(username) {
-  if (username === 'patron') return ADMIN;
+  if (username === 'admin') return ADMIN;
   if (username === currentUser && _userData) return _userData;
   return getUsers()[username] || null;
 }
 
 function registerUser(username, email, pass, plan) {
   const users = getUsers();
-  if (users[username] || username === 'patron') return false;
+  if (users[username] || username === 'admin') return false;
   const now = new Date();
   users[username] = {
     username, email, pass, plan,
@@ -2136,7 +2136,7 @@ function registerUser(username, email, pass, plan) {
 }
 
 function getUsage(username) {
-  if (username === 'patron') return { used:0, limit:99999 };
+  if (username === 'admin') return { used:0, limit:99999 };
   const u = (username === currentUser && _userData) ? _userData : getUsers()[username];
   if (!u) return { used:0, limit:2 };
   const now = new Date();
@@ -2148,7 +2148,7 @@ function getUsage(username) {
 }
 
 function incrementUsage(username, count = 1) {
-  if (username === 'patron') return;
+  if (username === 'admin') return;
   // Actualizar en memoria
   if (username === currentUser && _userData) {
     _userData.used = (_userData.used || 0) + count;
@@ -2163,7 +2163,7 @@ function incrementUsage(username, count = 1) {
 }
 
 function getUserPlan(username) {
-  if (username === 'patron') return 'admin';
+  if (username === 'admin') return 'admin';
   const u = username === currentUser && _userData ? _userData : getUsers()[username];
   if (!u) return 'free';
   // Si el plan no está activo, tratar como free para que no usen límites de un plan no pagado
@@ -2195,7 +2195,7 @@ function cleanExpiredPDFs(username) {
 }
 
 function addHistoryEntry(username, entry) {
-  if (username === 'patron') return;
+  if (username === 'admin') return;
   // Actualizar en memoria
   if (username === currentUser && _userData) {
     if (!Array.isArray(_userData.history)) _userData.history = [];
@@ -2869,7 +2869,7 @@ function refreshTopbar() {
   const planKey = getUserPlan(currentUser);
   // Banner de verificación de email
   const banner = document.getElementById('email-verify-banner');
-  if (banner) banner.style.display = (u?.emailVerified === false && currentUser !== 'patron') ? '' : 'none';
+  if (banner) banner.style.display = (u?.emailVerified === false && currentUser !== 'admin') ? '' : 'none';
   const planCfg = PLAN_CONFIG[planKey] || PLAN_CONFIG.free;
 
   const displayName = u?.displayName || currentUser;
@@ -2912,7 +2912,7 @@ function refreshTopbar() {
   }
 
   // Mostrar botón de panel admin solo para admin
-  const isAdmin = currentUser === 'patron';
+  const isAdmin = currentUser === 'admin';
   const adminBtn = document.getElementById('udrop-admin-btn');
   const adminDiv = document.getElementById('udrop-admin-divider');
   if (adminBtn) adminBtn.style.display = isAdmin ? '' : 'none';
@@ -3317,7 +3317,7 @@ function clearAll() {
 
 function updateBtn() {
   const { used, limit } = currentUser ? getUsage(currentUser) : { used:0, limit:0 };
-  const atLimit = currentUser !== 'patron' && used >= limit;
+  const atLimit = currentUser !== 'admin' && used >= limit;
   const btn = document.getElementById('btn-combine');
   btn.disabled = slots.length < 1 || atLimit;
   btn.title    = atLimit && slots.length > 0 ? 'Límite de hojas alcanzado para este plan' : '';
@@ -3398,14 +3398,14 @@ async function combineLabels() {
   if (slots.length < 1) return;
 
   // Bloquear si el email no está verificado
-  if (currentUser && currentUser !== 'patron' && _userData?.emailVerified === false) {
+  if (currentUser && currentUser !== 'admin' && _userData?.emailVerified === false) {
     showStatus('Verificá tu email antes de generar etiquetas. Revisá tu casilla de correo.', 'error');
     document.getElementById('email-verify-banner')?.scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
   // Verificar límite por hojas necesarias
-  if (currentUser && currentUser !== 'patron') {
+  if (currentUser && currentUser !== 'admin') {
     const { used, limit } = getUsage(currentUser);
     const sheetsNeeded = Math.ceil(slots.length / PER_SHEET);
     const remaining    = limit - used;
@@ -3502,7 +3502,7 @@ async function combineLabels() {
     document.getElementById('preview-section').scrollIntoView({ behavior:'smooth', block:'start' });
     showStatus(`✅ PDF listo — ${totalSheets} hoja${totalSheets!==1?'s':''}, ${slots.length} etiqueta${slots.length!==1?'s':''}.`,'success');
 
-    if (currentUser && currentUser !== 'patron') {
+    if (currentUser && currentUser !== 'admin') {
       const { used, limit } = getUsage(currentUser);
       if (used >= limit) setTimeout(() => showLimitModal(), 2000);
     }
@@ -3655,7 +3655,7 @@ function renderPersonalTab() {
 }
 
 async function savePersonal() {
-  if (!currentUser || currentUser === 'patron') return;
+  if (!currentUser || currentUser === 'admin') return;
   const displayName = document.getElementById('pf-displayname').value.trim();
   const errEl = document.getElementById('personal-error');
   const okEl  = document.getElementById('personal-success');
@@ -3672,7 +3672,7 @@ async function savePersonal() {
 }
 
 async function saveAvatar() {
-  if (!currentUser || currentUser === 'patron') return;
+  if (!currentUser || currentUser === 'admin') return;
   try {
     await _api('/api/user', 'PUT', { action:'update', avatar: profileSelectedAvatar });
     if (_userData) _userData.avatar = profileSelectedAvatar;
@@ -3686,7 +3686,7 @@ async function saveAvatar() {
 }
 
 async function saveNameColor() {
-  if (!currentUser || currentUser === 'patron') return;
+  if (!currentUser || currentUser === 'admin') return;
   try {
     await _api('/api/user', 'PUT', { action:'update', nameColor: profileSelectedColor });
     if (_userData) _userData.nameColor = profileSelectedColor;
@@ -3712,7 +3712,7 @@ function renderSecurityTab() {
 }
 
 async function changePassword() {
-  if (!currentUser || currentUser === 'patron') return;
+  if (!currentUser || currentUser === 'admin') return;
   const isGoogle = !!_userData?.googleAuth;
   const oldP  = document.getElementById('pf-pass-old').value;
   const newP  = document.getElementById('pf-pass-new').value;
@@ -3815,7 +3815,7 @@ function renderPlanTab() {
 }
 
 function changePlan(newPlan) {
-  if (!currentUser || currentUser === 'patron') return;
+  if (!currentUser || currentUser === 'admin') return;
   const oldPlan = getUserPlan(currentUser);
   if (newPlan === oldPlan) return;
   const planCfg    = PLAN_CONFIG[newPlan];
@@ -3916,7 +3916,7 @@ function fmtExp(input) {
 }
 
 function addPaymentCard() {
-  if (!currentUser || currentUser === 'patron') return;
+  if (!currentUser || currentUser === 'admin') return;
   const num  = document.getElementById('pf-card-num').value.replace(/\s/g,'');
   const exp  = document.getElementById('pf-card-exp').value.trim();
   const cvv  = document.getElementById('pf-card-cvv').value.trim();
@@ -4099,7 +4099,7 @@ function redownloadPDF(btn) {
 }
 
 function clearHistory() {
-  if (!currentUser || currentUser === 'patron') return;
+  if (!currentUser || currentUser === 'admin') return;
   showConfirmModal('🗑️', '¿Borrar historial?',
     'Se eliminarán todos los registros de generaciones. No afecta los PDFs ya descargados.', () => {
     const users = getUsers();
@@ -4114,7 +4114,7 @@ function clearHistory() {
    NOTIFICACIONES
 ═══════════════════════════════════════════════════════ */
 function addNotification(username, icon, title, body) {
-  if (username === 'patron') return;
+  if (username === 'admin') return;
   // Actualizar caché local
   const users = getUsers();
   if (users[username]) {
@@ -4173,7 +4173,7 @@ function renderNotificationsTab() {
 }
 
 function markAllNotifsRead() {
-  if (!currentUser || currentUser === 'patron') return;
+  if (!currentUser || currentUser === 'admin') return;
   const users = getUsers();
   if (users[currentUser]?.notifications) {
     users[currentUser].notifications.forEach(n => n.read = true);
@@ -4349,7 +4349,7 @@ function confirmCancelSubscription() {
 }
 
 function confirmDeleteAccount() {
-  if (currentUser === 'patron') return;
+  if (currentUser === 'admin') return;
   showConfirmModal(
     '🔴',
     '¿Eliminar tu cuenta?',
@@ -4393,7 +4393,7 @@ async function _refreshSAUsers() {
 }
 
 async function openSuperAdmin() {
-  if (currentUser !== 'patron') return;
+  if (currentUser !== 'admin') return;
   await _refreshSAUsers();
   renderSuperAdmin();
   showScreen('screen-superadmin');
