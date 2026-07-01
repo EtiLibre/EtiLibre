@@ -4067,7 +4067,8 @@ function renderPlanTab() {
   if (cancelNotice) {
     if (ud?.mpCancelAt && ud?.mpStatus === 'cancelled' && new Date(ud.mpCancelAt) > new Date()) {
       const fecha = new Date(ud.mpCancelAt).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' });
-      cancelNotice.innerHTML = `⏳ Tu suscripción fue cancelada. Podés seguir usando el plan <strong>${PLAN_CONFIG[ud.plan]?.label || ud.plan}</strong> hasta el <strong>${fecha}</strong>, después pasará automáticamente a Free.`;
+      const billingLabel = ud.billing === 'annual' ? ' (anual)' : '';
+      cancelNotice.innerHTML = `⏳ Tu suscripción fue cancelada. Podés seguir usando el plan <strong>${PLAN_CONFIG[ud.plan]?.label || ud.plan}${billingLabel}</strong> hasta el <strong>${fecha}</strong>, después pasará automáticamente a Free.`;
       cancelNotice.style.display = '';
     } else {
       cancelNotice.style.display = 'none';
