@@ -4102,9 +4102,15 @@ function changePlan(newPlan) {
       if (!users[currentUser]) users[currentUser] = {};
       users[currentUser].plan = newPlan;
       if (newPlan !== 'free') {
-        // Cancelar suscripción MP anterior si tenía una
+        // Cancelar suscripción MP anterior si tenía una — esperar confirmación
         if (oldPlan !== 'free') {
-          await _api('/api/mp/cancel-sub', 'POST', {}).catch(() => {});
+          try {
+            const cancelResult = await _api('/api/mp/cancel-sub', 'POST', {});
+            if (!cancelResult?.ok) throw new Error('No se pudo cancelar');
+          } catch (e) {
+            alert('No se pudo cancelar tu suscripción anterior en MercadoPago. Intentá de nuevo o contactá soporte.');
+            return;
+          }
         }
         // Ir al pago del nuevo plan
         users[currentUser].active = false;

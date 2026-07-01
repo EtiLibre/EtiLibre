@@ -60,6 +60,19 @@ export default async function handler(req, res) {
     }
   } catch (_) {}
 
+  // Cancelar cualquier suscripción activa previa para evitar cobros dobles
+  const ud = userDoc.data();
+  const existingSubId = ud.mpSubId;
+  if (existingSubId) {
+    try {
+      await fetch(`https://api.mercadopago.com/preapproval/${existingSubId}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'cancelled' })
+      });
+    } catch (_) {}
+  }
+
   // Generar token único para identificar al usuario al volver de MP
   // Funciona sin importar con qué email de MP paguen
   const token   = randomBytes(20).toString('hex');

@@ -23,27 +23,30 @@ export default async function handler(req, res) {
   if (!mpSubId && ud.plan && ud.plan !== 'free') {
     const auth = { headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` } };
     const PLAN_IDS = {
-      starter: '4f3cbb4d7b7643ccac2f4c5d06353e2c',
-      pro:     '8249ed9006064842b67ece3d76b38e0a',
-      business:'472deed04ef0404682fd78048a5324e0',
-      premium: '55add3001b744fbab79927fe89c1c28f'
+      starter:          '4f3cbb4d7b7643ccac2f4c5d06353e2c',
+      pro:              '8249ed9006064842b67ece3d76b38e0a',
+      business:         '472deed04ef0404682fd78048a5324e0',
+      premium:          '55add3001b744fbab79927fe89c1c28f',
+      'starter-anual':  '6cb2fc66d5354ac5a771ca0244f290b5',
+      'pro-anual':      '6e1a6a2e820c492fae62a60cbee873d6',
+      'business-anual': '83c5dfb9f53142d782295066589ac3be',
+      'premium-anual':  '8684980e1e9444f1aa051314f9e57b4d'
     };
-    const planId = PLAN_IDS[ud.plan];
-    if (planId) {
-      // Buscar por external_reference (username)
+    // Buscar en todos los planes activos del usuario (mensual y anual)
+    const planId = PLAN_IDS[ud.plan] || PLAN_IDS[ud.plan + '-anual'];
+    // Buscar cualquier suscripción activa por external_reference (no importa el plan)
+    try {
+      const r = await fetch(`https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(username)}&status=authorized&limit=5`, auth);
+      const d = await r.json();
+      mpSubId = d.results?.[0]?.id || null;
+    } catch (_) {}
+    // Buscar por email si no se encontró
+    if (!mpSubId && ud.email && planId) {
       try {
-        const r = await fetch(`https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(username)}&status=authorized&limit=1`, auth);
+        const r = await fetch(`https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(ud.email)}&status=authorized&limit=5`, auth);
         const d = await r.json();
         mpSubId = d.results?.[0]?.id || null;
       } catch (_) {}
-      // Buscar por email si no se encontró
-      if (!mpSubId && ud.email) {
-        try {
-          const r = await fetch(`https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(ud.email)}&preapproval_plan_id=${planId}&status=authorized&limit=1`, auth);
-          const d = await r.json();
-          mpSubId = d.results?.[0]?.id || null;
-        } catch (_) {}
-      }
     }
   }
 
