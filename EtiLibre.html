@@ -3959,17 +3959,22 @@ function renderVouchersTab() {
   el.innerHTML = list.map((inv, i) => {
     const dateStr = new Date(inv.date).toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' });
     const isMp = inv.source === 'mercadopago';
+    const isPromo = inv.source === 'promo';
     const amountStr = inv.amount ? ` · ${inv.amount}/mes` : '';
+    const icon = isMp ? '💳' : isPromo ? '🎟️' : '📄';
+    const dateLabel = isMp ? 'Pagado el' : isPromo ? 'Activado el' : 'Subido el';
+    const actionBtn = isMp
+      ? `<a href="${inv.url}" target="_blank" class="btn-sa success" style="font-size:13px;padding:8px 16px;text-decoration:none">🔗 Ver en MP</a>`
+      : isPromo
+        ? ''
+        : `<button class="btn-sa success" style="font-size:13px;padding:8px 16px" onclick="downloadMyInvoice(${i})">⬇ Descargar</button>`;
     return `<div class="voucher-item">
-      <div class="voucher-icon">${isMp ? '💳' : '📄'}</div>
+      <div class="voucher-icon">${icon}</div>
       <div class="voucher-info">
         <div class="voucher-name">${inv.name}${amountStr}</div>
-        <div class="voucher-date">${isMp ? 'Pagado el' : 'Subido el'} ${dateStr}</div>
+        <div class="voucher-date">${dateLabel} ${dateStr}</div>
       </div>
-      ${isMp
-        ? `<a href="${inv.url}" target="_blank" class="btn-sa success" style="font-size:13px;padding:8px 16px;text-decoration:none">🔗 Ver en MP</a>`
-        : `<button class="btn-sa success" style="font-size:13px;padding:8px 16px" onclick="downloadMyInvoice(${i})">⬇ Descargar</button>`
-      }
+      ${actionBtn}
     </div>`;
   }).join('');
 }
