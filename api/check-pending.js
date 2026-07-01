@@ -46,8 +46,25 @@ export default async function handler(req, res) {
 
   const user = doc.data();
   const auth  = { headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` } };
-  let planKey = user.mpPendingPlan;
+  let planKey = req.query.planKey || user.mpPendingPlan;
   let subId   = null;
+
+  // Si el usuario pegó manualmente su ID de suscripción MP (cuenta de MP distinta a Etify)
+  const manualSubId = req.query.mpSubId ? String(req.query.mpSubId).replace(/\D/g, '') : null;
+  if (manualSubId) {
+    try {
+      const r = await fetch(`https://api.mercadopago.com/preapproval/${manualSubId}`, {
+        headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` }
+      });
+      const d = await r.json();
+      if (r.ok && d.status === 'authorized') {
+        subId   = d.id;
+        // Determinar planKey por preapproval_plan_id
+        planKey = planKey || Object.keys(PLAN_IDS).find(k => PLAN_IDS[k] === d.preapproval_plan_id) || null;
+      }
+    } catch (_) {}
+    if (!subId) return res.json({ status: 'not_found' });
+  }
 
   if (planKey && PLAN_IDS[planKey]) {
     // Flujo normal: hay plan pendiente → buscar en ese plan específico

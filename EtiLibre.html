@@ -2011,11 +2011,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div class="profile-field">
             <label>Plan que pagaste</label>
             <select id="help-plan-key" style="width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit">
-              <option value="starter">Starter — $2.000/mes</option>
-              <option value="pro">Pro — $3.000/mes</option>
-              <option value="business">Business — $4.500/mes</option>
-              <option value="premium">Premium — $10.500/mes</option>
+              <optgroup label="Planes mensuales">
+                <option value="starter">Starter — $2.000/mes</option>
+                <option value="pro">Pro — $3.000/mes</option>
+                <option value="business">Business — $4.500/mes</option>
+                <option value="premium">Premium — $10.500/mes</option>
+              </optgroup>
+              <optgroup label="Planes anuales">
+                <option value="starter-anual">Starter Anual — $24.000/año</option>
+                <option value="pro-anual">Pro Anual — $36.000/año</option>
+                <option value="business-anual">Business Anual — $43.200/año</option>
+                <option value="premium-anual">Premium Anual — $126.000/año</option>
+              </optgroup>
             </select>
+          </div>
+          <div class="profile-field">
+            <label>ID de suscripción MP <span style="color:var(--text3)">(opcional — si tu cuenta de MP es distinta a la de Etify)</span></label>
+            <input type="text" id="help-mp-sub-id" placeholder="Ej: 123456789" style="font-family:monospace"/>
+            <p style="font-size:11px;color:var(--text3);margin:4px 0 0;line-height:1.5">Lo encontrás en la app de MercadoPago → Suscripciones → tu suscripción → el número al final de la URL.</p>
           </div>
           <div class="profile-field">
             <label>Número de operación MP <span style="color:var(--text3)">(opcional)</span></label>
@@ -2140,11 +2153,15 @@ function _getToken()  { return localStorage.getItem('etl_token'); }
 function _setToken(t) { localStorage.setItem('etl_token', t); }
 function _clearToken(){ localStorage.removeItem('etl_token'); }
 
-async function _api(path, method = 'GET', body = null) {
+async function _api(path, method = 'GET', body = null, params = null) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
   const token = _getToken();
   if (token) opts.headers['Authorization'] = `Bearer ${token}`;
   if (body !== null) opts.body = JSON.stringify(body);
+  if (params) {
+    const qs = new URLSearchParams(params).toString();
+    path = path + (path.includes('?') ? '&' : '?') + qs;
+  }
   const res  = await fetch(path, opts);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
@@ -4492,33 +4509,46 @@ function onHelpTopicChange() {
 }
 
 async function helpVerifyPayment() {
-  const btn  = document.getElementById('btn-help-verify');
-  const msg  = document.getElementById('help-verify-msg');
-  const plan = document.getElementById('help-plan-key').value;
+  const btn     = document.getElementById('btn-help-verify');
+  const msg     = document.getElementById('help-verify-msg');
+  const plan    = document.getElementById('help-plan-key').value;
+  const mpSubId = document.getElementById('help-mp-sub-id')?.value.trim();
+  const opNum   = document.getElementById('help-op-number')?.value.trim();
   btn.disabled = true; btn.textContent = 'Verificando…';
   msg.style.display = 'none';
 
+  const msgOk  = (t) => { msg.style.cssText = 'display:block;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:8px;color:#00c98d;padding:12px'; msg.textContent = t; };
+  const msgErr = (t) => { msg.style.cssText = 'display:block;background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:8px;color:var(--danger);padding:12px'; msg.textContent = t; };
+
   try {
-    // Forzar mpPendingPlan al plan elegido y correr check-pending
-    await _api('/api/user', 'PUT', { action: 'help-activate', planKey: plan });
-    const r = await _api('/api/check-pending');
-    if (r.status === 'activated') {
-      if (_userData) { _userData.active = true; _userData.plan = plan; _userData.mpPendingPlan = null; }
+    let activated = false;
+
+    // Si el usuario pegó un ID de suscripción MP, verificarlo directamente
+    if (mpSubId) {
+      const r = await _api('/api/check-pending', 'GET', null, { mpSubId, planKey: plan });
+      if (r.status === 'activated') activated = true;
+    }
+
+    // Si no, flujo normal: forzar mpPendingPlan y correr check-pending
+    if (!activated) {
+      await _api('/api/user', 'PUT', { action: 'help-activate', planKey: plan });
+      const r = await _api('/api/check-pending');
+      if (r.status === 'activated') activated = true;
+    }
+
+    if (activated) {
+      if (_userData) { _userData.active = true; _userData.plan = plan.replace('-anual',''); _userData.mpPendingPlan = null; }
       refreshTopbar(); updateUsageUI(); updateNotifBadge();
-      msg.style.cssText = 'display:block;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:8px;color:#00c98d;padding:12px';
-      msg.textContent = '✅ ¡Pago verificado! Tu plan fue activado correctamente.';
+      msgOk('✅ ¡Pago verificado! Tu plan fue activado correctamente.');
     } else {
-      msg.style.cssText = 'display:block;background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:8px;color:var(--danger);padding:12px';
-      msg.textContent = 'No pudimos verificar el pago automáticamente. Te contactaremos por email para resolverlo.';
-      // Enviar email de ayuda al admin
+      msgErr('No pudimos verificar el pago automáticamente. Te contactaremos por email para resolverlo.');
       const u = _userData || {};
       await fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ type:'help', name: u.displayName || currentUser, email: u.email || '',
-          subject:'Plan no activado', message:`Usuario: ${currentUser}\nPlan: ${plan}\nOp: ${document.getElementById('help-op-number').value}` }) });
+          subject:'Plan no activado', message:`Usuario: ${currentUser}\nPlan: ${plan}\nID MP: ${mpSubId || '-'}\nOp: ${opNum || '-'}` }) }).catch(()=>{});
     }
   } catch(e) {
-    msg.style.cssText = 'display:block;background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:8px;color:var(--danger);padding:12px';
-    msg.textContent = 'Error al verificar. Intentá de nuevo.';
+    msgErr('Error al verificar. Intentá de nuevo.');
   }
   btn.disabled = false; btn.textContent = 'Verificar mi pago automáticamente';
 }
