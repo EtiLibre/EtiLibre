@@ -2528,6 +2528,10 @@ function selectPlan(planKey) {
     changePlan(planKey);
     return;
   }
+  // Guardar plan elegido para redirigir después del login
+  if (planKey && planKey !== 'free') {
+    sessionStorage.setItem('selected_plan_after_login', planKey);
+  }
   showScreen('screen-register');
   document.getElementById('reg2-plan').value = planKey;
   refreshCaptcha2();
@@ -3098,6 +3102,17 @@ async function enterApp(username) {
   updateNotifBadge();
   showScreen('screen-app');
   clearAll();
+
+  // Si el usuario eligió un plan desde la landing antes de loguearse, redirigir al tab Plan
+  const pendingPlan = sessionStorage.getItem('selected_plan_after_login');
+  if (pendingPlan) {
+    sessionStorage.removeItem('selected_plan_after_login');
+    const isAnnual = pendingPlan.endsWith('-anual');
+    setTimeout(() => {
+      openProfile('plan');
+      if (isAnnual) setTimeout(() => setProfileBilling('annual'), 150);
+    }, 300);
+  }
   // Verificar en background: pago pendiente y vencimiento de cancelación
   try {
     let data = await _api('/api/auth');
