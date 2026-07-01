@@ -2698,8 +2698,10 @@ async function _handleGoogleUser(fbUser, planKey) {
   const email = fbUser.email || '';
   const name  = fbUser.displayName || email.split('@')[0] || 'usuario';
   if (!email) return false;
-  const VALID_PLANS = ['starter','pro','business','premium'];
+  const VALID_PLANS = ['starter','pro','business','premium','starter-anual','pro-anual','business-anual','premium-anual'];
   const wantedPlan  = VALID_PLANS.includes(planKey) ? planKey : null;
+  // Guardar en sessionStorage para que enterApp lo use (cubre login normal y Google)
+  if (wantedPlan) sessionStorage.setItem('selected_plan_after_login', wantedPlan);
   try {
     const idToken = await fbUser.getIdToken(); // token verificable server-side
     const data = await _api('/api/auth', 'POST', { action:'google', idToken, displayName: name });
@@ -2712,7 +2714,6 @@ async function _handleGoogleUser(fbUser, planKey) {
       document.getElementById('modal-google-tos').style.display = 'flex';
     } else {
       enterApp(data.user.username);
-      if (wantedPlan) openProfile('plan');
     }
   } catch (e) {
     alert('Error al iniciar sesión con Google: ' + (e.message || 'Intentá de nuevo'));
@@ -2732,12 +2733,10 @@ async function acceptGoogleTos() {
     if (_userData) _userData.tosAccepted = true;
     document.getElementById('modal-google-tos').style.display = 'none';
     if (_pendingGoogleUsername) {
-      const u    = _pendingGoogleUsername;
-      const plan = _pendingGooglePlan;
+      const u = _pendingGoogleUsername;
       _pendingGoogleUsername = null;
       _pendingGooglePlan     = null;
       enterApp(u);
-      if (plan) openProfile('plan');
     }
   } catch(e) {
     err.textContent = 'Error al guardar. Intentá de nuevo.';
