@@ -175,7 +175,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'change-password') {
-      if (payload.username === 'admin') return res.status(403).end();
+      if (payload.username === 'patron') return res.status(403).end();
       const { oldPass, newPass } = req.body;
       if (!newPass || newPass.length < 8) return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres.' });
       const doc = await ref.get();
