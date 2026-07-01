@@ -269,6 +269,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-plan:hover{background:var(--border2)}
 .plan-card.popular .btn-plan{background:var(--accent);border-color:var(--accent);color:#080b14}
 .plan-card.popular .btn-plan:hover{opacity:.88;background:var(--accent)}
+.plan-card.deal{border-color:#c084ff;background:linear-gradient(160deg,rgba(192,132,255,.07),var(--surface))}
+.plan-card.deal::before{content:'20% OFF';position:absolute;top:0;right:0;background:linear-gradient(135deg,#c084ff,#9b59f5);color:#fff;font-size:9px;font-weight:900;letter-spacing:1px;padding:5px 12px;border-bottom-left-radius:8px}
+.plan-card.deal .btn-plan{background:linear-gradient(135deg,#c084ff,#9b59f5);border-color:#c084ff;color:#fff}
+.plan-card.deal .btn-plan:hover{opacity:.88}
+.plan-price-original{font-size:13px;color:var(--text3);text-decoration:line-through;margin-right:4px}
+/* billing toggle */
+.billing-toggle{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:40px;margin-top:32px}
+.billing-toggle-track{width:52px;height:28px;background:var(--border2);border-radius:14px;cursor:pointer;position:relative;transition:background .2s;border:1px solid var(--border2)}
+.billing-toggle-track.on{background:var(--accent)}
+.billing-toggle-thumb{width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.billing-toggle-track.on .billing-toggle-thumb{left:27px}
+.billing-label{font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;user-select:none}
+.billing-label.active{color:var(--text)}
+.billing-save-badge{background:rgba(192,132,255,.18);color:#c084ff;border:1px solid rgba(192,132,255,.3);border-radius:20px;font-size:11px;font-weight:700;padding:3px 10px}
 
 /* ════════════════════════════════════════════════════════
    LANDING — FAQ / FOOTER
@@ -926,7 +940,141 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="section-tag">Planes y precios</div>
       <h2 class="section-title">Elegí el plan<br>que se ajusta a tu volumen</h2>
       <p class="section-desc">Todos los planes incluyen el mismo motor de combinado. La diferencia es cuántos PDFs podés generar por mes.</p>
-      <div class="plans-grid">
+
+      <!-- Toggle mensual / anual -->
+      <div class="billing-toggle">
+        <span class="billing-label active" id="lbl-monthly" onclick="setBilling('monthly')">Mensual</span>
+        <div class="billing-toggle-track" id="billing-track" onclick="toggleBilling()">
+          <div class="billing-toggle-thumb"></div>
+        </div>
+        <span class="billing-label" id="lbl-annual" onclick="setBilling('annual')">Anual <span class="billing-save-badge">Business 20% OFF</span></span>
+      </div>
+
+      <!-- PLANES ANUALES -->
+      <div class="plans-grid" id="grid-annual" style="display:none">
+
+        <!-- FREE anual -->
+        <div class="plan-card">
+          <div class="plan-name">Free</div>
+          <div class="plan-price"><span class="plan-price-free">Gratis</span></div>
+          <div class="plan-tagline">Probá la plataforma antes de comprometerte.</div>
+          <div class="plan-meter">
+            <div class="plan-meter-label">
+              <span class="plan-meter-name">PDFs por mes</span>
+              <span class="plan-meter-val">2</span>
+            </div>
+            <div class="plan-meter-bar"><div class="plan-meter-fill" style="width:2%;background:var(--teal)"></div></div>
+          </div>
+          <ul class="plan-features">
+            <li>2 PDFs combinados por mes</li>
+            <li>Hasta 3 etiquetas por hoja</li>
+            <li>Líneas de corte</li>
+            <li class="na">Soporte prioritario</li>
+            <li class="na">Historial de descargas</li>
+            <li class="na">Re-descarga de PDFs</li>
+          </ul>
+          <button class="btn-plan" onclick="selectPlan('free')">Empezar gratis</button>
+        </div>
+
+        <!-- STARTER anual -->
+        <div class="plan-card">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price"><span class="plan-price-amount">$24.000</span> <span class="plan-price-period">/ año</span></div>
+          <div class="plan-tagline">Para vendedores que arrancan a escalar.</div>
+          <div class="plan-meter">
+            <div class="plan-meter-label">
+              <span class="plan-meter-name">PDFs por mes</span>
+              <span class="plan-meter-val">25</span>
+            </div>
+            <div class="plan-meter-bar"><div class="plan-meter-fill" style="width:22%;background:var(--blue)"></div></div>
+          </div>
+          <ul class="plan-features">
+            <li>25 PDFs combinados por mes</li>
+            <li>Hasta 3 etiquetas por hoja</li>
+            <li>Líneas de corte</li>
+            <li class="na">Soporte prioritario</li>
+            <li class="na">Historial de descargas</li>
+            <li>Re-descarga de PDFs</li>
+          </ul>
+          <button class="btn-plan" onclick="contactAnnual('Starter anual — $24.000/año')">Elegir Starter</button>
+        </div>
+
+        <!-- PRO anual -->
+        <div class="plan-card popular">
+          <div class="plan-name">Pro</div>
+          <div class="plan-price"><span class="plan-price-amount">$36.000</span> <span class="plan-price-period">/ año</span></div>
+          <div class="plan-tagline">El favorito de vendedores activos.</div>
+          <div class="plan-meter">
+            <div class="plan-meter-label">
+              <span class="plan-meter-name">PDFs por mes</span>
+              <span class="plan-meter-val">80</span>
+            </div>
+            <div class="plan-meter-bar"><div class="plan-meter-fill" style="width:55%;background:var(--accent)"></div></div>
+          </div>
+          <ul class="plan-features">
+            <li>80 PDFs combinados por mes</li>
+            <li>Hasta 3 etiquetas por hoja</li>
+            <li>Líneas de corte</li>
+            <li>Soporte prioritario</li>
+            <li>Historial de descargas</li>
+            <li>Re-descarga de PDFs</li>
+          </ul>
+          <button class="btn-plan" onclick="contactAnnual('Pro anual — $36.000/año')">Elegir Pro</button>
+        </div>
+
+        <!-- BUSINESS anual — destacado con 20% OFF -->
+        <div class="plan-card deal">
+          <div class="plan-name">Business</div>
+          <div class="plan-price">
+            <span class="plan-price-original">$54.000</span>
+            <span class="plan-price-amount">$43.200</span> <span class="plan-price-period">/ año</span>
+          </div>
+          <div class="plan-tagline">Para operaciones de alto volumen. ¡El mejor precio!</div>
+          <div class="plan-meter">
+            <div class="plan-meter-label">
+              <span class="plan-meter-name">PDFs por mes</span>
+              <span class="plan-meter-val">200</span>
+            </div>
+            <div class="plan-meter-bar"><div class="plan-meter-fill" style="width:75%;background:#c084ff"></div></div>
+          </div>
+          <ul class="plan-features">
+            <li>200 PDFs combinados por mes</li>
+            <li>Hasta 3 etiquetas por hoja</li>
+            <li>Líneas de corte</li>
+            <li>Soporte prioritario</li>
+            <li>Historial de descargas</li>
+            <li>Re-descarga de PDFs</li>
+          </ul>
+          <button class="btn-plan" onclick="contactAnnual('Business anual — $43.200/año (20% OFF)')">Elegir Business</button>
+        </div>
+
+        <!-- PREMIUM anual -->
+        <div class="plan-card">
+          <div class="plan-name">Premium</div>
+          <div class="plan-price"><span class="plan-price-amount">$126.000</span> <span class="plan-price-period">/ año</span></div>
+          <div class="plan-tagline">Sin límites para grandes operaciones.</div>
+          <div class="plan-meter">
+            <div class="plan-meter-label">
+              <span class="plan-meter-name">PDFs por mes</span>
+              <span class="plan-meter-val">1.000</span>
+            </div>
+            <div class="plan-meter-bar"><div class="plan-meter-fill" style="width:100%;background:linear-gradient(90deg,#ffb347,var(--accent))"></div></div>
+          </div>
+          <ul class="plan-features">
+            <li>1.000 PDFs combinados por mes</li>
+            <li>Hasta 3 etiquetas por hoja</li>
+            <li>Líneas de corte</li>
+            <li>Soporte prioritario</li>
+            <li>Historial de descargas</li>
+            <li>Re-descarga de PDFs</li>
+          </ul>
+          <button class="btn-plan" onclick="contactAnnual('Premium anual — $126.000/año')">Elegir Premium</button>
+        </div>
+
+      </div>
+
+      <!-- PLANES MENSUALES -->
+      <div class="plans-grid" id="grid-monthly">
 
         <!-- FREE -->
         <div class="plan-card">
@@ -1043,7 +1191,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <button class="btn-plan" onclick="selectPlan('premium')">Elegir Premium</button>
         </div>
 
-      </div>
+      </div><!-- /grid-monthly -->
     </div>
   </section>
 
@@ -2254,6 +2402,36 @@ function showScreen(id) {
 
 function scrollToPricing() {
   document.getElementById('pricing').scrollIntoView({ behavior:'smooth' });
+}
+
+/* billing toggle */
+function toggleBilling() {
+  const track = document.getElementById('billing-track');
+  setBilling(track.classList.contains('on') ? 'monthly' : 'annual');
+}
+function setBilling(mode) {
+  const isAnnual = mode === 'annual';
+  document.getElementById('billing-track').classList.toggle('on', isAnnual);
+  document.getElementById('grid-annual').style.display  = isAnnual ? 'grid' : 'none';
+  document.getElementById('grid-monthly').style.display = isAnnual ? 'none' : 'grid';
+  document.getElementById('lbl-monthly').classList.toggle('active', !isAnnual);
+  document.getElementById('lbl-annual').classList.toggle('active', isAnnual);
+}
+function contactAnnual(planLabel) {
+  // Llevar al formulario de contacto con el plan preseleccionado
+  document.getElementById('contact').scrollIntoView({ behavior:'smooth' });
+  setTimeout(() => {
+    const sel = document.getElementById('contact-subject');
+    if (sel) {
+      for (const opt of sel.options) {
+        if (opt.value === 'Consulta sobre planes' || opt.value.toLowerCase().includes('plan')) {
+          sel.value = opt.value; break;
+        }
+      }
+    }
+    const msg = document.getElementById('contact-message');
+    if (msg && !msg.value) msg.value = `Hola, me interesa el plan ${planLabel}. ¿Me pueden dar más información?`;
+  }, 600);
 }
 
 /* ═══════════════════════════════════════════════════════
