@@ -2,14 +2,32 @@ import { db } from './_lib/firebase.js';
 import { requireAuth } from './_lib/auth.js';
 
 const PLAN_IDS = {
-  starter:  '4f3cbb4d7b7643ccac2f4c5d06353e2c',
-  pro:      '8249ed9006064842b67ece3d76b38e0a',
-  business: '472deed04ef0404682fd78048a5324e0',
-  premium:  '55add3001b744fbab79927fe89c1c28f'
+  starter:          '4f3cbb4d7b7643ccac2f4c5d06353e2c',
+  pro:              '8249ed9006064842b67ece3d76b38e0a',
+  business:         '472deed04ef0404682fd78048a5324e0',
+  premium:          '55add3001b744fbab79927fe89c1c28f',
+  'starter-anual':  '6cb2fc66d5354ac5a771ca0244f290b5',
+  'pro-anual':      '6e1a6a2e820c492fae62a60cbee873d6',
+  'business-anual': '83c5dfb9f53142d782295066589ac3be',
+  'premium-anual':  '8684980e1e9444f1aa051314f9e57b4d'
 };
 
-const PLAN_LABELS = { starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' };
-const PLAN_PRICES = { starter:'$2.000', pro:'$3.000', business:'$4.500', premium:'$10.500' };
+const PLAN_LABELS = {
+  starter:'Starter', pro:'Pro', business:'Business', premium:'Premium',
+  'starter-anual':'Starter Anual', 'pro-anual':'Pro Anual',
+  'business-anual':'Business Anual', 'premium-anual':'Premium Anual'
+};
+const PLAN_PRICES = {
+  starter:'$2.000', pro:'$3.000', business:'$4.500', premium:'$10.500',
+  'starter-anual':'$24.000', 'pro-anual':'$36.000',
+  'business-anual':'$43.200', 'premium-anual':'$126.000'
+};
+
+// Mapeo de plan anual → plan base (para activar el plan correcto en Firestore)
+const ANNUAL_TO_BASE = {
+  'starter-anual':'starter', 'pro-anual':'pro',
+  'business-anual':'business', 'premium-anual':'premium'
+};
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://etify.com.ar');
@@ -81,6 +99,10 @@ export default async function handler(req, res) {
 
   if (!subId) return res.json({ status: 'not_found' });
 
+  // Para planes anuales, el plan que se activa en Firestore es el plan base
+  const basePlanKey = ANNUAL_TO_BASE[planKey] || planKey;
+  const isAnnual    = !!ANNUAL_TO_BASE[planKey];
+
   // Activar plan en Firestore
   const now     = new Date().toISOString();
   const invoice = {
@@ -97,14 +119,15 @@ export default async function handler(req, res) {
     date:  now, read: false
   };
   await ref.update({
-    plan:           planKey,
-    active:         true,
-    mpSubId:        subId,
-    mpPendingPlan:  null,
+    plan:            basePlanKey,
+    active:          true,
+    mpSubId:         subId,
+    mpPendingPlan:   null,
     mpPendingPlanAt: null,
-    invoices:       [invoice, ...(user.invoices || [])].slice(0, 50),
-    notifications:  [notif,   ...(user.notifications || [])].slice(0, 50)
+    ...(isAnnual ? { billing: 'annual' } : {}),
+    invoices:        [invoice, ...(user.invoices || [])].slice(0, 50),
+    notifications:   [notif,   ...(user.notifications || [])].slice(0, 50)
   });
 
-  res.json({ status: 'activated', planKey });
+  res.json({ status: 'activated', planKey: basePlanKey });
 }

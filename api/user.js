@@ -100,7 +100,7 @@ export default async function handler(req, res) {
       return res.json({ ok:true, adExtensions: newExts });
     }
     if (action === 'help-activate') {
-      const VALID_PLANS = ['starter','pro','business','premium'];
+      const VALID_PLANS = ['starter','pro','business','premium','starter-anual','pro-anual','business-anual','premium-anual'];
       const { planKey } = req.body;
       if (!VALID_PLANS.includes(planKey)) return res.status(400).json({ error: 'Plan inválido' });
       const ip = getIp(req);
@@ -117,7 +117,7 @@ export default async function handler(req, res) {
       return res.json({ ok:true });
     }
     if (action === 'set-plan') {
-      const VALID = ['starter','pro','business','premium'];
+      const VALID = ['starter','pro','business','premium','starter-anual','pro-anual','business-anual','premium-anual'];
       const { planKey } = req.body;
       if (!VALID.includes(planKey)) return res.status(400).json({ error: 'Plan inválido' });
       // Solo marcamos el plan y active=false; mpPendingPlan se setea en /api/subscribe cuando el usuario realmente paga

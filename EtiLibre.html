@@ -997,7 +997,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <li class="na">Historial de descargas</li>
             <li>Re-descarga de PDFs</li>
           </ul>
-          <button class="btn-plan" onclick="contactAnnual('Starter anual — $24.000/año')">Elegir Starter</button>
+          <button class="btn-plan" onclick="selectPlan('starter-anual')">Elegir Starter</button>
         </div>
 
         <!-- PRO anual -->
@@ -1020,7 +1020,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <li>Historial de descargas</li>
             <li>Re-descarga de PDFs</li>
           </ul>
-          <button class="btn-plan" onclick="contactAnnual('Pro anual — $36.000/año')">Elegir Pro</button>
+          <button class="btn-plan" onclick="selectPlan('pro-anual')">Elegir Pro</button>
         </div>
 
         <!-- BUSINESS anual — destacado con 20% OFF -->
@@ -1046,7 +1046,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <li>Historial de descargas</li>
             <li>Re-descarga de PDFs</li>
           </ul>
-          <button class="btn-plan" onclick="contactAnnual('Business anual — $43.200/año (20% OFF)')">Elegir Business</button>
+          <button class="btn-plan" onclick="selectPlan('business-anual')">Elegir Business</button>
         </div>
 
         <!-- PREMIUM anual -->
@@ -1069,7 +1069,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <li>Historial de descargas</li>
             <li>Re-descarga de PDFs</li>
           </ul>
-          <button class="btn-plan" onclick="contactAnnual('Premium anual — $126.000/año')">Elegir Premium</button>
+          <button class="btn-plan" onclick="selectPlan('premium-anual')">Elegir Premium</button>
         </div>
 
       </div>
@@ -1628,6 +1628,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="payment-gate-icon">💳</div>
       <h2>Activá tu plan</h2>
       <p>Tu cuenta fue creada con éxito. Para usar el plan <strong id="gate-plan-name">Pro</strong>, completá el pago a través de Mercado Pago. Una vez procesado, hacé clic en "Ya pagué" para ingresar.</p>
+      <!-- Toggle mensual/anual en pasarela -->
+      <div class="billing-toggle" style="justify-content:center;margin:0 0 16px">
+        <span class="billing-label active" id="gate-lbl-monthly" onclick="setGateBilling('monthly')">Mensual</span>
+        <div class="billing-toggle-track" id="gate-billing-track" onclick="toggleGateBilling()">
+          <div class="billing-toggle-thumb"></div>
+        </div>
+        <span class="billing-label" id="gate-lbl-annual" onclick="setGateBilling('annual')">Anual <span class="billing-save-badge">Business 20% OFF</span></span>
+      </div>
+
       <div class="payment-gate-plan-box">
         <div>
           <div class="payment-gate-plan-name" id="gate-plan-label">Plan Pro</div>
@@ -2121,12 +2130,17 @@ initLibs();
    PLAN CONFIG
 ═══════════════════════════════════════════════════════ */
 const PLAN_CONFIG = {
-  free:     { label:'Free',     limit:2,     price:'Gratis',         color:'free'    },
-  starter:  { label:'Starter',  limit:25,    price:'$2.000/mes',     color:'starter' },
-  pro:      { label:'Pro',      limit:80,    price:'$3.000/mes',     color:'pro'     },
-  business: { label:'Business', limit:200,   price:'$4.500/mes',     color:'business'},
-  premium:  { label:'Premium',  limit:1000,  price:'$10.500/mes',    color:'premium' },
-  admin:    { label:'Admin',    limit:99999, price:'—',              color:'premium' },
+  free:             { label:'Free',             limit:2,     price:'Gratis',         color:'free'    },
+  starter:          { label:'Starter',          limit:25,    price:'$2.000/mes',     color:'starter' },
+  pro:              { label:'Pro',              limit:80,    price:'$3.000/mes',     color:'pro'     },
+  business:         { label:'Business',         limit:200,   price:'$4.500/mes',     color:'business'},
+  premium:          { label:'Premium',          limit:1000,  price:'$10.500/mes',    color:'premium' },
+  admin:            { label:'Admin',            limit:99999, price:'—',              color:'premium' },
+  // Planes anuales
+  'starter-anual':  { label:'Starter Anual',   limit:25,    price:'$24.000/año',    color:'starter', annual:true, base:'starter'  },
+  'pro-anual':      { label:'Pro Anual',        limit:80,    price:'$36.000/año',    color:'pro',     annual:true, base:'pro'      },
+  'business-anual': { label:'Business Anual',   limit:200,   price:'$43.200/año',    color:'business',annual:true, base:'business' },
+  'premium-anual':  { label:'Premium Anual',    limit:1000,  price:'$126.000/año',   color:'premium', annual:true, base:'premium'  },
 };
 
 /* ═══════════════════════════════════════════════════════
@@ -2416,6 +2430,35 @@ function scrollToPricing() {
 }
 
 /* billing toggle */
+function toggleGateBilling() {
+  const track = document.getElementById('gate-billing-track');
+  setGateBilling(track.classList.contains('on') ? 'monthly' : 'annual');
+}
+function setGateBilling(mode) {
+  const isAnnual = mode === 'annual';
+  document.getElementById('gate-billing-track').classList.toggle('on', isAnnual);
+  document.getElementById('gate-lbl-monthly').classList.toggle('active', !isAnnual);
+  document.getElementById('gate-lbl-annual').classList.toggle('active', isAnnual);
+  // Recalcular planKey según billing
+  if (!pendingPaymentUser) return;
+  const u = getUser(pendingPaymentUser);
+  const basePlan = (u?.plan || 'free').replace('-anual', '');
+  if (basePlan === 'free') return;
+  const newPlanKey = isAnnual ? basePlan + '-anual' : basePlan;
+  _applyGatePlan(newPlanKey);
+}
+function _applyGatePlan(planKey) {
+  const pc = PLAN_CONFIG[planKey];
+  if (!pc) return;
+  pendingPaymentPlan = planKey;
+  const el = (id) => document.getElementById(id);
+  el('gate-plan-name').textContent  = pc.label;
+  el('gate-plan-label').textContent = 'Plan ' + pc.label;
+  el('gate-plan-price').textContent = pc.price;
+  el('gate-plan-limit').textContent = pc.limit + ' hojas por mes';
+  const badge = el('gate-plan-badge');
+  if (badge) { badge.textContent = pc.label; badge.className = 'plan-badge ' + pc.color; }
+}
 function toggleProfileBilling() {
   const track = document.getElementById('profile-billing-track');
   setProfileBilling(track.classList.contains('on') ? 'monthly' : 'annual');
@@ -2461,6 +2504,11 @@ function contactAnnual(planLabel) {
    PLAN SELECT (desde landing)
 ═══════════════════════════════════════════════════════ */
 function selectPlan(planKey) {
+  if (currentUser && planKey !== 'free') {
+    // Usuario ya logueado → ir directo a la pasarela
+    changePlan(planKey);
+    return;
+  }
   showScreen('screen-register');
   document.getElementById('reg2-plan').value = planKey;
   refreshCaptcha2();
@@ -2775,15 +2823,16 @@ function showPaymentGate(username, isNewRegistration = false) {
     return;
   }
   pendingPaymentPlan = planKey;
-  const pc = PLAN_CONFIG[planKey] || PLAN_CONFIG.free;
   pendingPaymentUser = username;
   const el = (id) => document.getElementById(id);
-  el('gate-plan-name').textContent  = pc.label;
-  el('gate-plan-label').textContent = 'Plan ' + pc.label;
-  el('gate-plan-price').textContent = pc.price;
-  el('gate-plan-limit').textContent = pc.limit + ' hojas por mes';
-  const badge = el('gate-plan-badge');
-  if (badge) { badge.textContent = pc.label; badge.className = 'plan-badge ' + pc.color; }
+  // Resetear toggle a mensual al abrir la pasarela
+  const gateTrack = el('gate-billing-track');
+  if (gateTrack) {
+    gateTrack.classList.remove('on');
+    el('gate-lbl-monthly')?.classList.add('active');
+    el('gate-lbl-annual')?.classList.remove('active');
+  }
+  _applyGatePlan(planKey);
   const btn = el('btn-pay-mp');
   if (btn) { btn.disabled = false; }
   const btnTxt = el('btn-pay-mp-text');
@@ -3986,7 +4035,7 @@ function renderPlanTab() {
       ${isCurrent
         ? '<div style="font-size:11px;color:var(--accent);margin-top:6px;font-weight:700">Plan actual</div>'
         : isAnnualProfile && pk !== 'free'
-          ? `<button class="btn-profile-save" style="width:100%;margin-top:8px;font-size:12px;padding:7px${isBusinessDeal ? ';background:linear-gradient(135deg,#c084ff,#9b59f5);border-color:#c084ff' : ''}" onclick="contactAnnual('${pc.label} anual — ${ANNUAL_PRICES[pk]}')">Elegir</button>`
+          ? `<button class="btn-profile-save" style="width:100%;margin-top:8px;font-size:12px;padding:7px${isBusinessDeal ? ';background:linear-gradient(135deg,#c084ff,#9b59f5);border-color:#c084ff' : ''}" onclick="changePlan('${pk}-anual')">Elegir</button>`
           : `<button class="btn-profile-save" style="width:100%;margin-top:8px;font-size:12px;padding:7px" onclick="changePlan('${pk}')">Elegir</button>`}`;
     grid.appendChild(div);
   });

@@ -3,17 +3,26 @@ import { requireAuth } from './_lib/auth.js';
 import { randomBytes } from 'crypto';
 
 const PLAN_IDS = {
-  starter:  '4f3cbb4d7b7643ccac2f4c5d06353e2c',
-  pro:      '8249ed9006064842b67ece3d76b38e0a',
-  business: '472deed04ef0404682fd78048a5324e0',
-  premium:  '55add3001b744fbab79927fe89c1c28f'
+  starter:         '4f3cbb4d7b7643ccac2f4c5d06353e2c',
+  pro:             '8249ed9006064842b67ece3d76b38e0a',
+  business:        '472deed04ef0404682fd78048a5324e0',
+  premium:         '55add3001b744fbab79927fe89c1c28f',
+  // Planes anuales
+  'starter-anual':  '6cb2fc66d5354ac5a771ca0244f290b5',
+  'pro-anual':      '6e1a6a2e820c492fae62a60cbee873d6',
+  'business-anual': '83c5dfb9f53142d782295066589ac3be',
+  'premium-anual':  '8684980e1e9444f1aa051314f9e57b4d'
 };
 
 const PLAN_CHECKOUT = {
-  starter:  'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=4f3cbb4d7b7643ccac2f4c5d06353e2c',
-  pro:      'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=8249ed9006064842b67ece3d76b38e0a',
-  business: 'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=472deed04ef0404682fd78048a5324e0',
-  premium:  'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=55add3001b744fbab79927fe89c1c28f'
+  starter:         'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=4f3cbb4d7b7643ccac2f4c5d06353e2c',
+  pro:             'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=8249ed9006064842b67ece3d76b38e0a',
+  business:        'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=472deed04ef0404682fd78048a5324e0',
+  premium:         'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=55add3001b744fbab79927fe89c1c28f',
+  'starter-anual':  'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6cb2fc66d5354ac5a771ca0244f290b5',
+  'pro-anual':      'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6e1a6a2e820c492fae62a60cbee873d6',
+  'business-anual': 'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=83c5dfb9f53142d782295066589ac3be',
+  'premium-anual':  'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=8684980e1e9444f1aa051314f9e57b4d'
 };
 
 export default async function handler(req, res) {
