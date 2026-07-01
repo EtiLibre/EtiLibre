@@ -278,11 +278,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .faq-item h4{font-size:15px;font-weight:700;margin-bottom:8px}
 .faq-item p{font-size:14px;color:var(--text2);line-height:1.6}
 
-.footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.footer-links{display:flex;align-items:center;gap:8px}
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:40px 40px 32px;display:flex;flex-direction:column;align-items:center;gap:20px}
+.footer-top{display:flex;align-items:center;gap:16px}
+.footer-social a{display:inline-flex;align-items:center;gap:6px;color:var(--text3);font-size:13px;text-decoration:none;transition:color .2s}
+.footer-social a:hover{color:var(--accent)}
+.footer-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
 .footer-sep{color:var(--text3);font-size:12px}
-.footer-link-btn{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:0;text-decoration:underline;font-family:inherit}
+.footer-link-btn{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:0;text-decoration:none;font-family:inherit;transition:color .2s}
 .footer-link-btn:hover{color:var(--accent)}
+.footer-copy{font-size:12px;color:var(--text3);text-align:center}
 /* ── CONTACT SECTION ── */
 .contact-section{background:var(--surface2);border-top:1px solid var(--border);padding:72px 40px}
 .contact-inner{max-width:680px;margin:0 auto}
@@ -1104,20 +1108,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-logo"><svg class="brand-logo brand-logo-dark" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify"/></svg><svg class="brand-logo brand-logo-white" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify-white"/></svg></div>
-    <div class="footer-copy">© 2025 Etify · Herramienta independiente compatible con etiquetas de Mercado Libre</div>
+    <div class="footer-top">
+      <div class="footer-logo"><svg class="brand-logo brand-logo-dark" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify"/></svg><svg class="brand-logo brand-logo-white" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify-white"/></svg></div>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/etify.ar/" target="_blank" rel="noopener noreferrer">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+          @etify.ar
+        </a>
+      </div>
+    </div>
     <div class="footer-links">
       <button class="footer-link-btn" onclick="openModal('modal-tos')">Términos y Condiciones</button>
       <span class="footer-sep">·</span>
       <button class="footer-link-btn" onclick="openModal('modal-privacy')">Política de Privacidad</button>
       <span class="footer-sep">·</span>
       <button class="footer-link-btn" onclick="openModal('modal-cookies')">Política de Cookies</button>
-      <span class="footer-sep">·</span>
-      <a href="https://www.instagram.com/etify.ar/" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;color:var(--text3);font-size:12px;text-decoration:none;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
-        @etify.ar
-      </a>
     </div>
+    <div class="footer-copy">© 2025 Etify · Herramienta independiente compatible con etiquetas de envío</div>
   </footer>
 </div>
 
