@@ -3188,7 +3188,27 @@ async function enterApp(username) {
     refreshTopbar();
     updateUsageUI();
     updateNotifBadge();
+
+    // 3. Si hay cupón activo, programar downgrade automático cuando venza
+    schedulePromoExpiry(data);
   } catch (_) {}
+}
+
+let _promoExpiryTimer = null;
+function schedulePromoExpiry(userData) {
+  if (_promoExpiryTimer) { clearTimeout(_promoExpiryTimer); _promoExpiryTimer = null; }
+  if (!userData?.promoExpiresAt) return;
+  const msLeft = new Date(userData.promoExpiresAt) - Date.now();
+  if (msLeft <= 0) return; // ya venció (auth.js lo habrá bajado a free)
+  _promoExpiryTimer = setTimeout(async () => {
+    try {
+      const fresh = await _api('/api/auth'); // auth.js hace el downgrade en Firestore
+      _cacheUser(fresh);
+      refreshTopbar();
+      updateUsageUI();
+      showToast('⚠️ Tu cupón promocional venció. Ahora estás en el plan Free.');
+    } catch (_) {}
+  }, msLeft);
 }
 
 function refreshTopbar() {
