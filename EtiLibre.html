@@ -1649,6 +1649,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="action-area">
       <button class="btn-combine" id="btn-combine" onclick="combineLabels()" disabled>✂️ Combinar etiquetas</button>
       <button class="btn-clear" onclick="clearAll()">Limpiar todo</button>
+      <button class="btn-clear" onclick="goToPaymentHelp()" style="color:var(--accent);border-color:var(--accent)">Pagué y no se me activó</button>
       <div class="status-msg" id="status-msg"></div>
     </div>
 
@@ -3906,6 +3907,14 @@ const NAME_COLORS = [
 
 let profileSelectedAvatar = '👤';
 let profileSelectedColor  = '#e8eaf6';
+
+function goToPaymentHelp() {
+  openProfile('help');
+  setTimeout(() => {
+    const sel = document.getElementById('help-topic');
+    if (sel) { sel.value = 'plan_not_activated'; sel.dispatchEvent(new Event('change')); }
+  }, 150);
+}
 
 function openProfile(tab = 'personal') {
   if (!currentUser) return;
