@@ -3202,11 +3202,16 @@ function schedulePromoExpiry(userData) {
   if (msLeft <= 0) return; // ya venció (auth.js lo habrá bajado a free)
   _promoExpiryTimer = setTimeout(async () => {
     try {
-      const fresh = await _api('/api/auth'); // auth.js hace el downgrade en Firestore
+      const fresh = await _api('/api/auth'); // auth.js hace el downgrade/restauración en Firestore
       _cacheUser(fresh);
       refreshTopbar();
       updateUsageUI();
-      showToast('⚠️ Tu cupón promocional venció. Ahora estás en el plan Free.');
+      const PLAN_LABELS = { free:'Free', starter:'Starter', pro:'Pro', business:'Business', premium:'Premium' };
+      const restoredLabel = PLAN_LABELS[fresh.plan] || fresh.plan;
+      const msg = fresh.plan === 'free'
+        ? '⚠️ Tu cupón promocional venció. Volviste al plan Free.'
+        : `⚠️ Tu cupón venció. Volviste a tu plan ${restoredLabel}.`;
+      showToast(msg);
     } catch (_) {}
   }, msLeft);
 }

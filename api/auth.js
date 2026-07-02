@@ -24,9 +24,30 @@ export default async function handler(req, res) {
     const doc = await db.collection('users').doc(payload.username).get();
     if (!doc.exists) return res.status(404).json({ error: 'Usuario no encontrado' });
     let ud = doc.data();
-    // Si el promo venció, bajar a free automáticamente
+    // Si el promo venció, restaurar el plan previo (o free si no tenía uno)
     if (ud.promoExpiresAt && new Date(ud.promoExpiresAt) <= new Date()) {
-      const downgrade = { plan: 'free', active: true, promoCode: null, promoExpiresAt: null, mpSubId: null };
+      const restoredPlan    = ud.prevPlan    || 'free';
+      const restoredMpSubId = ud.prevMpSubId || null;
+      // Verificar que la suscripción MP previa siga activa en MP
+      let mpStillActive = false;
+      if (restoredMpSubId) {
+        try {
+          const r = await fetch(`https://api.mercadopago.com/preapproval/${restoredMpSubId}`, {
+            headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` }
+          });
+          const d = await r.json();
+          mpStillActive = r.ok && d.status === 'authorized';
+        } catch (_) {}
+      }
+      const downgrade = {
+        plan:           mpStillActive ? restoredPlan : 'free',
+        active:         true,
+        mpSubId:        mpStillActive ? restoredMpSubId : null,
+        promoCode:      null,
+        promoExpiresAt: null,
+        prevPlan:       null,
+        prevMpSubId:    null
+      };
       await db.collection('users').doc(payload.username).update(downgrade);
       ud = { ...ud, ...downgrade };
     }

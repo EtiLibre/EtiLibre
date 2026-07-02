@@ -158,9 +158,13 @@ export default async function handler(req, res) {
             body:  `Tu plan ${PLAN_LABELS[cd.plan] || cd.plan} fue activado con el código ${safeCode}.${promoExpiresAt ? ' Vence el ' + new Date(promoExpiresAt).toLocaleDateString('es-AR') + '.' : ''}`,
             date:  now.toISOString(), read: false
           };
+          // Guardar plan previo para restaurarlo al vencer el cupón
+          const prevPlan    = ud.promoCode ? (ud.prevPlan    || 'free') : (ud.plan    || 'free');
+          const prevMpSubId = ud.promoCode ? (ud.prevMpSubId || null)   : (ud.mpSubId || null);
           tx.update(ref, {
             plan: cd.plan, active: true, mpSubId: null, mpPendingPlan: null,
             promoCode: safeCode, promoExpiresAt,
+            prevPlan, prevMpSubId,
             invoices:      [invoice, ...(ud.invoices      || [])].slice(0, 50),
             notifications: [notif,   ...(ud.notifications || [])].slice(0, 50)
           });
