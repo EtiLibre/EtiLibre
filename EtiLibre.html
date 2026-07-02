@@ -863,43 +863,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 /* ═══════════════════════════════════════
    SCROLL REVEAL — animaciones de entrada
 ═══════════════════════════════════════ */
+@keyframes _heroIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes _revealUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes _revealScale{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes _revealLeft{from{opacity:0;transform:translateX(-32px)}to{opacity:1;transform:none}}
+@keyframes _revealRight{from{opacity:0;transform:translateX(32px)}to{opacity:1;transform:none}}
+
 @media(prefers-reduced-motion:no-preference){
-  @keyframes heroIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
-  @keyframes revealUp{from{opacity:0;transform:translateY(44px)}to{opacity:1;transform:none}}
-  @keyframes revealScale{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}
-  @keyframes revealLeft{from{opacity:0;transform:translateX(-36px)}to{opacity:1;transform:none}}
-  @keyframes revealRight{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
-  @keyframes counterUp{from{opacity:0;transform:translateY(16px) scale(.9)}to{opacity:1;transform:none}}
+  /* Hero — fade-in al cargar la página */
+  .hero-eyebrow{animation:_heroIn .7s cubic-bezier(.22,1,.36,1) .05s both}
+  .hero h1     {animation:_heroIn .75s cubic-bezier(.22,1,.36,1) .18s both}
+  .hero-sub    {animation:_heroIn .75s cubic-bezier(.22,1,.36,1) .30s both}
+  .hero-actions{animation:_heroIn .75s cubic-bezier(.22,1,.36,1) .42s both}
+  .hero-proof  {animation:_heroIn .75s cubic-bezier(.22,1,.36,1) .56s both}
 
-  /* Hero — animación en carga (no observer) */
-  .hero-eyebrow{animation:heroIn .7s cubic-bezier(.22,1,.36,1) .05s both}
-  .hero h1{animation:heroIn .75s cubic-bezier(.22,1,.36,1) .18s both}
-  .hero-sub{animation:heroIn .75s cubic-bezier(.22,1,.36,1) .30s both}
-  .hero-actions{animation:heroIn .75s cubic-bezier(.22,1,.36,1) .42s both}
-  .hero-proof{animation:heroIn .75s cubic-bezier(.22,1,.36,1) .56s both}
+  /* Estado inicial oculto (el JS agrega .in-view cuando entra al viewport) */
+  .rv-up   {opacity:0;transform:translateY(40px);transition:none}
+  .rv-scale{opacity:0;transform:translateY(24px) scale(.96);transition:none}
+  .rv-left {opacity:0;transform:translateX(-32px);transition:none}
+  .rv-right{opacity:0;transform:translateX(32px);transition:none}
 
-  /* Estados iniciales ocultos (antes de entrar en viewport) */
-  .rv-up    {opacity:0;transform:translateY(44px)}
-  .rv-scale {opacity:0;transform:translateY(28px) scale(.96)}
-  .rv-left  {opacity:0;transform:translateX(-36px)}
-  .rv-right {opacity:0;transform:translateX(36px)}
-
-  /* Estado visible */
-  .rv-up.in-view    {animation:revealUp    .65s cubic-bezier(.22,1,.36,1) both}
-  .rv-scale.in-view {animation:revealScale .65s cubic-bezier(.22,1,.36,1) both}
-  .rv-left.in-view  {animation:revealLeft  .6s  cubic-bezier(.22,1,.36,1) both}
-  .rv-right.in-view {animation:revealRight .6s  cubic-bezier(.22,1,.36,1) both}
+  /* Visible: dispara la animación */
+  .rv-up.in-view   {animation:_revealUp    .65s cubic-bezier(.22,1,.36,1) both}
+  .rv-scale.in-view{animation:_revealScale .65s cubic-bezier(.22,1,.36,1) both}
+  .rv-left.in-view {animation:_revealLeft  .6s  cubic-bezier(.22,1,.36,1) both}
+  .rv-right.in-view{animation:_revealRight .6s  cubic-bezier(.22,1,.36,1) both}
 
   /* Delays escalonados */
-  .rv-d1{animation-delay:.06s!important}
-  .rv-d2{animation-delay:.13s!important}
-  .rv-d3{animation-delay:.20s!important}
-  .rv-d4{animation-delay:.28s!important}
-  .rv-d5{animation-delay:.36s!important}
-  .rv-d6{animation-delay:.44s!important}
-  .rv-d7{animation-delay:.52s!important}
+  .rv-d1{animation-delay:.07s!important}
+  .rv-d2{animation-delay:.14s!important}
+  .rv-d3{animation-delay:.22s!important}
+  .rv-d4{animation-delay:.30s!important}
+  .rv-d5{animation-delay:.38s!important}
 }
-/* Cuando prefers-reduced-motion está activo, mostrar todo directamente */
+/* Accesibilidad: sin movimiento → todo visible directamente */
 @media(prefers-reduced-motion:reduce){
   .rv-up,.rv-scale,.rv-left,.rv-right{opacity:1!important;transform:none!important}
 }
@@ -5375,30 +5372,39 @@ window.addEventListener('scroll', () => {
    SCROLL REVEAL — IntersectionObserver
 ═══════════════════════════════════════ */
 (function initReveal() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  try {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.IntersectionObserver) {
+      // Fallback: mostrar todo si el browser no soporta IntersectionObserver
+      document.querySelectorAll('.rv-up,.rv-scale,.rv-left,.rv-right').forEach(el => {
+        el.style.opacity = '1'; el.style.transform = 'none';
+      });
+      return;
+    }
 
-  // Añadir clases de animación a plan cards dinámicamente
-  document.querySelectorAll('#grid-monthly .plan-card, #grid-annual .plan-card').forEach((card, i) => {
-    const delay = ['rv-d1','rv-d2','rv-d3','rv-d4','rv-d5'][i % 5];
-    card.classList.add('rv-scale', delay);
-  });
-
-  // Añadir clases a proof stats del hero
-  document.querySelectorAll('.proof-stat').forEach((el, i) => {
-    el.classList.add('rv-scale', ['rv-d1','rv-d2','rv-d3'][i]);
-  });
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add('in-view');
-      observer.unobserve(entry.target);
+    // Añadir clases de animación a plan cards dinámicamente
+    document.querySelectorAll('#grid-monthly .plan-card, #grid-annual .plan-card').forEach((card, i) => {
+      const delay = ['rv-d1','rv-d2','rv-d3','rv-d4','rv-d5'][i % 5];
+      card.classList.add('rv-scale', delay);
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
-  document.querySelectorAll('.rv-up, .rv-scale, .rv-left, .rv-right').forEach(el => {
-    observer.observe(el);
-  });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('in-view');
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+    document.querySelectorAll('.rv-up,.rv-scale,.rv-left,.rv-right').forEach(el => {
+      observer.observe(el);
+    });
+  } catch(e) {
+    // Fallback de seguridad: mostrar todo si algo falla
+    document.querySelectorAll('.rv-up,.rv-scale,.rv-left,.rv-right').forEach(el => {
+      el.style.opacity = '1'; el.style.transform = 'none';
+    });
+  }
 })();
 </script>
 
