@@ -55,7 +55,12 @@ export default async function handler(req, res) {
     const searchData = await searchRes.json();
     const existing = (searchData.results || []).find(s => s.external_reference === username && s.status === 'authorized');
     if (existing) {
-      await db.collection('users').doc(username).update({ plan: planKey, active: true, mpSubId: existing.id, mpPendingPlan: null });
+      const ANNUAL_TO_BASE = { 'starter-anual':'starter', 'pro-anual':'pro', 'business-anual':'business', 'premium-anual':'premium' };
+      const basePlanKey = ANNUAL_TO_BASE[planKey] || planKey;
+      await db.collection('users').doc(username).update({
+        plan: basePlanKey, active: true, mpSubId: existing.id, mpPendingPlan: null,
+        ...(ANNUAL_TO_BASE[planKey] ? { billing: 'annual' } : {})
+      });
       return res.json({ already_active: true });
     }
   } catch (_) {}

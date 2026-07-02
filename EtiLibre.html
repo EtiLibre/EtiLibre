@@ -859,6 +859,50 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .sa-user-actions{grid-column:1/-1;align-items:flex-start}
   .sa-actions-row{justify-content:flex-start}
 }
+
+/* ═══════════════════════════════════════
+   SCROLL REVEAL — animaciones de entrada
+═══════════════════════════════════════ */
+@media(prefers-reduced-motion:no-preference){
+  @keyframes heroIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+  @keyframes revealUp{from{opacity:0;transform:translateY(44px)}to{opacity:1;transform:none}}
+  @keyframes revealScale{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes revealLeft{from{opacity:0;transform:translateX(-36px)}to{opacity:1;transform:none}}
+  @keyframes revealRight{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
+  @keyframes counterUp{from{opacity:0;transform:translateY(16px) scale(.9)}to{opacity:1;transform:none}}
+
+  /* Hero — animación en carga (no observer) */
+  .hero-eyebrow{animation:heroIn .7s cubic-bezier(.22,1,.36,1) .05s both}
+  .hero h1{animation:heroIn .75s cubic-bezier(.22,1,.36,1) .18s both}
+  .hero-sub{animation:heroIn .75s cubic-bezier(.22,1,.36,1) .30s both}
+  .hero-actions{animation:heroIn .75s cubic-bezier(.22,1,.36,1) .42s both}
+  .hero-proof{animation:heroIn .75s cubic-bezier(.22,1,.36,1) .56s both}
+
+  /* Estados iniciales ocultos (antes de entrar en viewport) */
+  .rv-up    {opacity:0;transform:translateY(44px)}
+  .rv-scale {opacity:0;transform:translateY(28px) scale(.96)}
+  .rv-left  {opacity:0;transform:translateX(-36px)}
+  .rv-right {opacity:0;transform:translateX(36px)}
+
+  /* Estado visible */
+  .rv-up.in-view    {animation:revealUp    .65s cubic-bezier(.22,1,.36,1) both}
+  .rv-scale.in-view {animation:revealScale .65s cubic-bezier(.22,1,.36,1) both}
+  .rv-left.in-view  {animation:revealLeft  .6s  cubic-bezier(.22,1,.36,1) both}
+  .rv-right.in-view {animation:revealRight .6s  cubic-bezier(.22,1,.36,1) both}
+
+  /* Delays escalonados */
+  .rv-d1{animation-delay:.06s!important}
+  .rv-d2{animation-delay:.13s!important}
+  .rv-d3{animation-delay:.20s!important}
+  .rv-d4{animation-delay:.28s!important}
+  .rv-d5{animation-delay:.36s!important}
+  .rv-d6{animation-delay:.44s!important}
+  .rv-d7{animation-delay:.52s!important}
+}
+/* Cuando prefers-reduced-motion está activo, mostrar todo directamente */
+@media(prefers-reduced-motion:reduce){
+  .rv-up,.rv-scale,.rv-left,.rv-right{opacity:1!important;transform:none!important}
+}
 </style>
 </head>
 <body>
@@ -913,21 +957,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   <!-- HOW IT WORKS -->
   <div class="section">
-    <div class="section-tag">Cómo funciona</div>
-    <h2 class="section-title">Tres pasos y<br>a imprimir</h2>
-    <p class="section-desc">Sin registros, sin configuraciones raras. Etify hace el trabajo sucio para que vos te enfoques en vender.</p>
+    <div class="section-tag rv-up rv-d1">Cómo funciona</div>
+    <h2 class="section-title rv-up rv-d2">Tres pasos y<br>a imprimir</h2>
+    <p class="section-desc rv-up rv-d3">Sin registros, sin configuraciones raras. Etify hace el trabajo sucio para que vos te enfoques en vender.</p>
     <div class="steps-grid">
-      <div class="step-card">
+      <div class="step-card rv-scale rv-d1">
         <div class="step-num">01</div>
         <h3>Subí los PDFs</h3>
         <p>Arrastrá todos tus PDFs de etiquetas de una vez. Podés cargar tantos como necesites según tu plan.</p>
       </div>
-      <div class="step-card">
+      <div class="step-card rv-scale rv-d2">
         <div class="step-num">02</div>
         <h3>Etify los organiza</h3>
         <p>Se agrupan automáticamente en hojas A4 de hasta 3 etiquetas, centradas y con líneas de corte opcionales.</p>
       </div>
-      <div class="step-card">
+      <div class="step-card rv-scale rv-d3">
         <div class="step-num">03</div>
         <h3>Descargá e imprimí</h3>
         <p>Un clic y tenés el PDF combinado listo para mandar a la impresora. Sin perder calidad ni escalar nada.</p>
@@ -938,12 +982,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <!-- PRICING -->
   <section id="pricing">
     <div class="pricing-inner">
-      <div class="section-tag">Planes y precios</div>
-      <h2 class="section-title">Elegí el plan<br>que se ajusta a tu volumen</h2>
-      <p class="section-desc">Todos los planes incluyen el mismo motor de combinado. La diferencia es cuántos PDFs podés generar por mes.</p>
+      <div class="section-tag rv-up rv-d1">Planes y precios</div>
+      <h2 class="section-title rv-up rv-d2">Elegí el plan<br>que se ajusta a tu volumen</h2>
+      <p class="section-desc rv-up rv-d3">Todos los planes incluyen el mismo motor de combinado. La diferencia es cuántos PDFs podés generar por mes.</p>
 
       <!-- Toggle mensual / anual -->
-      <div class="billing-toggle">
+      <div class="billing-toggle rv-up rv-d4">
         <span class="billing-label active" id="lbl-monthly" onclick="setBilling('monthly')">Mensual</span>
         <div class="billing-toggle-track" id="billing-track" onclick="toggleBilling()">
           <div class="billing-toggle-thumb"></div>
@@ -1198,22 +1242,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   <!-- FAQ -->
   <div class="section">
-    <div class="section-tag">Preguntas frecuentes</div>
-    <h2 class="section-title">Todo lo que<br>necesitás saber</h2>
+    <div class="section-tag rv-up rv-d1">Preguntas frecuentes</div>
+    <h2 class="section-title rv-up rv-d2">Todo lo que<br>necesitás saber</h2>
     <div class="faq-grid">
-      <div class="faq-item">
+      <div class="faq-item rv-up rv-d1">
         <h4>¿Qué pasa cuando llego al límite de PDFs?</h4>
         <p>La plataforma te avisa cuando te acercás al límite. Al alcanzarlo, podés actualizar tu plan para seguir generando PDFs ese mes.</p>
       </div>
-      <div class="faq-item">
+      <div class="faq-item rv-up rv-d2">
         <h4>¿Se reinician los PDFs cada mes?</h4>
         <p>Sí, el contador se reinicia el primer día de cada mes calendario. Los PDFs no utilizados no se acumulan para el mes siguiente.</p>
       </div>
-      <div class="faq-item">
+      <div class="faq-item rv-up rv-d3">
         <h4>¿Mis PDFs quedan almacenados en algún servidor?</h4>
         <p>No. Todo el procesamiento ocurre directamente en tu navegador. Tus etiquetas nunca salen de tu computadora.</p>
       </div>
-      <div class="faq-item">
+      <div class="faq-item rv-up rv-d4">
         <h4>¿Puedo cambiar de plan cuando quiera?</h4>
         <p>Sí, podés upgradear tu plan en cualquier momento. El nuevo límite aplica inmediatamente para el resto del mes.</p>
       </div>
@@ -1226,9 +1270,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <!-- SECCIÓN CONTACTO -->
   <section class="contact-section" id="contact">
     <div class="contact-inner">
-      <h2 class="contact-title">¿Tenés algún problema o consulta?</h2>
-      <p class="contact-sub">Completá el formulario y te respondemos a la brevedad.</p>
-      <form class="contact-form" id="contact-form" onsubmit="submitContactForm(event)">
+      <h2 class="contact-title rv-up">¿Tenés algún problema o consulta?</h2>
+      <p class="contact-sub rv-up rv-d1">Completá el formulario y te respondemos a la brevedad.</p>
+      <form class="contact-form rv-up rv-d2" id="contact-form" onsubmit="submitContactForm(event)">
         <div class="contact-row">
           <div class="field"><label>Nombre</label><input type="text" id="cf-name" placeholder="Tu nombre" required></div>
           <div class="field"><label>Email</label><input type="email" id="cf-email" placeholder="tu@email.com" required></div>
@@ -5326,6 +5370,36 @@ window.addEventListener('scroll', () => {
   const btn = document.getElementById('scroll-top-btn');
   if (btn) btn.style.display = window.scrollY > 400 ? 'block' : 'none';
 });
+
+/* ═══════════════════════════════════════
+   SCROLL REVEAL — IntersectionObserver
+═══════════════════════════════════════ */
+(function initReveal() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  // Añadir clases de animación a plan cards dinámicamente
+  document.querySelectorAll('#grid-monthly .plan-card, #grid-annual .plan-card').forEach((card, i) => {
+    const delay = ['rv-d1','rv-d2','rv-d3','rv-d4','rv-d5'][i % 5];
+    card.classList.add('rv-scale', delay);
+  });
+
+  // Añadir clases a proof stats del hero
+  document.querySelectorAll('.proof-stat').forEach((el, i) => {
+    el.classList.add('rv-scale', ['rv-d1','rv-d2','rv-d3'][i]);
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in-view');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.rv-up, .rv-scale, .rv-left, .rv-right').forEach(el => {
+    observer.observe(el);
+  });
+})();
 </script>
 
 </body>
