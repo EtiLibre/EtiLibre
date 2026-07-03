@@ -4616,6 +4616,11 @@ async function helpVerifyPayment() {
     if (mpSubId) {
       const r = await _api('/api/check-pending', 'GET', null, { mpSubId, planKey: plan });
       if (r.status === 'activated') activated = true;
+      if (r.status === 'already_claimed') {
+        msgErr('❌ Este ID de suscripción ya fue utilizado para activar otro plan. Si creés que es un error, contactá a soporte.');
+        btn.disabled = false; btn.textContent = 'Verificar mi pago automáticamente';
+        return;
+      }
     }
 
     // Si no, flujo normal: forzar mpPendingPlan y correr check-pending
