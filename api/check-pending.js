@@ -52,9 +52,9 @@ export default async function handler(req, res) {
   // Si el usuario pegó manualmente su ID de suscripción MP (cuenta de MP distinta a Etify)
   const manualSubId = req.query.mpSubId ? String(req.query.mpSubId).replace(/\D/g, '') : null;
   if (manualSubId) {
-    // Verificar que esta suscripción no fue ya reclamada por OTRO usuario
+    // Verificar que esta suscripción no fue ya reclamada (ni por este usuario ni por otro)
     const claimDoc = await db.collection('claimed_subs').doc(manualSubId).get();
-    if (claimDoc.exists && claimDoc.data().username !== username) {
+    if (claimDoc.exists) {
       return res.json({ status: 'already_claimed' });
     }
     try {
