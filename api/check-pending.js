@@ -51,10 +51,11 @@ export default async function handler(req, res) {
 
   // Si el usuario pegó manualmente su ID de suscripción MP (cuenta de MP distinta a Etify)
   const manualSubId = req.query.mpSubId ? String(req.query.mpSubId).replace(/\D/g, '') : null;
+  let mpPayerEmail = null; // se guarda para búsquedas automáticas futuras
   if (manualSubId) {
-    // Verificar que esta suscripción no fue ya reclamada (ni por este usuario ni por otro)
+    // Verificar que esta suscripción no fue ya reclamada por OTRO usuario
     const claimDoc = await db.collection('claimed_subs').doc(manualSubId).get();
-    if (claimDoc.exists) {
+    if (claimDoc.exists && claimDoc.data().username !== username) {
       return res.json({ status: 'already_claimed' });
     }
     try {
@@ -63,9 +64,9 @@ export default async function handler(req, res) {
       });
       const d = await r.json();
       if (r.ok && d.status === 'authorized') {
-        subId   = d.id;
-        // Determinar planKey por preapproval_plan_id
-        planKey = planKey || Object.keys(PLAN_IDS).find(k => PLAN_IDS[k] === d.preapproval_plan_id) || null;
+        subId        = d.id;
+        mpPayerEmail = d.payer_email || d.payer?.email || null;
+        planKey      = planKey || Object.keys(PLAN_IDS).find(k => PLAN_IDS[k] === d.preapproval_plan_id) || null;
       }
     } catch (_) {}
     if (!subId) return res.json({ status: 'not_found' });
@@ -83,7 +84,7 @@ export default async function handler(req, res) {
       subId = d.results?.[0]?.id || null;
     } catch (_) {}
 
-    // 2. Buscar por email + plan
+    // 2. Buscar por email Etify + plan
     if (!subId && user.email) {
       try {
         const r = await fetch(`https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(user.email)}&preapproval_plan_id=${planId}&status=authorized&limit=1`, auth);
@@ -92,24 +93,35 @@ export default async function handler(req, res) {
       } catch (_) {}
     }
 
-    // 3. Buscar en el plan sin filtrar por usuario, validando ownership
+    // 3. Buscar por email MP guardado (distinto al email Etify — activado manualmente antes)
+    if (!subId && user.mpPayerEmail && user.mpPayerEmail !== user.email) {
+      try {
+        const r = await fetch(`https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(user.mpPayerEmail)}&preapproval_plan_id=${planId}&status=authorized&limit=1`, auth);
+        const d = await r.json();
+        subId = d.results?.[0]?.id || null;
+      } catch (_) {}
+    }
+
+    // 4. Buscar en el plan sin filtrar por usuario, validando ownership
     if (!subId) {
       try {
         const r = await fetch(`https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${planId}&status=authorized&limit=20`, auth);
         const d = await r.json();
+        const emails = [user.email, user.mpPayerEmail].filter(Boolean).map(e => e.toLowerCase());
         const match = (d.results || []).find(s => {
           if (new Date(s.date_created) < since) return false;
           if (s.external_reference === username) return true;
-          const subEmail = s.payer_email || s.payer?.email;
-          return subEmail && user.email && subEmail.toLowerCase() === user.email.toLowerCase();
+          const subEmail = (s.payer_email || s.payer?.email || '').toLowerCase();
+          return subEmail && emails.includes(subEmail);
         });
         subId = match?.id || null;
       } catch (_) {}
     }
   } else {
-    // Sin mpPendingPlan: buscar en TODOS los planes por external_reference o email
-    // Cubre el caso donde el usuario pagó sin pasar por la pasarela o volvió manualmente
+    // Sin mpPendingPlan: buscar en TODOS los planes por external_reference, email Etify o email MP guardado
     const allPlanIds = Object.values(PLAN_IDS);
+    const emailsToTry = [...new Set([user.email, user.mpPayerEmail].filter(Boolean))];
+
     for (const pid of allPlanIds) {
       if (subId) break;
       try {
@@ -117,17 +129,17 @@ export default async function handler(req, res) {
         const d = await r.json();
         if (d.results?.[0]) {
           subId   = d.results[0].id;
-          // Determinar qué planKey corresponde a este plan ID
           planKey = Object.keys(PLAN_IDS).find(k => PLAN_IDS[k] === pid) || null;
         }
       } catch (_) {}
     }
-    // Si no encontró por external_reference, buscar por email
-    if (!subId && user.email) {
+    // Buscar por todos los emails conocidos del usuario
+    for (const email of emailsToTry) {
+      if (subId) break;
       for (const pid of allPlanIds) {
         if (subId) break;
         try {
-          const r = await fetch(`https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(user.email)}&preapproval_plan_id=${pid}&status=authorized&limit=1`, auth);
+          const r = await fetch(`https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(email)}&preapproval_plan_id=${pid}&status=authorized&limit=1`, auth);
           const d = await r.json();
           if (d.results?.[0]) {
             subId   = d.results[0].id;
@@ -167,6 +179,8 @@ export default async function handler(req, res) {
     mpPendingPlan:   null,
     mpPendingPlanAt: null,
     ...(isAnnual ? { billing: 'annual' } : {}),
+    // Guardar email de MP si difiere del email Etify → permite verificación automática futura
+    ...(mpPayerEmail && mpPayerEmail !== user.email ? { mpPayerEmail } : {}),
     invoices:        [invoice, ...(user.invoices || [])].slice(0, 50),
     notifications:   [notif,   ...(user.notifications || [])].slice(0, 50)
   });
