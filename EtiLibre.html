@@ -441,7 +441,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-modal-ghost{background:none;border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-family:inherit;font-size:14px;padding:13px 22px;cursor:pointer}
 
 /* Drop zone & app styles (same as original) */
-.drop-zone{background:var(--surface);border:2px dashed var(--border);border-radius:var(--r);padding:44px 32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:24px}
+.drop-zone{display:block;background:var(--surface);border:2px dashed var(--border);border-radius:var(--r);padding:44px 32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:24px}
 .drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(255,230,0,.03)}
 .drop-zone.disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
 .drop-zone-icon{font-size:38px;margin-bottom:10px}
@@ -3534,7 +3534,9 @@ dropZone.addEventListener('drop', async e => {
   await loadFiles(files);
 });
 fileInput.addEventListener('change', async () => {
-  const files = [...fileInput.files].filter(isPdf);
+  // No filtrar por isPdf acá: el atributo accept ya restringe la selección,
+  // y en Android/Drive el nombre puede llegar sin extensión .pdf
+  const files = [...fileInput.files];
   if (files.length) await loadFiles(files);
   fileInput.value = '';
 });
