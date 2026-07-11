@@ -723,9 +723,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .usage-cta{order:3;width:100%}
   .btn-upgrade-inline{width:100%}
   /* DROP ZONE */
-  .drop-zone{padding:28px 16px}
-  .drop-zone-icon{font-size:28px}
-  .drop-zone-title{font-size:14px}
+  .drop-zone{padding:32px 16px;border-width:2px}
+  .drop-zone-icon{font-size:36px;margin-bottom:8px}
+  .drop-zone-title{font-size:15px}
+  .drop-zone-sub{font-size:12px}
   /* SHEETS */
   .upload-grid{grid-template-columns:1fr!important}
   .sheet-header{flex-wrap:wrap;gap:6px}
@@ -1618,11 +1619,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
     <div id="lib-banner"></div>
 
-    <label class="drop-zone" id="drop-zone" for="file-input-multi">
+    <label class="drop-zone" id="drop-zone">
       <div class="drop-zone-icon">📂</div>
-      <div class="drop-zone-title">Arrastrá los PDFs acá</div>
-      <div class="drop-zone-sub">o hacé clic para seleccionar · <strong>sin límite de archivos por carga</strong></div>
-      <input type="file" id="file-input-multi" accept=".pdf,application/pdf" multiple style="display:none">
+      <div class="drop-zone-title">Tocá para seleccionar PDFs</div>
+      <div class="drop-zone-sub">o arrastrá los archivos acá · <strong>sin límite de archivos por carga</strong></div>
+      <input type="file" id="file-input-multi" accept=".pdf,application/pdf" multiple>
     </label>
 
     <div class="files-counter" id="files-counter"></div>
@@ -3545,7 +3546,16 @@ function isPdf(f) {
 
 async function loadFiles(files) {
   if (typeof pdfjsLib === 'undefined') { showStatus('Las librerías aún no están listas. Esperá un momento.','error'); return; }
-  for (const file of files) slots.push({ buf: await file.arrayBuffer(), name: file.name });
+  let loaded = 0;
+  for (const file of files) {
+    try {
+      slots.push({ buf: await file.arrayBuffer(), name: file.name });
+      loaded++;
+    } catch(e) {
+      showStatus(`No se pudo leer "${file.name}". Intentá descargarlo antes de seleccionarlo.`, 'error');
+    }
+  }
+  if (loaded === 0) return;
   renderAll(); updateBtn();
   document.getElementById('preview-section').style.display = 'none';
 }
