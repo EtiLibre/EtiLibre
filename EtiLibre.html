@@ -238,6 +238,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .step-card p{font-size:14px;color:var(--text2);line-height:1.6}
 .step-mockup{display:flex;justify-content:center;margin-bottom:4px}
 .step-phone{width:140px;height:auto;filter:drop-shadow(0 8px 24px rgba(0,0,0,.18));border-radius:20px}
+@media(prefers-reduced-motion:no-preference){
+  .step-card:nth-child(1) .step-phone{animation:_phoneFloat 3.2s ease-in-out infinite}
+  .step-card:nth-child(2) .step-phone{animation:_phoneFloat 3.2s ease-in-out infinite .6s}
+  .step-card:nth-child(3) .step-phone{animation:_phoneFloat 3.2s ease-in-out infinite 1.2s}
+  .step-badge{animation:_badgePop .5s cubic-bezier(.34,1.56,.64,1) both}
+}
+@keyframes _phoneFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes _badgePop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes _shimmer{0%,100%{background-position:200% center}50%{background-position:-200% center}}
+.steps-highlight{background:linear-gradient(90deg,var(--accent),#ffaa00,var(--accent));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+@media(prefers-reduced-motion:no-preference){.steps-highlight{animation:_shimmer 3s linear infinite}}
 
 /* ════════════════════════════════════════════════════════
    LANDING — PRICING
@@ -959,7 +970,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <!-- HOW IT WORKS -->
   <div class="section">
     <div class="section-tag rv-up rv-d1">Cómo funciona</div>
-    <h2 class="section-title rv-up rv-d2">Tres pasos y<br>a imprimir</h2>
+    <h2 class="section-title rv-up rv-d2">Tres pasos y<br><span class="steps-highlight">a imprimir</span></h2>
     <p class="section-desc rv-up rv-d3">Simple y rápido. Cargás los PDFs, Etify los organiza y en segundos tenés todo listo para imprimir.</p>
     <div class="steps-grid">
 
@@ -976,8 +987,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <rect x="8" y="26" width="204" height="36" rx="0" fill="var(--bg)"/>
             <text x="28" y="49" font-size="13" font-weight="800" fill="var(--text)" font-family="system-ui,sans-serif">🏷️ Etify</text>
             <!-- Drop zone -->
-            <rect x="18" y="72" width="184" height="120" rx="10" fill="var(--bg)" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 4"/>
-            <text x="110" y="112" font-size="28" text-anchor="middle" font-family="system-ui,sans-serif">📂</text>
+            <rect x="18" y="72" width="184" height="120" rx="10" fill="var(--bg)" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 4">
+              <animate attributeName="stroke-dashoffset" values="0;20" dur="1.2s" repeatCount="indefinite"/>
+            </rect>
+            <g>
+              <animateTransform attributeName="transform" type="translate" values="0 0;0 -5;0 0" dur="1.8s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+              <text x="110" y="112" font-size="28" text-anchor="middle" font-family="system-ui,sans-serif">📂</text>
+            </g>
             <text x="110" y="138" font-size="10" font-weight="700" text-anchor="middle" fill="var(--text)" font-family="system-ui,sans-serif">Tocá para seleccionar PDFs</text>
             <text x="110" y="154" font-size="8" text-anchor="middle" fill="var(--text2)" font-family="system-ui,sans-serif">o arrastrá los archivos acá</text>
             <text x="110" y="168" font-size="7.5" font-weight="700" text-anchor="middle" fill="var(--blue)" font-family="system-ui,sans-serif">sin límite de archivos por carga</text>
@@ -1047,8 +1063,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <text x="110" y="197" font-size="6" text-anchor="middle" fill="var(--text2)" font-family="system-ui,sans-serif">📦 Envío</text>
             <rect x="90" y="201" width="40" height="2" rx="1" fill="var(--border)"/>
             <rect x="90" y="205" width="30" height="2" rx="1" fill="var(--border)"/>
-            <!-- Combine btn active -->
-            <rect x="18" y="232" width="184" height="34" rx="8" fill="var(--accent)"/>
+            <!-- Combine btn active (pulsing) -->
+            <rect x="18" y="232" width="184" height="34" rx="8" fill="var(--accent)">
+              <animate attributeName="opacity" values="1;0.7;1" dur="1.4s" repeatCount="indefinite"/>
+            </rect>
             <text x="110" y="253" font-size="10" font-weight="700" text-anchor="middle" fill="#000" font-family="system-ui,sans-serif">✂️ Combinar etiquetas</text>
             <!-- Clear -->
             <rect x="18" y="274" width="184" height="28" rx="8" fill="none" stroke="var(--border)" stroke-width="1.5"/>
@@ -1098,10 +1116,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <rect x="50" y="206" width="120" height="30" rx="3" fill="var(--bg)" stroke="var(--border2)" stroke-width="1"/>
             <text x="110" y="220" font-size="7" text-anchor="middle" fill="var(--text2)" font-family="system-ui,sans-serif">📦 Etiqueta de envío</text>
             <rect x="56" y="224" width="80" height="2" rx="1" fill="var(--border)"/>
-            <!-- Download btn -->
-            <rect x="18" y="270" width="184" height="38" rx="10" fill="#22c55e"/>
-            <text x="110" y="287" font-size="10" font-weight="800" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif">⬇ Descargar PDF</text>
-            <text x="110" y="300" font-size="7.5" text-anchor="middle" fill="rgba(255,255,255,0.75)" font-family="system-ui,sans-serif">2 hojas · 4 etiquetas</text>
+            <!-- Download btn (glowing + arrow bounce) -->
+            <rect x="18" y="270" width="184" height="38" rx="10" fill="#22c55e">
+              <animate attributeName="opacity" values="1;0.82;1" dur="1.6s" repeatCount="indefinite"/>
+            </rect>
+            <g>
+              <animateTransform attributeName="transform" type="translate" values="0 0;0 3;0 0" dur="1s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+              <text x="110" y="287" font-size="10" font-weight="800" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif">⬇ Descargar PDF</text>
+            </g>
+            <text x="110" y="301" font-size="7.5" text-anchor="middle" fill="rgba(255,255,255,0.75)" font-family="system-ui,sans-serif">2 hojas · 4 etiquetas</text>
             <!-- Home bar -->
             <rect x="85" y="360" width="50" height="4" rx="2" fill="var(--border)"/>
           </svg>
