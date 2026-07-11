@@ -305,6 +305,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px}
 .faq-item h4{font-size:15px;font-weight:700;margin-bottom:8px}
 .faq-item p{font-size:14px;color:var(--text2);line-height:1.6}
+/* FAQ ACCORDION */
+.faq-acc{max-width:760px;margin-top:40px;display:flex;flex-direction:column;gap:10px}
+.faq-acc-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s}
+.faq-acc-item.open{border-color:var(--accent)}
+.faq-acc-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;background:none;border:none;cursor:pointer;text-align:left;font-size:15px;font-weight:700;color:var(--text);font-family:inherit;line-height:1.4}
+.faq-acc-btn:hover{color:var(--accent)}
+.faq-acc-icon{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--text2);transition:transform .3s,border-color .2s,color .2s;line-height:1}
+.faq-acc-item.open .faq-acc-icon{transform:rotate(45deg);border-color:var(--accent);color:var(--accent)}
+.faq-acc-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.faq-acc-body p{padding:0 22px 18px;font-size:14px;color:var(--text2);line-height:1.7;margin:0}
 
 .footer{background:var(--surface);border-top:1px solid var(--border);padding:48px 40px 36px;display:flex;flex-direction:column;align-items:center;gap:18px}
 .footer-logo .brand-logo{height:36px}
@@ -1402,23 +1412,80 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="section">
     <div class="section-tag rv-up rv-d1">Preguntas frecuentes</div>
     <h2 class="section-title rv-up rv-d2">Todo lo que<br>necesitás saber</h2>
-    <div class="faq-grid">
-      <div class="faq-item rv-up rv-d1">
-        <h4>¿Qué pasa cuando llego al límite de PDFs?</h4>
-        <p>La plataforma te avisa cuando te acercás al límite. Al alcanzarlo, podés actualizar tu plan para seguir generando PDFs ese mes.</p>
+    <div class="faq-acc rv-up rv-d3">
+
+      <div class="faq-acc-item">
+        <button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Cómo funciona exactamente?
+          <span class="faq-acc-icon">+</span>
+        </button>
+        <div class="faq-acc-body"><p>Subís los PDFs de tus etiquetas de envío (de MercadoLibre, MercadoPago u otros), Etify las agrupa automáticamente en hojas A4 de hasta 3 etiquetas por hoja, y descargás el PDF combinado listo para imprimir. Todo ocurre en tu navegador, sin subir nada a ningún servidor.</p></div>
       </div>
-      <div class="faq-item rv-up rv-d2">
-        <h4>¿Se reinician los PDFs cada mes?</h4>
-        <p>Sí, el contador se reinicia el primer día de cada mes calendario. Los PDFs no utilizados no se acumulan para el mes siguiente.</p>
+
+      <div class="faq-acc-item">
+        <button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Funciona en el celular?
+          <span class="faq-acc-icon">+</span>
+        </button>
+        <div class="faq-acc-body"><p>Sí, Etify funciona perfectamente en Android e iOS desde el navegador, sin instalar nada. Podés seleccionar PDFs desde Google Drive, Descargas o cualquier carpeta del celular y generar el combinado en segundos.</p></div>
       </div>
-      <div class="faq-item rv-up rv-d3">
-        <h4>¿Mis PDFs quedan almacenados en algún servidor?</h4>
-        <p>No. Todo el procesamiento ocurre directamente en tu navegador. Tus etiquetas nunca salen de tu computadora.</p>
+
+      <div class="faq-acc-item">
+        <button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Cuántas etiquetas entran en una hoja A4?
+          <span class="faq-acc-icon">+</span>
+        </button>
+        <div class="faq-acc-body"><p>Hasta 3 etiquetas por hoja. Si cargás más PDFs, Etify los distribuye automáticamente en la cantidad de hojas necesarias. Por ejemplo, 7 etiquetas quedan en 3 hojas: las primeras dos con 3 etiquetas y la última con 1.</p></div>
       </div>
-      <div class="faq-item rv-up rv-d4">
-        <h4>¿Puedo cambiar de plan cuando quiera?</h4>
-        <p>Sí, podés upgradear tu plan en cualquier momento. El nuevo límite aplica inmediatamente para el resto del mes.</p>
+
+      <div class="faq-acc-item">
+        <button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Qué pasa cuando llego al límite mensual?
+          <span class="faq-acc-icon">+</span>
+        </button>
+        <div class="faq-acc-body"><p>La plataforma te avisa cuando te acercás al límite. Al alcanzarlo, podés mirar un anuncio para ganar usos extra (hasta 2 por mes) o actualizar tu plan para seguir generando PDFs sin interrupciones.</p></div>
       </div>
+
+      <div class="faq-acc-item">
+        <button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿El contador se reinicia cada mes?
+          <span class="faq-acc-icon">+</span>
+        </button>
+        <div class="faq-acc-body"><p>Sí, el contador de PDFs se reinicia automáticamente el primer día de cada mes calendario. Los usos no utilizados no se acumulan para el mes siguiente.</p></div>
+      </div>
+
+      <div class="faq-acc-item">
+        <button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Con qué método puedo pagar?
+          <span class="faq-acc-icon">+</span>
+        </button>
+        <div class="faq-acc-body"><p>Los pagos se procesan a través de MercadoPago, por lo que podés pagar con tarjeta de crédito, débito, dinero en cuenta de MercadoPago o cualquier otro método disponible en tu país. La suscripción se renueva automáticamente cada mes.</p></div>
+      </div>
+
+      <div class="faq-acc-item">
+        <button class="faq-acc-btn" onclick="toggleFaq(this)">
+          Pagué pero no se me activó el plan, ¿qué hago?
+          <span class="faq-acc-icon">+</span>
+        </button>
+        <div class="faq-acc-body"><p>Podés usar el botón "Pagué y no se me activó" que aparece en la sección de la app. Te va a pedir el número de operación de MercadoPago y lo verificamos al instante. Si el problema persiste, usá el formulario de contacto al final de esta página.</p></div>
+      </div>
+
+      <div class="faq-acc-item">
+        <button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Mis etiquetas quedan guardadas en algún servidor?
+          <span class="faq-acc-icon">+</span>
+        </button>
+        <div class="faq-acc-body"><p>No. Todo el procesamiento ocurre directamente en tu navegador. Tus PDFs nunca se envían a ningún servidor externo y no quedan almacenados en ningún lado. Tu información es tuya y solo tuya.</p></div>
+      </div>
+
+      <div class="faq-acc-item">
+        <button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Puedo cancelar la suscripción cuando quiera?
+          <span class="faq-acc-icon">+</span>
+        </button>
+        <div class="faq-acc-body"><p>Sí, podés cancelar en cualquier momento desde tu perfil en Etify o directamente desde MercadoPago. No hay penalidades ni períodos mínimos. Al cancelar, conservás el acceso hasta que finalice el período ya pagado.</p></div>
+      </div>
+
     </div>
   </div>
 
@@ -5587,6 +5654,21 @@ window.addEventListener('scroll', () => {
 /* ═══════════════════════════════════════
    SCROLL REVEAL — IntersectionObserver
 ═══════════════════════════════════════ */
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-acc-item');
+  const body = item.querySelector('.faq-acc-body');
+  const isOpen = item.classList.contains('open');
+  // Cerrar todos los demás
+  document.querySelectorAll('.faq-acc-item.open').forEach(el => {
+    el.classList.remove('open');
+    el.querySelector('.faq-acc-body').style.maxHeight = '0';
+  });
+  if (!isOpen) {
+    item.classList.add('open');
+    body.style.maxHeight = body.scrollHeight + 'px';
+  }
+}
+
 (function initReveal() {
   try {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
