@@ -4,7 +4,7 @@ import { rateLimit, getIp } from './_lib/rateLimit.js';
 import bcrypt          from 'bcryptjs';
 import { randomBytes } from 'crypto';
 
-import { sendVerificationEmail } from './email-verify.js';
+import { sendVerificationEmail, genCode } from './email-verify.js';
 
 const ADMIN_HASH = process.env.ADMIN_PASS_HASH;
 
@@ -108,11 +108,12 @@ export default async function handler(req, res) {
       if (prev.resetMonth === curMonth) inheritedUsed = prev.used || 0;
     }
 
-    const verifyToken = randomBytes(24).toString('hex');
+    const verifyToken = genCode();
+    const verifyTokenExp = new Date(Date.now() + 15 * 60 * 1000).toISOString();
     const userData = {
       username, email, pass: await bcrypt.hash(pass, 12),
-      plan: 'free', active: true, // siempre free hasta que paguen
-      emailVerified: false, emailVerifyToken: verifyToken,
+      plan: 'free', active: true,
+      emailVerified: false, emailVerifyToken: verifyToken, emailVerifyTokenExp: verifyTokenExp,
       displayName: username, avatar:'👤', nameColor:'',
       invoices:[], history:[],
       notifications:[{ id:Date.now().toString(), icon:'🎉', title:'¡Bienvenido a Etify!',
