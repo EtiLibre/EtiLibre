@@ -112,7 +112,6 @@
   gtag('config', 'G-TJNJ98CJWT');
 </script>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6394476482927745" crossorigin="anonymous"></script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="apple-touch-icon" href="/favicon.svg">
 <!-- Firebase SDK (Google Auth) -->
@@ -1443,7 +1442,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           ¿Qué pasa cuando llego al límite mensual?
           <span class="faq-acc-icon">+</span>
         </button>
-        <div class="faq-acc-body"><p>La plataforma te avisa cuando te acercás al límite. Al alcanzarlo, podés mirar un anuncio para ganar usos extra (hasta 2 por mes) o actualizar tu plan para seguir generando PDFs sin interrupciones.</p></div>
+        <div class="faq-acc-body"><p>La plataforma te avisa cuando te acercás al límite. Al alcanzarlo, podés actualizar tu plan para seguir generando PDFs sin interrupciones.</p></div>
       </div>
 
       <div class="faq-acc-item">
@@ -1939,34 +1938,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="modal-card">
     <div class="modal-icon">🚀</div>
     <h3 id="modal-title">Límite del plan alcanzado</h3>
-    <p id="modal-body">Usaste todos los PDFs disponibles de tu plan este mes. Actualizá tu plan para seguir generando etiquetas.</p>
+    <p id="modal-body">Usaste los 2 PDFs disponibles del plan gratuito este mes. Elegí un plan para seguir generando etiquetas sin límites.</p>
     <div class="modal-actions">
       <button class="btn-modal-primary" onclick="goUpgrade()">Ver planes →</button>
-      <button class="btn-modal-ghost" id="btn-watch-ad" style="display:none" onclick="openAdModal()">📺 Ver un anuncio (+1 uso)</button>
       <button class="btn-modal-ghost" onclick="closeLimitModal()">Ahora no</button>
     </div>
-    <p id="modal-ad-note" style="display:none;font-size:11px;color:var(--text3);margin-top:8px"></p>
-  </div>
-</div>
-
-<!-- AD MODAL -->
-<div class="modal-overlay" id="ad-modal" style="display:none">
-  <div class="modal-card" style="max-width:380px">
-    <div class="modal-icon">📺</div>
-    <h3>Mirá este anuncio</h3>
-    <p style="font-size:13px;color:var(--text2)">Vas a obtener 1 uso extra al finalizar.</p>
-    <div style="margin:16px 0;min-height:100px;overflow:hidden" id="ad-slot-wrap">
-      <ins class="adsbygoogle"
-           id="ad-slot-ins"
-           style="display:block;width:100%;min-height:100px"
-           data-ad-client="ca-pub-6394476482927745"
-           data-ad-slot="4333262139"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-    </div>
-    <div id="ad-countdown" style="font-size:22px;font-weight:800;color:var(--accent);margin-bottom:12px">5</div>
-    <button class="btn-modal-primary" id="btn-ad-claim" style="display:none;width:100%" onclick="claimAdBonus()">✅ Obtener uso extra</button>
-    <button class="btn-modal-ghost" onclick="closeAdModal()" style="margin-top:8px;width:100%">Cancelar</button>
   </div>
 </div>
 
@@ -2583,7 +2559,7 @@ function getUsage(username) {
   const now = new Date();
   const curMonth = now.getFullYear() * 100 + now.getMonth();
   if (u.resetMonth !== curMonth) {
-    if (username === currentUser && _userData) { _userData.used = 0; _userData.adExtensions = 0; _userData.resetMonth = curMonth; }
+    if (username === currentUser && _userData) { _userData.used = 0; _userData.resetMonth = curMonth; }
   }
   return { used: u.used || 0, limit: PLAN_CONFIG[u.plan || 'free']?.limit || 2 };
 }
@@ -3613,82 +3589,17 @@ function updateUsageUI() {
    LIMIT MODAL
 ═══════════════════════════════════════════════════════ */
 function showLimitModal(isUpgradePrompt = false) {
-  const { used, limit } = getUsage(currentUser);
+  const { limit } = getUsage(currentUser);
+  const planKey = getUserPlan(currentUser);
   document.getElementById('modal-title').textContent = isUpgradePrompt ? 'Ampliar tu plan' : '¡Límite alcanzado!';
   document.getElementById('modal-body').textContent  = isUpgradePrompt
-    ? `Tu plan actual permite ${limit} hojas por mes. Actualizá para generar más este mes.`
-    : `Usaste las ${limit} hojas disponibles de tu plan este mes. Actualizá tu plan para seguir generando etiquetas.`;
-
-  const adBtn  = document.getElementById('btn-watch-ad');
-  const adNote = document.getElementById('modal-ad-note');
-  const planKey = getUserPlan(currentUser);
-  const adExts  = _userData?.adExtensions || 0;
-  if (planKey === 'free') {
-    const remaining = 2 - adExts;
-    if (remaining > 0) {
-      adBtn.style.display  = '';
-      adNote.style.display = '';
-      adNote.textContent   = `Podés ver ${remaining} anuncio${remaining!==1?'s':''} más este mes para obtener usos extra.`;
-    } else {
-      adBtn.style.display  = 'none';
-      adNote.style.display = '';
-      adNote.textContent   = 'Ya usaste tus 2 anuncios disponibles este mes.';
-    }
-  } else {
-    adBtn.style.display  = 'none';
-    adNote.style.display = 'none';
-  }
-
+    ? `Tu plan actual permite ${limit} hojas por mes. Elegí un plan para generar más.`
+    : planKey === 'free'
+      ? 'Usaste los 2 PDFs disponibles del plan gratuito este mes. Elegí un plan para seguir generando etiquetas sin límites.'
+      : `Usaste las ${limit} hojas disponibles de tu plan este mes. Actualizá tu plan para seguir generando etiquetas.`;
   document.getElementById('limit-modal').style.display = 'flex';
 }
 function closeLimitModal() { document.getElementById('limit-modal').style.display = 'none'; }
-
-let _adTimer = null;
-let _adPushed = false;
-function openAdModal() {
-  closeLimitModal();
-  document.getElementById('ad-modal').style.display = 'flex';
-  document.getElementById('btn-ad-claim').style.display = 'none';
-  // Inicializar AdSense recién cuando el modal es visible (evita error availableWidth=0)
-  if (!_adPushed) {
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      _adPushed = true;
-    } catch (_) {}
-  }
-  let secs = 5;
-  document.getElementById('ad-countdown').style.display = 'block';
-  document.getElementById('ad-countdown').textContent = secs;
-  _adTimer = setInterval(() => {
-    secs--;
-    if (secs > 0) {
-      document.getElementById('ad-countdown').textContent = secs;
-    } else {
-      clearInterval(_adTimer);
-      document.getElementById('ad-countdown').style.display = 'none';
-      document.getElementById('btn-ad-claim').style.display = '';
-    }
-  }, 1000);
-}
-function closeAdModal() {
-  if (_adTimer) { clearInterval(_adTimer); _adTimer = null; }
-  document.getElementById('ad-modal').style.display = 'none';
-}
-async function claimAdBonus() {
-  try {
-    const data = await _api('/api/user', 'PUT', { action:'watch-ad' });
-    if (_userData) {
-      _userData.adExtensions = data.adExtensions;
-      _userData.used = Math.max(0, (_userData.used || 1) - 1);
-    }
-    closeAdModal();
-    updateUsageUI();
-    alert('✅ ¡Uso extra añadido! Ya podés generar otro PDF.');
-  } catch (e) {
-    closeAdModal();
-    alert('No se pudo aplicar el bono: ' + (e.message || 'Error'));
-  }
-}
 
 async function submitContactForm(e) {
   e.preventDefault();
@@ -5228,13 +5139,11 @@ function renderSAStats() {
     return sum + (prices[u.plan] || 0);
   }, 0);
 
-  const totalAds = users.reduce((sum, u) => sum + (u.adExtensions || 0), 0);
   document.getElementById('sa-stats').innerHTML = `
     <div class="sa-stat"><div class="sa-stat-val">${total}</div><div class="sa-stat-label">Usuarios registrados</div></div>
     <div class="sa-stat"><div class="sa-stat-val" style="color:var(--teal)">${active}</div><div class="sa-stat-label">Cuentas activas (pagaron)</div></div>
     <div class="sa-stat"><div class="sa-stat-val" style="color:var(--danger)">${inactive}</div><div class="sa-stat-label">Sin pago pendiente</div></div>
     <div class="sa-stat"><div class="sa-stat-val">$${revenue.toLocaleString('es-AR')}</div><div class="sa-stat-label">Ingresos estimados / mes</div></div>
-    <div class="sa-stat"><div class="sa-stat-val" style="color:var(--blue)">${totalAds}</div><div class="sa-stat-label">Anuncios vistos este mes</div></div>
   `;
 }
 

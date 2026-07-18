@@ -84,21 +84,6 @@ export default async function handler(req, res) {
       const updated = await ref.get();
       return res.json({ ok:true, used: updated.data().used });
     }
-    if (action === 'watch-ad') {
-      // Usar transacción para evitar race condition
-      const newExts = await db.runTransaction(async tx => {
-        const doc = await tx.get(ref);
-        const d = doc.data();
-        const now = new Date();
-        const curMonth = now.getFullYear() * 100 + now.getMonth();
-        const adExts = d.resetMonth !== curMonth ? 0 : (d.adExtensions || 0);
-        if (adExts >= 2) throw new Error('LIMIT');
-        tx.update(ref, { adExtensions: adExts + 1 });
-        return adExts + 1;
-      }).catch(e => { if (e.message === 'LIMIT') return null; throw e; });
-      if (newExts === null) return res.status(400).json({ error: 'Límite de anuncios alcanzado' });
-      return res.json({ ok:true, adExtensions: newExts });
-    }
     if (action === 'help-activate') {
       const VALID_PLANS = ['starter','pro','business','premium','starter-anual','pro-anual','business-anual','premium-anual'];
       const { planKey } = req.body;
