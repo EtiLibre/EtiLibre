@@ -3342,6 +3342,7 @@ function cancelPaymentGate() {
 ═══════════════════════════════════════════════════════ */
 async function enterApp(username) {
   currentUser = username;
+  history.pushState({ user: username }, '', '/' + username);
   refreshTopbar();
   updateUsageUI();
   updateNotifBadge();
@@ -3562,6 +3563,7 @@ function showToast(msg, duration = 6000) {
 function doLogout() {
   _clearToken();
   currentUser = null;
+  history.pushState({}, '', '/');
   showScreen('screen-landing');
 }
 

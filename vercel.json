@@ -11,6 +11,10 @@
     {
       "source": "/",
       "destination": "/EtiLibre.html"
+    },
+    {
+      "source": "/:path((?!api|__).+)",
+      "destination": "/EtiLibre.html"
     }
   ],
   "headers": [
