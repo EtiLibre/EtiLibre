@@ -4950,8 +4950,119 @@ async function _refreshSAUsers() {
   _refreshSAPromos();
 }
 
+function _injectAdminPanel() {
+  const el = document.getElementById('screen-superadmin');
+  if (!el || el.dataset.injected) return;
+  el.dataset.injected = '1';
+  el.innerHTML = `
+  <nav class="sa-topbar">
+    <div class="sa-topbar-left">
+      <span class="sa-logo">⚙️ Panel Super Admin</span>
+      <span class="sa-badge">ADMIN</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-sa" onclick="renderSuperAdmin()">↺ Actualizar</button>
+      <button class="btn-logout" onclick="showScreen('screen-app')">← Volver a la app</button>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </nav>
+  <div class="sa-main">
+    <div class="sa-stats" id="sa-stats"></div>
+    <p class="sa-section-title">Usuarios registrados</p>
+    <div class="sa-toolbar">
+      <input class="sa-search" id="sa-search" type="text" placeholder="Buscar por nombre, email o plan…" oninput="renderSAUsers()"/>
+      <select class="sa-filter" id="sa-filter" onchange="renderSAUsers()">
+        <option value="">Todos los planes</option>
+        <option value="free">Free</option>
+        <option value="starter">Starter</option>
+        <option value="pro">Pro</option>
+        <option value="business">Business</option>
+        <option value="premium">Premium</option>
+      </select>
+      <select class="sa-filter" id="sa-filter-status" onchange="renderSAUsers()">
+        <option value="">Todos los estados</option>
+        <option value="active">Activos (pagaron)</option>
+        <option value="inactive">Sin pago</option>
+      </select>
+    </div>
+    <div class="sa-user-list" id="sa-user-list"></div>
+
+    <div style="margin-top:48px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <p class="sa-section-title" style="margin:0">Bajas y eliminados</p>
+        <button class="btn-sa success" onclick="exportDeletedCSV()">⬇ Exportar CSV</button>
+      </div>
+      <div class="sa-tos-table-wrap">
+        <table class="sa-tos-table" id="sa-deleted-table">
+          <thead><tr><th>Usuario</th><th>Email</th><th>Plan que tenía</th><th>Fecha de baja</th><th>¿Tiene factura?</th><th>Suscripción MP</th></tr></thead>
+          <tbody id="sa-deleted-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="margin-top:48px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <p class="sa-section-title" style="margin:0">🎟️ Códigos Promocionales</p>
+        <button class="btn-sa success" onclick="togglePromoForm()">+ Nuevo código</button>
+      </div>
+      <div id="promo-form" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:20px;margin-bottom:20px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Código</label>
+            <input id="pf-code" type="text" placeholder="ETIFY2026" maxlength="30"
+              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box;text-transform:uppercase;letter-spacing:1px"
+              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Plan</label>
+            <select id="pf-plan" style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+              <option value="starter">Starter</option><option value="pro">Pro</option><option value="business">Business</option><option value="premium">Premium</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Máx. usos</label>
+            <input id="pf-maxuses" type="number" min="1" max="10000" value="1"
+              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Duración (días, 0=permanente)</label>
+            <input id="pf-days" type="number" min="0" value="30"
+              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sa success" onclick="saCreatePromo()">Crear código</button>
+          <button class="btn-sa" onclick="togglePromoForm()">Cancelar</button>
+        </div>
+        <div id="promo-form-msg" style="display:none;margin-top:10px;font-size:13px;border-radius:6px;padding:8px 12px"></div>
+      </div>
+      <div class="sa-table-wrap">
+        <table class="sa-table" id="sa-promos-table">
+          <thead><tr><th>Código</th><th>Plan</th><th>Usos</th><th>Duración</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+          <tbody id="sa-promos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="margin-top:48px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <p class="sa-section-title" style="margin:0">Registro de aceptación de Términos y Condiciones</p>
+        <button class="btn-sa success" onclick="exportTosCSV()">⬇ Exportar CSV</button>
+      </div>
+      <div class="sa-tos-table-wrap">
+        <table class="sa-tos-table" id="sa-tos-table">
+          <thead><tr><th>#</th><th>Usuario</th><th>Nombre</th><th>Correo electrónico</th><th>Plan</th><th>Registro</th><th>T&amp;C aceptados</th></tr></thead>
+          <tbody id="sa-tos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <input type="file" id="sa-invoice-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="saHandleInvoiceUpload(event)"/>`;
+}
+
 async function openSuperAdmin() {
   if (currentUser !== 'admin') return;
+  _injectAdminPanel();
   await _refreshSAUsers();
   renderSuperAdmin();
   showScreen('screen-superadmin');
@@ -5321,144 +5432,9 @@ async function saNotifyUser(username) {
 </script>
 
 <!-- ════════════════════════════════════════════════════
-     SCREEN: SUPER ADMIN
+     SCREEN: SUPER ADMIN (inyectado dinámicamente al autenticar)
 ════════════════════════════════════════════════════════ -->
-<div id="screen-superadmin" class="screen">
-  <nav class="sa-topbar">
-    <div class="sa-topbar-left">
-      <span class="sa-logo">⚙️ Panel Super Admin</span>
-      <span class="sa-badge">ADMIN</span>
-    </div>
-    <div style="display:flex;gap:10px">
-      <button class="btn-sa" onclick="renderSuperAdmin()">↺ Actualizar</button>
-      <button class="btn-logout" onclick="showScreen('screen-app')">← Volver a la app</button>
-      <button class="btn-logout" onclick="doLogout()">Salir</button>
-    </div>
-  </nav>
-  <div class="sa-main">
-    <!-- Stats -->
-    <div class="sa-stats" id="sa-stats"></div>
-    <!-- Toolbar -->
-    <p class="sa-section-title">Usuarios registrados</p>
-    <div class="sa-toolbar">
-      <input class="sa-search" id="sa-search" type="text" placeholder="Buscar por nombre, email o plan…" oninput="renderSAUsers()"/>
-      <select class="sa-filter" id="sa-filter" onchange="renderSAUsers()">
-        <option value="">Todos los planes</option>
-        <option value="free">Free</option>
-        <option value="starter">Starter</option>
-        <option value="pro">Pro</option>
-        <option value="business">Business</option>
-        <option value="premium">Premium</option>
-      </select>
-      <select class="sa-filter" id="sa-filter-status" onchange="renderSAUsers()">
-        <option value="">Todos los estados</option>
-        <option value="active">Activos (pagaron)</option>
-        <option value="inactive">Sin pago</option>
-      </select>
-    </div>
-    <div class="sa-user-list" id="sa-user-list"></div>
-
-    <!-- Bajas y eliminados -->
-    <div style="margin-top:48px">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0">Bajas y eliminados</p>
-        <button class="btn-sa success" onclick="exportDeletedCSV()">⬇ Exportar CSV</button>
-      </div>
-      <div class="sa-tos-table-wrap">
-        <table class="sa-tos-table" id="sa-deleted-table">
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Email</th>
-              <th>Plan que tenía</th>
-              <th>Fecha de baja</th>
-              <th>¿Tiene factura?</th>
-              <th>Suscripción MP</th>
-            </tr>
-          </thead>
-          <tbody id="sa-deleted-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Códigos Promocionales -->
-    <div style="margin-top:48px">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0">🎟️ Códigos Promocionales</p>
-        <button class="btn-sa success" onclick="togglePromoForm()">+ Nuevo código</button>
-      </div>
-      <!-- Formulario crear código -->
-      <div id="promo-form" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:20px;margin-bottom:20px">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px">
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Código</label>
-            <input id="pf-code" type="text" placeholder="ETIFY2026" maxlength="30"
-              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box;text-transform:uppercase;letter-spacing:1px"
-              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Plan</label>
-            <select id="pf-plan" style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
-              <option value="starter">Starter</option>
-              <option value="pro">Pro</option>
-              <option value="business">Business</option>
-              <option value="premium">Premium</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Máx. usos</label>
-            <input id="pf-maxuses" type="number" min="1" max="10000" value="1" placeholder="1"
-              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Duración (días, 0=permanente)</label>
-            <input id="pf-days" type="number" min="0" value="30" placeholder="30"
-              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
-          </div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn-sa success" onclick="saCreatePromo()">Crear código</button>
-          <button class="btn-sa" onclick="togglePromoForm()">Cancelar</button>
-        </div>
-        <div id="promo-form-msg" style="display:none;margin-top:10px;font-size:13px;border-radius:6px;padding:8px 12px"></div>
-      </div>
-      <!-- Tabla de códigos -->
-      <div class="sa-table-wrap">
-        <table class="sa-table" id="sa-promos-table">
-          <thead><tr><th>Código</th><th>Plan</th><th>Usos</th><th>Duración</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
-          <tbody id="sa-promos-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Registro T&C -->
-    <div style="margin-top:48px">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0">Registro de aceptación de Términos y Condiciones</p>
-        <button class="btn-sa success" onclick="exportTosCSV()">⬇ Exportar CSV</button>
-      </div>
-      <div class="sa-tos-table-wrap">
-        <table class="sa-tos-table" id="sa-tos-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Usuario</th>
-              <th>Nombre</th>
-              <th>Correo electrónico</th>
-              <th>Plan</th>
-              <th>Registro</th>
-              <th>T&C aceptados</th>
-            </tr>
-          </thead>
-          <tbody id="sa-tos-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- INPUT FILE oculto para subir facturas desde el admin -->
-<input type="file" id="sa-invoice-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="saHandleInvoiceUpload(event)"/>
+<div id="screen-superadmin" class="screen"></div>
 
 <!-- ════════════════════════════════════════════════════
      MODAL BLOQUEANTE: ACEPTAR T&C (Google users)
