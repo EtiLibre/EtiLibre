@@ -1872,7 +1872,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </select>
       </div>
       <div class="opt-group">
-        <span class="opt-label">Tipo de etiqueta</span>
+        <span class="opt-label">Proveedor</span>
+        <select class="opt-select" id="carrier-select" onchange="onCarrierChange()">
+          <option value="ml">Mercado Libre</option>
+          <option value="ca">Correo Argentino</option>
+        </select>
+      </div>
+      <div class="opt-group" id="opt-crop-header">
+        <span class="opt-label">Opciones ML</span>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text)">
           <input type="checkbox" id="crop-header-check" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
           Omitir encabezado (Pack ID)
@@ -3665,7 +3672,13 @@ function closeConfirmModal() { document.getElementById('confirm-modal').style.di
    DROP ZONE
 ═══════════════════════════════════════════════════════ */
 const PER_SHEET = 3;
+let labelMode = 'ml'; // 'ml' | 'ca'
 let slots = [];
+
+function onCarrierChange() {
+  labelMode = document.getElementById('carrier-select').value;
+  document.getElementById('opt-crop-header').style.display = labelMode === 'ml' ? '' : 'none';
+}
 let downloadUrl = null;
 
 const dropZone  = document.getElementById('drop-zone');
@@ -3862,42 +3875,87 @@ async function renderPageToCanvas(buf) {
   return c;
 }
 
+// Detecta el bounding box de contenido no-blanco en un canvas (para CA)
+function detectLabelBounds(canvas) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const d = ctx.getImageData(0, 0, w, h).data;
+  let x0 = w, x1 = 0, y0 = h, y1 = 0;
+  const step = 4; // samplear cada 4px para velocidad
+  for (let y = 0; y < h; y += step) {
+    for (let x = 0; x < w; x += step) {
+      const i = (y * w + x) * 4;
+      if ((d[i] + d[i+1] + d[i+2]) / 3 < 230) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x;
+        if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+    }
+  }
+  if (x1 < x0) return { x:0, y:0, w:canvas.width, h:canvas.height }; // fallback: página entera
+  const pad = Math.round(RENDER_SCALE * 5);
+  return {
+    x: Math.max(0, x0 - pad),
+    y: Math.max(0, y0 - pad),
+    w: Math.min(w - Math.max(0, x0 - pad), x1 - x0 + 1 + 2*pad),
+    h: Math.min(h - Math.max(0, y0 - pad), y1 - y0 + 1 + 2*pad)
+  };
+}
+
 async function buildSheetCanvas(group, gapPt, lineType, cropHeader) {
-  const n        = group.length;
-  const cropX_px = Math.round(pt2px(CROP.x));
-  const cropW_px = Math.round(pt2px(CROP.w));
-  const cropH_px = Math.round(pt2px(CROP.h));
-  const gapPx    = Math.round(pt2px(gapPt));
-  const outW_px  = Math.round(pt2px(A4_W_PT));
-  const outH_px  = Math.round(pt2px(A4_H_PT));
+  const n      = group.length;
+  const gapPx  = Math.round(pt2px(gapPt));
+  const outW   = Math.round(pt2px(A4_W_PT));
+  const outH   = Math.round(pt2px(A4_H_PT));
 
   const canvas = document.createElement('canvas');
-  canvas.width = outW_px; canvas.height = outH_px;
+  canvas.width = outW; canvas.height = outH;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, outW_px, outH_px);
+  ctx.fillRect(0, 0, outW, outH);
 
-  const cropped = [];
-  for (const slot of group) {
-    const src = await renderPageToCanvas(slot.buf);
-    // Si la página es más alta que el estándar, tiene encabezado Pack ID
-    const pagePt = src.height / RENDER_SCALE;
-    let cropY_px = Math.round(pt2px(CROP.y));
-    if (cropHeader && pagePt > STANDARD_LABEL_H_PT + 20) {
-      const extraPt = pagePt - STANDARD_LABEL_H_PT;
-      cropY_px = Math.round(pt2px(CROP.y + extraPt));
+  const dividers = []; // posiciones x de líneas de corte
+
+  if (labelMode === 'ca') {
+    // Correo Argentino: auto-detectar área de contenido, escalar a slot y centrar
+    const slotW = Math.round((outW - gapPx * (n - 1)) / n);
+    for (let i = 0; i < n; i++) {
+      const src = await renderPageToCanvas(group[i].buf);
+      const b   = detectLabelBounds(src);
+      const sc  = Math.min(slotW / b.w, outH / b.h);
+      const dw  = Math.round(b.w * sc);
+      const dh  = Math.round(b.h * sc);
+      const sx  = i * (slotW + gapPx);
+      const ox  = sx + Math.round((slotW - dw) / 2);
+      const oy  = Math.round((outH - dh) / 2);
+      ctx.drawImage(src, b.x, b.y, b.w, b.h, ox, oy, dw, dh);
+      if (i < n - 1) dividers.push(sx + slotW + Math.round(gapPx / 2));
     }
-    const cc  = document.createElement('canvas');
-    cc.width  = cropW_px; cc.height = cropH_px;
-    cc.getContext('2d').drawImage(src, cropX_px, cropY_px, cropW_px, cropH_px, 0, 0, cropW_px, cropH_px);
-    cropped.push(cc);
+  } else {
+    // Mercado Libre: crop fijo calibrado
+    const cx = Math.round(pt2px(CROP.x));
+    const cw = Math.round(pt2px(CROP.w));
+    const ch = Math.round(pt2px(CROP.h));
+    const cropped = [];
+    for (const slot of group) {
+      const src    = await renderPageToCanvas(slot.buf);
+      const pagePt = src.height / RENDER_SCALE;
+      let cy = Math.round(pt2px(CROP.y));
+      if (cropHeader && pagePt > STANDARD_LABEL_H_PT + 20)
+        cy = Math.round(pt2px(CROP.y + (pagePt - STANDARD_LABEL_H_PT)));
+      const cc = document.createElement('canvas');
+      cc.width = cw; cc.height = ch;
+      cc.getContext('2d').drawImage(src, cx, cy, cw, ch, 0, 0, cw, ch);
+      cropped.push(cc);
+    }
+    const totalW = cw * n + gapPx * (n - 1);
+    const startX = Math.round((outW - totalW) / 2);
+    const startY = Math.round((outH - ch) / 2);
+    for (let i = 0; i < n; i++) {
+      const lx = startX + i * (cw + gapPx);
+      ctx.drawImage(cropped[i], lx, startY);
+      if (i < n - 1) dividers.push(lx + cw + Math.round(gapPx / 2));
+    }
   }
-
-  const totalW = cropW_px * n + gapPx * (n - 1);
-  const startX = Math.round((outW_px - totalW) / 2);
-  const startY = Math.round((outH_px - cropH_px) / 2);
-
-  for (let i = 0; i < n; i++) ctx.drawImage(cropped[i], startX + i*(cropW_px+gapPx), startY);
 
   if (lineType > 0 && n > 1) {
     ctx.strokeStyle = 'rgba(120,120,120,0.7)';
@@ -3905,9 +3963,8 @@ async function buildSheetCanvas(group, gapPt, lineType, cropHeader) {
     ctx.setLineDash(lineType === 1
       ? [Math.round(RENDER_SCALE*5), Math.round(RENDER_SCALE*4)]
       : []);
-    for (let i = 0; i < n-1; i++) {
-      const lx = startX + (i+1)*cropW_px + i*gapPx + Math.round(gapPx/2);
-      ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,outH_px); ctx.stroke();
+    for (const lx of dividers) {
+      ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, outH); ctx.stroke();
     }
   }
   return canvas;
