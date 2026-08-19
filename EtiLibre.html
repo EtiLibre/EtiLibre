@@ -3876,29 +3876,35 @@ async function renderPageToCanvas(buf) {
 }
 
 // Detecta el bounding box de contenido no-blanco en un canvas (para CA)
+// Usa conteo por columna/fila para ignorar píxeles sueltos (footers, ruido de compresión)
 function detectLabelBounds(canvas) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   const d = ctx.getImageData(0, 0, w, h).data;
-  let x0 = w, x1 = 0, y0 = h, y1 = 0;
-  const step = 4; // samplear cada 4px para velocidad
+  const THRESH = 190; // solo píxeles claramente oscuros (texto, códigos, bordes)
+  const step   = 2;  // samplear cada 2px
+  const MIN    = 6;  // mínimo de muestras oscuras en una columna/fila para considerarla contenido
+
+  const colC = new Int32Array(w);
+  const rowC = new Int32Array(h);
   for (let y = 0; y < h; y += step) {
     for (let x = 0; x < w; x += step) {
       const i = (y * w + x) * 4;
-      if ((d[i] + d[i+1] + d[i+2]) / 3 < 230) {
-        if (x < x0) x0 = x; if (x > x1) x1 = x;
-        if (y < y0) y0 = y; if (y > y1) y1 = y;
-      }
+      if ((d[i] + d[i+1] + d[i+2]) / 3 < THRESH) { colC[x]++; rowC[y]++; }
     }
   }
-  if (x1 < x0) return { x:0, y:0, w:canvas.width, h:canvas.height }; // fallback: página entera
-  const pad = Math.round(RENDER_SCALE * 5);
-  return {
-    x: Math.max(0, x0 - pad),
-    y: Math.max(0, y0 - pad),
-    w: Math.min(w - Math.max(0, x0 - pad), x1 - x0 + 1 + 2*pad),
-    h: Math.min(h - Math.max(0, y0 - pad), y1 - y0 + 1 + 2*pad)
-  };
+
+  let x0 = 0, x1 = w-1, y0 = 0, y1 = h-1;
+  for (let x = 0; x < w; x++)   if (colC[x] >= MIN) { x0 = x; break; }
+  for (let x = w-1; x >= 0; x--) if (colC[x] >= MIN) { x1 = x; break; }
+  for (let y = 0; y < h; y++)   if (rowC[y] >= MIN) { y0 = y; break; }
+  for (let y = h-1; y >= 0; y--) if (rowC[y] >= MIN) { y1 = y; break; }
+
+  if (x1 <= x0 || y1 <= y0) return { x:0, y:0, w, h }; // fallback: página entera
+  const pad = Math.round(RENDER_SCALE * 8);
+  const rx  = Math.max(0, x0 - pad);
+  const ry  = Math.max(0, y0 - pad);
+  return { x:rx, y:ry, w:Math.min(w - rx, x1-x0+1+2*pad), h:Math.min(h - ry, y1-y0+1+2*pad) };
 }
 
 async function buildSheetCanvas(group, gapPt, lineType, cropHeader) {
