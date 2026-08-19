@@ -960,9 +960,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <!-- HERO -->
   <section class="hero">
     <div class="hero-glow"></div>
-    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Compatible con etiquetas de Mercado Libre</div>
+    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Mercado Libre &amp; Correo Argentino</div>
     <h1>Combinar etiquetas<br><em>nunca fue tan fácil</em></h1>
-    <p class="hero-sub">Subí tus PDFs de etiquetas y Etify las acomoda automáticamente en hojas A4 listas para imprimir. Sin Illustrator. Sin complicaciones.</p>
+    <p class="hero-sub">Subí tus PDFs de etiquetas de Mercado Libre o Correo Argentino y Etify las acomoda automáticamente en hojas A4 listas para imprimir. Sin Illustrator. Sin complicaciones.</p>
     <div class="hero-actions">
       <button class="btn-hero-primary" onclick="showScreen('screen-register')">Empezar gratis</button>
       <button class="btn-hero-ghost" onclick="scrollToPricing()">Ver planes →</button>
@@ -3027,12 +3027,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (params.get('email_verified') === '1') {
     history.replaceState(null, '', '/');
     if (_userData) { _userData.emailVerified = true; _cacheUser(_userData); }
-    // Entrar a la app si hay sesión activa
     if (_getToken() && !currentUser) {
       _api('/api/auth').then(data => { _cacheUser(data); enterApp(data.username); }).catch(() => {});
     } else {
       alert('✅ ¡Email verificado! Ya podés generar etiquetas.');
     }
+    return;
+  }
+
+  // Auto-login: si hay token guardado, intentar restaurar la sesión
+  if (_getToken() && !currentUser) {
+    _api('/api/auth')
+      .then(data => { _cacheUser(data); enterApp(data.username); })
+      .catch(() => { _clearToken(); }); // token expirado → limpiar y mostrar landing
   }
 });
 
