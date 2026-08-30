@@ -68,8 +68,10 @@
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Etify",
+  "description": "Etify es una herramienta web argentina que combina etiquetas de envío de Mercado Libre y Correo Argentino en hojas A4 listas para imprimir, directamente en el navegador sin subir archivos a ningún servidor.",
   "url": "https://etify.com.ar",
   "logo": "https://etify.com.ar/og-image.png",
+  "foundingLocation": { "@type": "Country", "name": "Argentina" },
   "contactPoint": {
     "@type": "ContactPoint",
     "contactType": "customer support",
@@ -1609,6 +1611,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
   </section>
 
+  <!-- ACERCA DE -->
+  <section id="nosotros" style="background:var(--surface);border-top:1px solid var(--border);padding:72px 40px">
+    <div style="max-width:760px;margin:0 auto">
+      <h2 style="font-size:clamp(24px,4vw,36px);font-weight:900;letter-spacing:-1px;margin-bottom:16px">Acerca de Etify</h2>
+      <p style="font-size:15px;color:var(--text2);line-height:1.75;margin-bottom:20px">
+        Etify es una herramienta web argentina diseñada para vendedores de Mercado Libre y Correo Argentino. Nació de una necesidad concreta del comercio electrónico local: las etiquetas de envío llegan como PDFs individuales, pero imprimirlas de a una desperdicia papel, tiempo y dinero. Etify resuelve ese problema agrupando automáticamente hasta 3 etiquetas por hoja A4, generando un PDF listo para imprimir en segundos.
+      </p>
+      <p style="font-size:15px;color:var(--text2);line-height:1.75;margin-bottom:28px">
+        La plataforma funciona 100% en el navegador: ningún archivo se sube a servidores externos, no requiere instalación y es compatible con cualquier dispositivo. Está optimizada para el flujo de trabajo real de los vendedores argentinos que operan con Mercado Libre, MercadoPago y Correo Argentino.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px">
+          <div style="font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Privacidad real</div>
+          <div style="font-size:14px;color:var(--text2);line-height:1.6">Tus PDFs nunca salen de tu dispositivo. El procesamiento es local, en tu propio navegador.</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px">
+          <div style="font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Hecho para Argentina</div>
+          <div style="font-size:14px;color:var(--text2);line-height:1.6">Compatible con etiquetas de Mercado Libre, MercadoPago y Correo Argentino. Precios en pesos.</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px">
+          <div style="font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Sin instalación</div>
+          <div style="font-size:14px;color:var(--text2);line-height:1.6">Funciona desde cualquier navegador en PC, Mac, Android e iOS. Sin descargas, sin cuentas adicionales.</div>
+        </div>
+      </div>
+      <p style="font-size:14px;color:var(--text3);line-height:1.7">
+        <strong style="color:var(--text2)">Misión:</strong> democratizar las herramientas de logística para que cualquier vendedor online, sin importar su volumen, pueda operar con la misma eficiencia que una gran empresa. Sin software costoso, sin curvas de aprendizaje, sin complicaciones.
+      </p>
+    </div>
+  </section>
+
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-logo"><svg class="brand-logo brand-logo-dark" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify"/></svg><svg class="brand-logo brand-logo-white" viewBox="0 0 512 197.93" xmlns="http://www.w3.org/2000/svg" aria-label="Etify"><use href="#logo-etify-white"/></svg></div>
@@ -1619,6 +1651,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       </a>
     </div>
     <div class="footer-links">
+      <a class="footer-link-btn" href="#nosotros" style="text-decoration:none">Acerca de Etify</a>
+      <span class="footer-sep">·</span>
       <button class="footer-link-btn" onclick="openModal('modal-tos')">Términos y Condiciones</button>
       <span class="footer-sep">·</span>
       <button class="footer-link-btn" onclick="openModal('modal-privacy')">Política de Privacidad</button>
