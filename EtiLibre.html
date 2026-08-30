@@ -1038,6 +1038,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </a>
     <div class="nav-actions">
       <button class="btn-theme-toggle" id="theme-toggle-landing" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+      <a href="#nosotros" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text2)'">Acerca de</a>
       <button class="btn-nav-ghost" onclick="showScreen('screen-login')">Iniciar sesión</button>
       <button class="btn-nav-cta" onclick="scrollToPricing()">Ver planes</button>
     </div>
@@ -1659,7 +1660,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <span class="footer-sep">·</span>
       <button class="footer-link-btn" onclick="openModal('modal-cookies')">Política de Cookies</button>
     </div>
-    <div class="footer-copy">© 2025 Etify · Herramienta independiente compatible con etiquetas de envío</div>
+    <div class="footer-copy">© 2026 Etify · Herramienta web para etiquetas de envío de Mercado Libre y Correo Argentino</div>
   </footer>
 </div>
 
@@ -3124,6 +3125,35 @@ async function acceptGoogleTos() {
     if (btn) { btn.disabled = false; btn.textContent = 'Aceptar y continuar'; }
   }
 }
+
+// Gestión de meta tags SEO por ruta SPA
+(function() {
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  const canonical = document.querySelector('link[rel="canonical"]');
+  const robotsMeta = document.querySelector('meta[name="robots"]');
+
+  const noindexRoutes = {
+    '/login':                    'Iniciar sesión | Etify',
+    '/terminos-y-condiciones':   'Términos y Condiciones | Etify',
+    '/politica-de-privacidad':   'Política de Privacidad | Etify',
+    '/politica-de-cookies':      'Política de Cookies | Etify',
+  };
+
+  if (noindexRoutes[path]) {
+    // Páginas legales/login: noindex y título propio
+    document.title = noindexRoutes[path];
+    let rm = robotsMeta;
+    if (!rm) { rm = document.createElement('meta'); rm.name = 'robots'; document.head.appendChild(rm); }
+    rm.content = 'noindex, nofollow';
+    if (canonical) canonical.href = 'https://etify.com.ar' + path;
+  } else if (path !== '/' && path.length > 1 && !path.startsWith('/api')) {
+    // Rutas de usuario (/{username}): noindex
+    let rm = robotsMeta;
+    if (!rm) { rm = document.createElement('meta'); rm.name = 'robots'; document.head.appendChild(rm); }
+    rm.content = 'noindex, nofollow';
+    if (canonical) canonical.href = 'https://etify.com.ar' + path;
+  }
+})();
 
 document.addEventListener('DOMContentLoaded', () => {
   checkMpReturn();
