@@ -163,6 +163,26 @@
       "@type": "Question",
       "name": "¿Etify es gratis?",
       "acceptedAnswer": { "@type": "Answer", "text": "Sí, Etify tiene un plan gratuito con 2 PDFs combinados por mes. Para mayor volumen hay planes desde $2.000 ARS/mes." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo pongo 3 etiquetas de Mercado Libre en una sola hoja A4?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Descargá los PDFs de tus etiquetas desde 'Mis ventas' en Mercado Libre, subílos todos juntos a Etify y hacé clic en 'Combinar etiquetas'. Etify los agrupa automáticamente de a 3 por hoja A4 y genera un único PDF listo para imprimir, sin necesidad de ningún programa adicional." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Necesito Acrobat o Illustrator para combinar las etiquetas de Mercado Libre?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Etify funciona directamente en el navegador sin instalar ni pagar nada extra. No necesitás Adobe Acrobat, Illustrator, Word ni ningún otro programa para combinar etiquetas de Mercado Libre en hojas A4." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Sirve para etiquetas de Andreani u otros correos?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Etify está optimizado para etiquetas de Mercado Libre y Correo Argentino. Las etiquetas de Andreani, OCA u otros operadores pueden funcionar si el PDF tiene un tamaño compatible, pero el resultado óptimo garantizado es con ML y Correo Argentino." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Etify es una aplicación oficial de Mercado Libre?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Etify es una herramienta independiente, no pertenece ni está afiliada a Mercado Libre, MercadoPago, Correo Argentino ni a ninguna empresa de logística. Es un servicio creado para ayudar a los vendedores argentinos a optimizar la impresión de sus etiquetas de envío." }
     }
   ]
 }
@@ -1590,6 +1610,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div class="faq-acc-body"><p>Sí, podés cancelar en cualquier momento desde tu perfil en Etify o directamente desde MercadoPago. No hay penalidades ni períodos mínimos. Al cancelar, conservás el acceso hasta que finalice el período ya pagado.</p></div>
       </div>
 
+      <div class="faq-acc-item">
+        <h3 class="faq-acc-h3"><button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Cómo pongo 3 etiquetas de Mercado Libre en una sola hoja A4?
+          <span class="faq-acc-icon">+</span>
+        </button></h3>
+        <div class="faq-acc-body"><p>Descargá los PDFs de tus etiquetas desde "Mis ventas" en Mercado Libre, subílos todos juntos a Etify y hacé clic en "Combinar etiquetas". Etify los agrupa automáticamente de a 3 por hoja A4 y te genera un único PDF listo para imprimir. No hace falta ningún programa adicional.</p></div>
+      </div>
+
+      <div class="faq-acc-item">
+        <h3 class="faq-acc-h3"><button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Necesito Acrobat, Illustrator o algún programa para combinar las etiquetas?
+          <span class="faq-acc-icon">+</span>
+        </button></h3>
+        <div class="faq-acc-body"><p>No. Etify funciona directamente en el navegador, sin instalar ni pagar nada extra. No necesitás Adobe Acrobat, Illustrator, Word ni ningún otro programa. Subís los PDFs, Etify los combina y descargás el resultado en segundos.</p></div>
+      </div>
+
+      <div class="faq-acc-item">
+        <h3 class="faq-acc-h3"><button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Sirve para etiquetas de Andreani u otros correos?
+          <span class="faq-acc-icon">+</span>
+        </button></h3>
+        <div class="faq-acc-body"><p>Etify está optimizado para etiquetas de Mercado Libre y Correo Argentino. Las etiquetas de Andreani, OCA u otros operadores pueden funcionar si el PDF tiene un tamaño compatible, pero el resultado óptimo garantizado es con ML y Correo Argentino.</p></div>
+      </div>
+
+      <div class="faq-acc-item">
+        <h3 class="faq-acc-h3"><button class="faq-acc-btn" onclick="toggleFaq(this)">
+          ¿Etify es una aplicación oficial de Mercado Libre?
+          <span class="faq-acc-icon">+</span>
+        </button></h3>
+        <div class="faq-acc-body"><p>No. Etify es una herramienta independiente, no pertenece ni está afiliada a Mercado Libre, MercadoPago, Correo Argentino ni a ninguna empresa de logística. Es un servicio creado para ayudar a los vendedores argentinos a optimizar la impresión de sus etiquetas de envío.</p></div>
+      </div>
+
     </div>
   </div>
 
@@ -1746,6 +1798,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <li>Podés usar Etify desde tu celular Android o iPhone <strong style="color:var(--text)">sin instalar ninguna app</strong>.</li>
         <li>El PDF combinado que genera Etify es compatible con cualquier impresora que soporte tamaño <strong style="color:var(--text)">A4</strong>.</li>
       </ul>
+    </div>
+
+    <!-- PREGUNTAS FRECUENTES GUIA -->
+    <h2 style="font-size:clamp(20px,3vw,28px);font-weight:900;letter-spacing:-1px;margin-bottom:8px">Preguntas frecuentes sobre impresión de etiquetas</h2>
+    <p style="font-size:15px;color:var(--text2);margin-bottom:24px">Respuestas concretas a las dudas más comunes de vendedores argentinos.</p>
+    <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:56px">
+
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;color:var(--text)">¿Cuántas etiquetas de Mercado Libre entran en una hoja A4?</h3>
+        <p style="font-size:14px;color:var(--text2);line-height:1.7">Hasta 3 etiquetas por hoja A4 (210 × 297 mm). Las etiquetas de Mercado Libre tienen un formato vertical que permite acomodar 3 en una misma hoja sin perder legibilidad ni calidad del código QR o de barras. Imprimir de a 1 por hoja desperdicia el 66% del papel.</p>
+      </div>
+
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;color:var(--text)">¿Cómo combinar etiquetas de Mercado Libre en una hoja A4 paso a paso?</h3>
+        <p style="font-size:14px;color:var(--text2);line-height:1.7"><strong style="color:var(--text)">1.</strong> Ingresá a "Mis ventas" en Mercado Libre y seleccioná las órdenes con envío pendiente. <strong style="color:var(--text)">2.</strong> Hacé clic en "Imprimir etiquetas" y descargá los PDFs individualmente. <strong style="color:var(--text)">3.</strong> Abrí Etify en tu navegador (etify.com.ar), subí todos los PDFs de una vez. <strong style="color:var(--text)">4.</strong> Etify los agrupa de 3 por hoja A4 automáticamente. <strong style="color:var(--text)">5.</strong> Descargá el PDF combinado e imprimí en tamaño A4 al 100% de escala.</p>
+      </div>
+
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;color:var(--text)">¿Las etiquetas combinadas son válidas para Correo Argentino y Mercado Envíos?</h3>
+        <p style="font-size:14px;color:var(--text2);line-height:1.7">Sí. El PDF que genera Etify mantiene el contenido original de cada etiqueta sin modificarlo: el código QR, el código de barras, los datos del destinatario y el número de tracking quedan intactos. Al cortar la hoja por las líneas de guía, cada etiqueta es idéntica al original y válida para ser escaneada por Correo Argentino o cualquier operador de Mercado Envíos.</p>
+      </div>
+
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;color:var(--text)">¿Por qué la etiqueta de ML queda cortada o mal impresa?</h3>
+        <p style="font-size:14px;color:var(--text2);line-height:1.7">El problema más común es imprimir con la opción "Ajustar a la página" o "Encajar en página" activada en el diálogo de impresión. Siempre configurá la impresora en <strong style="color:var(--text)">tamaño A4, escala 100% (sin ajuste)</strong>. Si el PDF combinado de Etify igual se ve mal, verificá que el driver de tu impresora tenga el tamaño de papel configurado como A4 y no como Carta (Letter).</p>
+      </div>
+
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;color:var(--text)">¿Es mejor imprimir en papel adhesivo o papel común?</h3>
+        <p style="font-size:14px;color:var(--text2);line-height:1.7">Depende del volumen. Para pocos envíos, papel común A4 + cinta adhesiva transparente funciona bien y es económico. Para alto volumen, el <strong style="color:var(--text)">papel adhesivo A4 (sticker)</strong> ahorra tiempo al pegar la etiqueta directamente sin cinta. Cualquier impresora de inyección de tinta o láser imprime correctamente en ambos tipos de papel.</p>
+      </div>
+
     </div>
 
     <h2 style="font-size:clamp(20px,3vw,28px);font-weight:900;letter-spacing:-1px;margin-bottom:8px">Comparación de planes</h2>
