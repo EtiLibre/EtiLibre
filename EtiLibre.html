@@ -341,6 +341,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #pricing{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .pricing-inner{max-width:1180px;margin:0 auto;padding:96px 24px}
 .plans-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:48px}
+/* carousel mobile */
+.plans-carousel-wrap{position:relative}
+.plans-carousel-arrow{display:none;position:absolute;top:50%;transform:translateY(-50%);z-index:2;background:var(--surface);border:1.5px solid var(--border2);border-radius:50%;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:18px;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.plans-carousel-arrow:hover{border-color:var(--accent);color:var(--accent)}
+.plans-carousel-arrow.left{left:-18px}
+.plans-carousel-arrow.right{right:-18px}
+.plans-carousel-dots{display:none;justify-content:center;gap:6px;margin-top:16px}
+.plans-carousel-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);transition:all .25s;cursor:pointer;border:none;padding:0}
+.plans-carousel-dot.active{background:var(--accent);width:20px;border-radius:4px}
 .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px 22px;display:flex;flex-direction:column;transition:border-color .2s;position:relative;overflow:hidden}
 .plan-card:hover{border-color:var(--border2)}
 .plan-card.popular{border-color:var(--accent);background:linear-gradient(160deg,rgba(255,230,0,.05),var(--surface))}
@@ -788,7 +797,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .btn-nav-cta{font-size:12px;padding:6px 12px}
   .nav-actions .btn-theme-toggle{font-size:15px;padding:5px 7px;border-radius:8px}
   .nav-link-guia{display:none}
-  .nav-btn-login{display:none}
+  .nav-btn-login{font-size:12px;padding:6px 10px}
   /* HERO */
   .hero{padding:80px 16px 48px}
   .hero h1{font-size:36px;letter-spacing:-2px}
@@ -800,8 +809,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   /* SECTIONS */
   .section{padding:56px 16px}
   .pricing-inner{padding:56px 16px}
-  .plans-grid{grid-template-columns:1fr}
+  .plans-grid{display:flex;flex-direction:row;overflow-x:scroll;scroll-snap-type:x mandatory;scroll-behavior:smooth;gap:12px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .plans-grid::-webkit-scrollbar{display:none}
+  .plans-grid .plan-card{min-width:calc(100vw - 64px);scroll-snap-align:center;flex-shrink:0}
   .faq-grid{grid-template-columns:1fr}
+  .plans-carousel-arrow{display:flex}
+  .plans-carousel-dots{display:flex}
   .footer{padding:24px 16px;flex-direction:column;text-align:center}
   .contact-section{padding:48px 20px}
   .contact-row{grid-template-columns:1fr}
@@ -1251,6 +1264,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <span class="billing-label" id="lbl-annual" onclick="setBilling('annual')">Anual <span class="billing-save-badge">Business 20% OFF</span></span>
       </div>
 
+      <div class="plans-carousel-wrap">
+        <button class="plans-carousel-arrow left" onclick="plansCarouselNav(-1)" aria-label="Anterior">‹</button>
+        <button class="plans-carousel-arrow right" onclick="plansCarouselNav(1)" aria-label="Siguiente">›</button>
+
       <!-- PLANES ANUALES -->
       <div class="plans-grid" id="grid-annual" style="display:none">
 
@@ -1493,6 +1510,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </div>
 
       </div><!-- /grid-monthly -->
+
+      </div><!-- /plans-carousel-wrap -->
+      <div class="plans-carousel-dots" id="plans-dots"></div>
 
       <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--text2,#888)">* Precios en pesos argentinos (ARS).</p>
     </div>
@@ -3032,10 +3052,57 @@ function toggleBilling() {
 function setBilling(mode) {
   const isAnnual = mode === 'annual';
   document.getElementById('billing-track').classList.toggle('on', isAnnual);
-  document.getElementById('grid-annual').style.display  = isAnnual ? 'grid' : 'none';
-  document.getElementById('grid-monthly').style.display = isAnnual ? 'none' : 'grid';
+  const annual = document.getElementById('grid-annual');
+  const monthly = document.getElementById('grid-monthly');
+  if (window.innerWidth <= 780) {
+    annual.style.display  = isAnnual ? 'flex' : 'none';
+    monthly.style.display = isAnnual ? 'none' : 'flex';
+  } else {
+    annual.style.display  = isAnnual ? 'grid' : 'none';
+    monthly.style.display = isAnnual ? 'none' : 'grid';
+  }
   document.getElementById('lbl-monthly').classList.toggle('active', !isAnnual);
   document.getElementById('lbl-annual').classList.toggle('active', isAnnual);
+  plansCarouselInit();
+}
+
+/* ── PLANS CAROUSEL (mobile) ── */
+function plansCarouselInit() {
+  const grid = document.querySelector('.plans-grid:not([style*="display: none"]):not([style*="display:none"])');
+  const dotsEl = document.getElementById('plans-dots');
+  if (!grid || !dotsEl) return;
+  const cards = grid.querySelectorAll('.plan-card');
+  const n = cards.length;
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('button');
+    d.className = 'plans-carousel-dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Plan ' + (i+1));
+    d.onclick = () => plansCarouselGoTo(i);
+    dotsEl.appendChild(d);
+  }
+  grid._carouselIdx = 0;
+  grid.onscroll = () => {
+    const idx = Math.round(grid.scrollLeft / grid.clientWidth);
+    if (idx !== grid._carouselIdx) {
+      grid._carouselIdx = idx;
+      dotsEl.querySelectorAll('.plans-carousel-dot').forEach((d,i) => d.classList.toggle('active', i === idx));
+    }
+  };
+}
+
+function plansCarouselGoTo(idx) {
+  const grid = document.querySelector('.plans-grid:not([style*="display: none"]):not([style*="display:none"])');
+  if (!grid) return;
+  const cards = grid.querySelectorAll('.plan-card');
+  grid._carouselIdx = Math.max(0, Math.min(idx, cards.length - 1));
+  grid.scrollTo({ left: grid._carouselIdx * grid.clientWidth, behavior: 'smooth' });
+}
+
+function plansCarouselNav(dir) {
+  const grid = document.querySelector('.plans-grid:not([style*="display: none"]):not([style*="display:none"])');
+  if (!grid) return;
+  plansCarouselGoTo((grid._carouselIdx || 0) + dir);
 }
 function contactAnnual(planLabel) {
   // Llevar al formulario de contacto con el plan preseleccionado
@@ -3313,6 +3380,7 @@ async function acceptGoogleTos() {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (window.innerWidth <= 780) plansCarouselInit();
   checkMpReturn();
   checkMpRef();
   const params = new URLSearchParams(window.location.search);
