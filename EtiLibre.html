@@ -4441,13 +4441,13 @@ function drawWatermark(ctx, lx, ly, lw, lh, mode) {
     wx = lx + lw - wmW - margin;
     wy = ly + margin;
   } else if (mode === 'andreani') {
-    // Right de la fila "Id: #101 / Remito:" (zona con espacio)
+    // Right de la fila "Id: #101 / Remito:" - zona antes del N° de Bulto
     wx = lx + lw - wmW - margin;
-    wy = ly + Math.round(lh * 0.28);
+    wy = ly + Math.round(lh * 0.22);
   } else {
-    // CA: dentro del bloque DESTINATARIO, derecha
+    // CA: zona derecha entre DESTINATARIO y T&T barcode
     wx = lx + lw - wmW - margin;
-    wy = ly + Math.round(lh * 0.62);
+    wy = ly + Math.round(lh * 0.74);
   }
 
   ctx.save();
