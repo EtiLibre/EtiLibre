@@ -4431,21 +4431,23 @@ function getWmLogo() {
 function drawWatermark(ctx, lx, ly, lw, lh, mode) {
   if (!_wmLogoImg) return;
   // Proporción logo: 512 × 197.93
-  const wmW = Math.round(lw * 0.30);
+  const wmW = Math.round(lw * 0.26);
   const wmH = Math.round(wmW * (197.93 / 512));
+  const margin = Math.round(lw * 0.02);
 
-  // Centrado horizontal dentro de la etiqueta
-  const wx = lx + Math.round((lw - wmW) / 2);
-  let wy;
+  let wx, wy;
   if (mode === 'ml') {
-    // Área header superior (zona blanca debajo del encabezado ML)
-    wy = ly + Math.round(lh * 0.04);
+    // Top-RIGHT del header (a la derecha del texto Remitente)
+    wx = lx + lw - wmW - margin;
+    wy = ly + margin;
   } else if (mode === 'andreani') {
-    // Zona inferior: tabla de órdenes / área blanca del fondo
-    wy = ly + Math.round(lh * 0.82);
+    // Right de la fila "Id: #101 / Remito:" (zona con espacio)
+    wx = lx + lw - wmW - margin;
+    wy = ly + Math.round(lh * 0.28);
   } else {
-    // CA: recuadro blanco vacío al fondo de la etiqueta
-    wy = ly + Math.round(lh * 0.88);
+    // CA: dentro del bloque DESTINATARIO, derecha
+    wx = lx + lw - wmW - margin;
+    wy = ly + Math.round(lh * 0.62);
   }
 
   ctx.save();
