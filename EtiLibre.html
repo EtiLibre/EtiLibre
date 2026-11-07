@@ -1631,7 +1631,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           ¿Sirve para etiquetas de Andreani u otros correos?
           <span class="faq-acc-icon">+</span>
         </button></h3>
-        <div class="faq-acc-body"><p>Etify está optimizado para etiquetas de Mercado Libre y Correo Argentino. Las etiquetas de Andreani, OCA u otros operadores pueden funcionar si el PDF tiene un tamaño compatible, pero el resultado óptimo garantizado es con ML y Correo Argentino.</p></div>
+        <div class="faq-acc-body"><p>Etify está optimizado para etiquetas de Mercado Libre, Correo Argentino y Andreani. Las etiquetas de OCA u otros operadores pueden funcionar si el PDF tiene un tamaño compatible, pero el resultado óptimo garantizado es con esos tres proveedores.</p></div>
       </div>
 
       <div class="faq-acc-item">
@@ -2232,7 +2232,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <select class="opt-select" id="carrier-select" onchange="onCarrierChange()">
           <option value="ml">Mercado Libre</option>
           <option value="ca">Correo Argentino</option>
-          <option value="ca">Andreani</option>
+          <option value="andreani">Andreani</option>
         </select>
       </div>
       <div class="opt-group" id="opt-crop-header">
@@ -4147,7 +4147,7 @@ function closeConfirmModal() { document.getElementById('confirm-modal').style.di
    DROP ZONE
 ═══════════════════════════════════════════════════════ */
 const PER_SHEET = 3;
-let labelMode = 'ml'; // 'ml' | 'ca'
+let labelMode = 'ml'; // 'ml' | 'ca' | 'andreani'
 let slots = [];
 
 function onCarrierChange() {
@@ -4382,50 +4382,91 @@ function detectLabelBounds(canvas) {
   return { x:rx, y:ry, w:Math.min(w - rx, x1-x0+1+2*pad), h:Math.min(h - ry, y1-y0+1+2*pad) };
 }
 
-function drawWatermark(ctx, x, y, w, h) {
-  // Esquina superior derecha de cada label, 18% opacidad
-  const wmW = Math.round(w * 0.28);
-  const wmH = Math.round(wmW * 0.39); // proporción logo Etify ~512:197
-  const margin = Math.round(w * 0.03);
-  const wx = x + w - wmW - margin;
-  const wy = y + margin;
+// Cache del logo Etify para watermark
+let _wmLogoImg = null;
+function getWmLogo() {
+  if (_wmLogoImg) return Promise.resolve(_wmLogoImg);
+  // Logo Etify SVG (versión oscura sobre fondo blanco)
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 197.93">
+    <path d="M128.5,48.47v107.46c0,8.14-6.43,14.81-14.48,15.22-.23.01-.46.02-.69.02H23.58c-.26,0-.52-.01-.78-.02-8.08-.36-14.55-7.05-14.55-15.22V22.96c0-8.18,6.47-14.86,14.55-15.22.26-.01.52-.02.78-.02h63.48l.31.02h.09s.03.01.03.01c1.28.1,2.57.48,3.73,1.1.82.46,1.54,1,2.15,1.61l32.38,32.39c.3.29.52.55.72.8.84,1.04,1.46,2.32,1.77,3.67l.08.35.18.8Z" fill="#051b35"/>
+    <path d="M158.29,33.42h85.02v22.94h-60.9v25.81h55.5v22.44h-55.5v26.31h61.74v23.11h-85.86V33.42Z" fill="#051b35"/>
+    <path d="M279.58,48.26v18.89h24.12v20.75h-24.12v29.52c0,6.19,1.63,10.35,4.89,12.48,3.26,2.14,7.76,3.2,13.49,3.2h7.59v20.92h-11.3c-25.3,0-37.95-11.69-37.95-35.09V48.26h23.28Z" fill="#051b35"/>
+    <rect x="314.66" y="33.42" width="23.28" height="22.6" rx="11.3" ry="11.3" fill="#c9a000"/>
+    <rect x="314.66" y="67.15" width="23.28" height="86.87" fill="#051b35"/>
+    <path d="M355.9,51.3c3.32-5.73,8.01-10.15,14.09-13.24,6.07-3.09,13.04-4.64,20.92-4.64h12.15v20.41h-12.15c-5.62,0-9.81,1.49-12.57,4.47-2.76,2.98-4.13,7.62-4.13,13.92v.17h25.98v20.41h-25.98v61.23h-23.28v-82.65c0-7.65,1.66-14.34,4.97-20.07Z" fill="#051b35"/>
+    <path d="M413.51,169.21h11.81c5.85,0,10.4-3.32,13.66-9.95l3.88-8.6-36.27-83.5h25.64l14.84,35.93,8.1,22.6,8.27-22.6,14.68-35.93h25.64l-37.78,86.87c-3.15,7.53-6.33,13.86-9.53,18.98-3.2,5.12-7.23,9.28-12.06,12.48-4.84,3.2-10.69,4.81-17.54,4.81h-13.33v-21.09Z" fill="#051b35"/>
+    <path d="M128.59,48.47v107.46c0,8.17-6.48,14.86-14.57,15.22-.23.01-.46.02-.69.02H23.58c-.26,0-.52-.01-.78-.02-8.04-.41-14.46-7.08-14.46-15.22V22.96c0-8.15,6.42-14.81,14.46-15.22.26-.01.52-.02.78-.02h63.79s.09.02.09.02v7.33l-1.59-.13h-.13c-.17-.02-.37-.02-.54-.02H23.58c-4.44,0-8.05,3.61-8.05,8.04v132.97c0,4.43,3.61,8.04,8.05,8.04h89.75c4.45,0,8.06-3.61,8.06-8.04V51.11c0-.47-.05-.98-.17-1.48l-.08-.36-.38-1.6h7.65l.09.4.09.4Z" fill="#051b35"/>
+    <path d="M112.95,50.35v-5.77H28.36c-2.42,0-4.4,1.96-4.4,4.38v24.32c0,2.43,1.98,4.39,4.4,4.39h80.2c2.42,0,4.4-1.96,4.4-4.39v-22.93Z" fill="#fff"/>
+    <path d="M47.2,55.15v11.95c0,1.6-1.3,2.9-2.9,2.9h-10.78c-1.6,0-2.9-1.3-2.9-2.9v-11.95c0-1.61,1.3-2.91,2.9-2.91h10.78c1.6,0,2.9,1.3,2.9,2.91Z" fill="#051b35"/>
+    <path d="M76.73,66.7v.62c0,.52-.41.93-.93.93h-22.99c-.52,0-.93-.41-.93-.93v-.62c0-.51.41-.93.93-.93h22.99c.52,0,.93.42.93.93Z" fill="#051b35"/>
+    <path d="M64.55,57.95v.62c0,.51-.42.93-.94.93h-10.8c-.52,0-.93-.42-.93-.93v-.62c0-.51.41-.93.93-.93h10.8c.52,0,.94.42.94.93Z" fill="#051b35"/>
+    <rect x="91.44" y="52.59" width="2.77" height="17.06" fill="#051b35"/>
+    <rect x="97.65" y="52.59" width="2.76" height="17.06" fill="#051b35"/>
+    <rect x="103.85" y="52.59" width="2.77" height="17.06" fill="#051b35"/>
+    <path d="M112.95,87.58v24.32c0,2.42-1.97,4.39-4.39,4.39H28.36c-2.42,0-4.4-1.97-4.4-4.39v-24.32c0-2.42,1.98-4.39,4.4-4.39h80.2c2.42,0,4.39,1.97,4.39,4.39Z" fill="#fff"/>
+    <rect x="30.62" y="90.87" width="16.58" height="17.76" rx="2.9" ry="2.9" fill="#051b35"/>
+    <rect x="51.88" y="104.4" width="24.86" height="2.48" rx=".93" ry=".93" fill="#051b35"/>
+    <rect x="51.88" y="95.64" width="12.67" height="2.48" rx=".93" ry=".93" fill="#051b35"/>
+    <rect x="91.44" y="91.22" width="2.77" height="17.06" fill="#051b35"/>
+    <rect x="97.65" y="91.22" width="2.77" height="17.06" fill="#051b35"/>
+    <rect x="103.85" y="91.22" width="2.77" height="17.06" fill="#051b35"/>
+    <path d="M112.95,126.2v24.32c0,2.42-1.97,4.39-4.39,4.39H28.36c-2.42,0-4.4-1.97-4.4-4.39v-24.32c0-2.42,1.98-4.39,4.4-4.39h80.2c2.42,0,4.39,1.97,4.39,4.39Z" fill="#fff"/>
+    <rect x="30.62" y="129.49" width="16.58" height="17.76" rx="2.9" ry="2.9" fill="#051b35"/>
+    <rect x="51.88" y="143.01" width="24.86" height="2.48" rx=".93" ry=".93" fill="#051b35"/>
+    <rect x="51.88" y="134.26" width="12.67" height="2.48" rx=".93" ry=".93" fill="#051b35"/>
+    <rect x="91.44" y="129.84" width="2.77" height="17.06" fill="#051b35"/>
+    <rect x="97.65" y="129.84" width="2.77" height="17.06" fill="#051b35"/>
+    <rect x="103.85" y="129.84" width="2.77" height="17.06" fill="#051b35"/>
+    <path d="M128.59,48.47v.8h-29.24c-.46,0-.92-.02-1.38-.07-.16-.02-.32-.04-.48-.06-.03-.01-.06-.01-.09-.02h-.02c-.11-.01-.23-.03-.34-.05-.04-.01-.07-.01-.11-.02-.02,0-.03-.01-.05-.01-.16-.03-.34-.06-.5-.1-.23-.05-.46-.11-.69-.18-.03-.01-.07-.02-.1-.03-.23-.06-.47-.14-.69-.22-.18-.06-.36-.12-.53-.2-.03-.01-.06-.02-.09-.03-.21-.09-.42-.18-.63-.28-.22-.1-.43-.21-.64-.32-.1-.05-.2-.11-.29-.16-.12-.07-.24-.14-.35-.21-.21-.13-.42-.26-.62-.4-.18-.12-.36-.25-.53-.38-.25-.19-.49-.39-.72-.59l-.21-.18c-.23-.21-.45-.43-.66-.65-.17-.17-.32-.35-.48-.53-.13-.15-.25-.3-.37-.45-.13-.17-.26-.33-.38-.5-.11-.15-.21-.3-.31-.45-.11-.17-.21-.33-.31-.5-.18-.3-.35-.6-.5-.92-.07-.15-.15-.3-.22-.46-.02-.03-.03-.07-.05-.1-.05-.13-.11-.26-.16-.39-.06-.14-.11-.28-.16-.41-.08-.2-.15-.41-.21-.62-.04-.12-.08-.25-.11-.37-.06-.19-.11-.39-.15-.58-.04-.15-.07-.31-.1-.46-.03-.18-.07-.37-.09-.55-.07-.45-.12-.9-.14-1.36-.01-.23-.02-.46-.02-.69V7.72h1.5s.09.02.09.02h.12c1.28.11,2.57.49,3.73,1.11.82.46,1.54,1,2.15,1.61l32.38,32.39c.3.29.52.55.72.8.84,1.04,1.46,2.32,1.77,3.67l.08.35.09.4.09.4Z" fill="#c9a000"/>
+  </svg>`;
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => { _wmLogoImg = img; res(img); };
+    img.onerror = () => res(null);
+    img.src = url;
+  });
+}
 
+function drawWatermark(ctx, lx, ly, lw, lh, mode) {
+  if (!_wmLogoImg) return;
+  // Proporción logo: 512 × 197.93
+  const wmW = Math.round(lw * 0.36);
+  const wmH = Math.round(wmW * (197.93 / 512));
+
+  let wx, wy;
+  if (mode === 'ml') {
+    // Top-right del header ML (dentro del área de remitente/Pack ID)
+    wx = lx + Math.round(lw * 0.52);
+    wy = ly + Math.round(lh * 0.015);
+  } else if (mode === 'andreani') {
+    // Right del bloque remitente (sección media-superior)
+    wx = lx + Math.round(lw * 0.52);
+    wy = ly + Math.round(lh * 0.26);
+  } else {
+    // CA: sección destinatario (área inferior)
+    wx = lx + Math.round(lw * 0.45);
+    wy = ly + Math.round(lh * 0.54);
+  }
+
+  // Fondo blanco semi-transparente detrás del logo
+  const pad = Math.round(wmH * 0.15);
   ctx.save();
-  ctx.globalAlpha = 0.18;
-
-  // Fondo pill redondeado
-  const pad = Math.round(wmH * 0.18);
-  const r   = Math.round(wmH * 0.22);
-  const bx  = wx - pad; const by = wy - pad;
-  const bw  = wmW + pad * 2; const bh = wmH + pad * 2;
-  ctx.fillStyle = '#051b35';
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = '#ffffff';
+  const r = Math.round(wmH * 0.2);
   ctx.beginPath();
-  ctx.moveTo(bx + r, by);
-  ctx.lineTo(bx + bw - r, by); ctx.quadraticCurveTo(bx+bw, by, bx+bw, by+r);
-  ctx.lineTo(bx + bw, by + bh - r); ctx.quadraticCurveTo(bx+bw, by+bh, bx+bw-r, by+bh);
-  ctx.lineTo(bx + r, by + bh); ctx.quadraticCurveTo(bx, by+bh, bx, by+bh-r);
-  ctx.lineTo(bx, by + r); ctx.quadraticCurveTo(bx, by, bx+r, by);
+  ctx.moveTo(wx - pad + r, wy - pad);
+  ctx.lineTo(wx + wmW + pad - r, wy - pad); ctx.quadraticCurveTo(wx+wmW+pad, wy-pad, wx+wmW+pad, wy-pad+r);
+  ctx.lineTo(wx + wmW + pad, wy + wmH + pad - r); ctx.quadraticCurveTo(wx+wmW+pad, wy+wmH+pad, wx+wmW+pad-r, wy+wmH+pad);
+  ctx.lineTo(wx - pad + r, wy + wmH + pad); ctx.quadraticCurveTo(wx-pad, wy+wmH+pad, wx-pad, wy+wmH+pad-r);
+  ctx.lineTo(wx - pad, wy - pad + r); ctx.quadraticCurveTo(wx-pad, wy-pad, wx-pad+r, wy-pad);
   ctx.closePath();
   ctx.fill();
 
-  // Texto "etify" en blanco
-  ctx.globalAlpha = 0.18;
-  const fontSize = Math.round(wmH * 0.72);
-  ctx.font = `800 ${fontSize}px 'Arial Black', Arial, sans-serif`;
-  ctx.fillStyle = '#ffffff';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  // Punto amarillo sobre la "i"
-  const textX = wx + Math.round(wmW * 0.04);
-  const textY = wy + Math.round(wmH * 0.5);
-  ctx.fillText('etify', textX, textY);
-  // Punto amarillo encima de la i (posición aproximada)
-  ctx.fillStyle = '#FFE600';
-  const dotR = Math.round(fontSize * 0.08);
-  const dotX = textX + Math.round(fontSize * 1.52);
-  const dotY = wy + Math.round(wmH * 0.1);
-  ctx.beginPath(); ctx.arc(dotX, dotY, dotR, 0, Math.PI * 2); ctx.fill();
-
+  // Logo Etify
+  ctx.globalAlpha = 0.22;
+  ctx.drawImage(_wmLogoImg, wx, wy, wmW, wmH);
   ctx.restore();
 }
 
@@ -4444,7 +4485,9 @@ async function buildSheetCanvas(group, gapPt, lineType, cropHeader) {
 
   const dividers = []; // posiciones x de líneas de corte
 
-  if (labelMode === 'ca') {
+  if (isFree) await getWmLogo(); // precarga logo antes de dibujar
+
+  if (labelMode === 'ca' || labelMode === 'andreani') {
     // Correo Argentino / Andreani: auto-detectar área de contenido, escalar a slot y centrar
     const slotW = Math.round((outW - gapPx * (n - 1)) / n);
     for (let i = 0; i < n; i++) {
@@ -4457,7 +4500,7 @@ async function buildSheetCanvas(group, gapPt, lineType, cropHeader) {
       const ox  = sx + Math.round((slotW - dw) / 2);
       const oy  = Math.round((outH - dh) / 2);
       ctx.drawImage(src, b.x, b.y, b.w, b.h, ox, oy, dw, dh);
-      if (isFree) drawWatermark(ctx, ox, oy, dw, dh);
+      if (isFree) drawWatermark(ctx, ox, oy, dw, dh, labelMode);
       if (i < n - 1) dividers.push(sx + slotW + Math.round(gapPx / 2));
     }
   } else {
@@ -4483,7 +4526,7 @@ async function buildSheetCanvas(group, gapPt, lineType, cropHeader) {
     for (let i = 0; i < n; i++) {
       const lx = startX + i * (cw + gapPx);
       ctx.drawImage(cropped[i], lx, startY);
-      if (isFree) drawWatermark(ctx, lx, startY, cw, ch);
+      if (isFree) drawWatermark(ctx, lx, startY, cw, ch, 'ml');
       if (i < n - 1) dividers.push(lx + cw + Math.round(gapPx / 2));
     }
   }
