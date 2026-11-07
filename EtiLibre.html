@@ -4430,42 +4430,27 @@ function getWmLogo() {
 
 function drawWatermark(ctx, lx, ly, lw, lh, mode) {
   if (!_wmLogoImg) return;
-  // Proporción logo: 512 × 197.93
-  const wmW = Math.round(lw * 0.36);
+  // Logo pequeño: 18% del ancho de etiqueta. Proporción 512×197.93
+  const wmW = Math.round(lw * 0.18);
   const wmH = Math.round(wmW * (197.93 / 512));
 
   let wx, wy;
   if (mode === 'ml') {
-    // Top-right del header ML (dentro del área de remitente/Pack ID)
-    wx = lx + Math.round(lw * 0.52);
-    wy = ly + Math.round(lh * 0.015);
+    // Esquina superior derecha del header (top-right, zona con espacio)
+    wx = lx + lw - wmW - Math.round(lw * 0.02);
+    wy = ly + Math.round(lh * 0.02);
   } else if (mode === 'andreani') {
-    // Right del bloque remitente (sección media-superior)
-    wx = lx + Math.round(lw * 0.52);
-    wy = ly + Math.round(lh * 0.26);
+    // Derecha del bloque remitente
+    wx = lx + lw - wmW - Math.round(lw * 0.02);
+    wy = ly + Math.round(lh * 0.27);
   } else {
-    // CA: sección destinatario (área inferior)
-    wx = lx + Math.round(lw * 0.45);
-    wy = ly + Math.round(lh * 0.54);
+    // CA: derecha de la sección destinatario
+    wx = lx + lw - wmW - Math.round(lw * 0.02);
+    wy = ly + Math.round(lh * 0.55);
   }
 
-  // Fondo blanco semi-transparente detrás del logo
-  const pad = Math.round(wmH * 0.15);
   ctx.save();
-  ctx.globalAlpha = 0.55;
-  ctx.fillStyle = '#ffffff';
-  const r = Math.round(wmH * 0.2);
-  ctx.beginPath();
-  ctx.moveTo(wx - pad + r, wy - pad);
-  ctx.lineTo(wx + wmW + pad - r, wy - pad); ctx.quadraticCurveTo(wx+wmW+pad, wy-pad, wx+wmW+pad, wy-pad+r);
-  ctx.lineTo(wx + wmW + pad, wy + wmH + pad - r); ctx.quadraticCurveTo(wx+wmW+pad, wy+wmH+pad, wx+wmW+pad-r, wy+wmH+pad);
-  ctx.lineTo(wx - pad + r, wy + wmH + pad); ctx.quadraticCurveTo(wx-pad, wy+wmH+pad, wx-pad, wy+wmH+pad-r);
-  ctx.lineTo(wx - pad, wy - pad + r); ctx.quadraticCurveTo(wx-pad, wy-pad, wx-pad+r, wy-pad);
-  ctx.closePath();
-  ctx.fill();
-
-  // Logo Etify
-  ctx.globalAlpha = 0.22;
+  ctx.globalAlpha = 0.20;
   ctx.drawImage(_wmLogoImg, wx, wy, wmW, wmH);
   ctx.restore();
 }
