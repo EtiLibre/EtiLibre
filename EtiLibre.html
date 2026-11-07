@@ -4431,7 +4431,7 @@ async function buildSheetCanvas(group, gapPt, lineType, cropHeader) {
   const gapPx  = Math.round(pt2px(gapPt));
   const outW   = Math.round(pt2px(A4_W_PT));
   const outH   = Math.round(pt2px(A4_H_PT));
-  const isFree = true; // TEST — revertir antes de subir
+  const isFree = getUserPlan(currentUser) === 'free' || location.hash === '#test-wm';
 
   const canvas = document.createElement('canvas');
   canvas.width = outW; canvas.height = outH;
