@@ -949,8 +949,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .sa-topbar{background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
 .sa-topbar-row1{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
 .sa-topbar-row2{display:flex;gap:6px;padding:0 28px 10px;flex-wrap:wrap}
-.sa-nav-btn{font-size:12px;font-weight:600;font-family:inherit;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
-.sa-nav-btn:hover,.sa-nav-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
 .sa-topbar-left{display:flex;align-items:center;gap:16px}
 .sa-logo{font-size:16px;font-weight:900;color:var(--accent)}
 .sa-badge{background:var(--danger);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:100px;letter-spacing:.5px}
@@ -984,24 +982,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-sa.success:hover{border-color:var(--teal);color:var(--teal)}
 .sa-tos-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
 .sa-tos-table{width:100%;border-collapse:collapse;font-size:13px}
+/* Admin tabs */
+.sa-tabs{display:flex;gap:2px;padding:0 28px;border-bottom:1px solid var(--border)}
+.sa-tab-btn{font-size:13px;font-weight:600;font-family:inherit;padding:12px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;margin-bottom:-1px}
+.sa-tab-btn:hover{color:var(--text)}
+.sa-tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.sa-tab-pane{display:none}.sa-tab-pane.active{display:block}
 /* Analytics */
-.an-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.an-kpi{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:16px 20px;display:flex;flex-direction:column;gap:3px}
-.an-kpi-val{font-size:28px;font-weight:800;color:var(--accent);line-height:1.1;font-variant-numeric:tabular-nums}
-.an-kpi-lbl{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-.an-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.an-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.an-chart-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:16px 18px}
-.an-chart-box .an-ct{position:relative;width:100%}
-.an-chart-title{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
-.an-period{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.an-period button{font-size:11px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:600;font-family:inherit;transition:all .15s}
+.an-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.an-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 22px}
+.an-kpi-val{font-size:36px;font-weight:900;line-height:1;letter-spacing:-1px;margin-bottom:4px}
+.an-kpi-lbl{font-size:11px;color:var(--text2);font-weight:600}
+.an-kpi-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.an-bar-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 24px;margin-bottom:14px}
+.an-bar-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px}
+.an-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.an-bar-row:last-child{margin-bottom:0}
+.an-bar-label{font-size:13px;color:var(--text);min-width:120px;flex-shrink:0}
+.an-bar-track{flex:1;background:var(--surface2);border-radius:4px;height:6px;overflow:hidden}
+.an-bar-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .5s ease}
+.an-bar-count{font-size:12px;color:var(--text2);min-width:60px;text-align:right;white-space:nowrap}
+.an-chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 24px;margin-bottom:14px}
+.an-chart-wrap .an-bar-title{margin-bottom:4px}
+.an-chart-sub{font-size:11px;color:var(--text2);margin-bottom:16px}
+.an-bars-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.an-period{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.an-period button{font-size:12px;padding:6px 16px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:600;font-family:inherit;transition:all .15s}
 .an-period button.active{background:var(--accent);border-color:var(--accent);color:#000}
-/* WM Configurator mejorado */
-.wm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.wm-editor{display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start}
-@media(max-width:800px){.wm-editor{grid-template-columns:1fr}.an-grid{grid-template-columns:repeat(2,1fr)}.an-row{grid-template-columns:1fr}.an-row2{grid-template-columns:1fr}}
-@media(max-width:500px){.an-grid{grid-template-columns:repeat(2,1fr)}}
+.an-day-chart{display:flex;align-items:flex-end;gap:3px;height:80px;margin-bottom:8px}
+.an-day-bar{flex:1;border-radius:3px 3px 0 0;background:var(--accent);opacity:.85;min-height:2px;transition:height .3s ease;cursor:pointer;position:relative}
+.an-day-bar:hover{opacity:1}
+.an-day-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--text3)}
 /* WM Configurator */
 .wm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .wm-tab{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-family:inherit;font-size:11px;font-weight:600;padding:5px 11px;cursor:pointer;transition:all .2s}
@@ -1034,6 +1045,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .sa-user-card{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
   .sa-user-actions{grid-column:1/-1;align-items:flex-start}
   .sa-actions-row{justify-content:flex-start}
+  .an-kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .an-bars-grid{grid-template-columns:1fr}
+  .sa-tabs{padding:0 16px}
+  .sa-tab-btn{font-size:12px;padding:10px 14px}
+  .sa-main{padding:20px 16px}
 }
 
 /* ═══════════════════════════════════════
@@ -5661,118 +5677,121 @@ function _injectAdminPanel() {
         <span class="sa-badge">ADMIN</span>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn-sa" onclick="renderSuperAdmin();anLoad()">↺ Actualizar</button>
+        <button class="btn-sa" onclick="renderSuperAdmin();if(_saActiveTab==='metricas')anLoad()">↺ Actualizar</button>
         <button class="btn-logout" onclick="showScreen('screen-app')">← App</button>
         <button class="btn-logout" onclick="doLogout()">Salir</button>
       </div>
     </div>
-    <div class="sa-topbar-row2">
-      <button class="sa-nav-btn" onclick="document.getElementById('sa-anchor-users').scrollIntoView({behavior:'smooth'})">👥 Usuarios</button>
-      <button class="sa-nav-btn" onclick="document.getElementById('sa-anchor-deleted').scrollIntoView({behavior:'smooth'})">🗑 Bajas</button>
-      <button class="sa-nav-btn" onclick="document.getElementById('sa-anchor-promos').scrollIntoView({behavior:'smooth'})">🎟 Códigos Promo</button>
-      <button class="sa-nav-btn" onclick="document.getElementById('sa-anchor-tos').scrollIntoView({behavior:'smooth'})">📋 T&amp;C</button>
-      <button class="sa-nav-btn" onclick="document.getElementById('an-section').scrollIntoView({behavior:'smooth'})">📊 Métricas</button>
-      <button class="sa-nav-btn" onclick="document.getElementById('wm-config-section').scrollIntoView({behavior:'smooth'})">🎨 Marca de Agua</button>
+    <div class="sa-tabs">
+      <button class="sa-tab-btn active" onclick="saSetTab('usuarios',this)">👥 Usuarios</button>
+      <button class="sa-tab-btn" onclick="saSetTab('metricas',this)">📊 Métricas</button>
+      <button class="sa-tab-btn" onclick="saSetTab('wm',this)">🎨 Marca de Agua</button>
     </div>
   </nav>
-  <div class="sa-main">
-    <div class="sa-stats" id="sa-stats"></div>
-    <p class="sa-section-title" id="sa-anchor-users">Usuarios registrados</p>
-    <div class="sa-toolbar">
-      <input class="sa-search" id="sa-search" type="text" placeholder="Buscar por nombre, email o plan…" oninput="renderSAUsers()"/>
-      <select class="sa-filter" id="sa-filter" onchange="renderSAUsers()">
-        <option value="">Todos los planes</option>
-        <option value="free">Free</option>
-        <option value="starter">Starter</option>
-        <option value="pro">Pro</option>
-        <option value="business">Business</option>
-        <option value="premium">Premium</option>
-      </select>
-      <select class="sa-filter" id="sa-filter-status" onchange="renderSAUsers()">
-        <option value="">Todos los estados</option>
-        <option value="active">Activos (pagaron)</option>
-        <option value="inactive">Sin pago</option>
-      </select>
-    </div>
-    <div class="sa-user-list" id="sa-user-list"></div>
 
-    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0" id="sa-anchor-deleted">Bajas y eliminados</p>
-        <button class="btn-sa success" onclick="exportDeletedCSV()">⬇ Exportar CSV</button>
+  <!-- TAB: USUARIOS -->
+  <div class="sa-tab-pane active" id="sa-tab-usuarios">
+    <div class="sa-main">
+      <div class="sa-stats" id="sa-stats"></div>
+      <p class="sa-section-title" id="sa-anchor-users">Usuarios registrados</p>
+      <div class="sa-toolbar">
+        <input class="sa-search" id="sa-search" type="text" placeholder="Buscar por nombre, email o plan…" oninput="renderSAUsers()"/>
+        <select class="sa-filter" id="sa-filter" onchange="renderSAUsers()">
+          <option value="">Todos los planes</option>
+          <option value="free">Free</option>
+          <option value="starter">Starter</option>
+          <option value="pro">Pro</option>
+          <option value="business">Business</option>
+          <option value="premium">Premium</option>
+        </select>
+        <select class="sa-filter" id="sa-filter-status" onchange="renderSAUsers()">
+          <option value="">Todos los estados</option>
+          <option value="active">Activos (pagaron)</option>
+          <option value="inactive">Sin pago</option>
+        </select>
       </div>
-      <div class="sa-tos-table-wrap">
-        <table class="sa-tos-table" id="sa-deleted-table">
-          <thead><tr><th>Usuario</th><th>Email</th><th>Plan que tenía</th><th>Fecha de baja</th><th>¿Tiene factura?</th><th>Suscripción MP</th></tr></thead>
-          <tbody id="sa-deleted-tbody"></tbody>
-        </table>
-      </div>
-    </div>
+      <div class="sa-user-list" id="sa-user-list"></div>
 
-    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0" id="sa-anchor-promos">🎟️ Códigos Promocionales</p>
-        <button class="btn-sa success" onclick="togglePromoForm()">+ Nuevo código</button>
-      </div>
-      <div id="promo-form" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:20px;margin-bottom:20px">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px">
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Código</label>
-            <input id="pf-code" type="text" placeholder="ETIFY2026" maxlength="30"
-              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box;text-transform:uppercase;letter-spacing:1px"
-              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Plan</label>
-            <select id="pf-plan" style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
-              <option value="starter">Starter</option><option value="pro">Pro</option><option value="business">Business</option><option value="premium">Premium</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Máx. usos</label>
-            <input id="pf-maxuses" type="number" min="1" max="10000" value="1"
-              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Duración (días, 0=permanente)</label>
-            <input id="pf-days" type="number" min="0" value="30"
-              style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
-          </div>
+      <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <p class="sa-section-title" style="margin:0" id="sa-anchor-deleted">Bajas y eliminados</p>
+          <button class="btn-sa success" onclick="exportDeletedCSV()">⬇ Exportar CSV</button>
         </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn-sa success" onclick="saCreatePromo()">Crear código</button>
-          <button class="btn-sa" onclick="togglePromoForm()">Cancelar</button>
+        <div class="sa-tos-table-wrap">
+          <table class="sa-tos-table" id="sa-deleted-table">
+            <thead><tr><th>Usuario</th><th>Email</th><th>Plan que tenía</th><th>Fecha de baja</th><th>¿Tiene factura?</th><th>Suscripción MP</th></tr></thead>
+            <tbody id="sa-deleted-tbody"></tbody>
+          </table>
         </div>
-        <div id="promo-form-msg" style="display:none;margin-top:10px;font-size:13px;border-radius:6px;padding:8px 12px"></div>
       </div>
-      <div class="sa-table-wrap">
-        <table class="sa-table" id="sa-promos-table">
-          <thead><tr><th>Código</th><th>Plan</th><th>Usos</th><th>Duración</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
-          <tbody id="sa-promos-tbody"></tbody>
-        </table>
-      </div>
-    </div>
 
-    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0" id="sa-anchor-tos">Registro de aceptación de Términos y Condiciones</p>
-        <button class="btn-sa success" onclick="exportTosCSV()">⬇ Exportar CSV</button>
+      <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <p class="sa-section-title" style="margin:0" id="sa-anchor-promos">🎟️ Códigos Promocionales</p>
+          <button class="btn-sa success" onclick="togglePromoForm()">+ Nuevo código</button>
+        </div>
+        <div id="promo-form" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:20px;margin-bottom:20px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px">
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Código</label>
+              <input id="pf-code" type="text" placeholder="ETIFY2026" maxlength="30"
+                style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box;text-transform:uppercase;letter-spacing:1px"
+                oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Plan</label>
+              <select id="pf-plan" style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+                <option value="starter">Starter</option><option value="pro">Pro</option><option value="business">Business</option><option value="premium">Premium</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Máx. usos</label>
+              <input id="pf-maxuses" type="number" min="1" max="10000" value="1"
+                style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Duración (días, 0=permanente)</label>
+              <input id="pf-days" type="number" min="0" value="30"
+                style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;box-sizing:border-box">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sa success" onclick="saCreatePromo()">Crear código</button>
+            <button class="btn-sa" onclick="togglePromoForm()">Cancelar</button>
+          </div>
+          <div id="promo-form-msg" style="display:none;margin-top:10px;font-size:13px;border-radius:6px;padding:8px 12px"></div>
+        </div>
+        <div class="sa-table-wrap">
+          <table class="sa-table" id="sa-promos-table">
+            <thead><tr><th>Código</th><th>Plan</th><th>Usos</th><th>Duración</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+            <tbody id="sa-promos-tbody"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="sa-tos-table-wrap">
-        <table class="sa-tos-table" id="sa-tos-table">
-          <thead><tr><th>#</th><th>Usuario</th><th>Nombre</th><th>Correo electrónico</th><th>Plan</th><th>Registro</th><th>T&amp;C aceptados</th></tr></thead>
-          <tbody id="sa-tos-tbody"></tbody>
-        </table>
+
+      <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <p class="sa-section-title" style="margin:0" id="sa-anchor-tos">Registro de aceptación de Términos y Condiciones</p>
+          <button class="btn-sa success" onclick="exportTosCSV()">⬇ Exportar CSV</button>
+        </div>
+        <div class="sa-tos-table-wrap">
+          <table class="sa-tos-table" id="sa-tos-table">
+            <thead><tr><th>#</th><th>Usuario</th><th>Nombre</th><th>Correo electrónico</th><th>Plan</th><th>Registro</th><th>T&amp;C aceptados</th></tr></thead>
+            <tbody id="sa-tos-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
+    <input type="file" id="sa-invoice-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="saHandleInvoiceUpload(event)"/>
   </div>
-  <input type="file" id="sa-invoice-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="saHandleInvoiceUpload(event)"/>
 
-    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px" id="an-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+  <!-- TAB: MÉTRICAS -->
+  <div class="sa-tab-pane" id="sa-tab-metricas">
+    <div class="sa-main" id="an-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
         <div>
-          <p class="sa-section-title" style="margin:0 0 2px">📊 Métricas y Analytics</p>
-          <p style="font-size:12px;color:var(--text2);margin:0">Actividad de generación de etiquetas por usuarios.</p>
+          <h2 style="font-size:20px;font-weight:800;margin:0 0 2px;letter-spacing:-.3px">Métricas</h2>
+          <p style="font-size:13px;color:var(--text2);margin:0">Actividad de generación de etiquetas</p>
         </div>
         <div style="display:flex;gap:8px">
           <button class="btn-sa" onclick="anLoad()">↺ Actualizar</button>
@@ -5786,37 +5805,17 @@ function _injectAdminPanel() {
         <button onclick="anSetPeriod(365,this)">1 año</button>
         <button onclick="anSetPeriod(99999,this)">Todo</button>
       </div>
-      <div class="an-grid" id="an-kpis"></div>
-      <!-- Fila 1: línea ancha + dona tipo -->
-      <div class="an-row">
-        <div class="an-chart-box">
-          <div class="an-chart-title">Etiquetas generadas por día</div>
-          <div class="an-ct" style="height:160px"><canvas id="an-chart-line"></canvas></div>
-        </div>
-        <div class="an-chart-box">
-          <div class="an-chart-title">Tipo de etiqueta</div>
-          <div class="an-ct" style="height:160px"><canvas id="an-chart-type"></canvas></div>
-        </div>
-        <div class="an-chart-box">
-          <div class="an-chart-title">Dispositivo</div>
-          <div class="an-ct" style="height:160px"><canvas id="an-chart-device"></canvas></div>
-        </div>
+      <div class="an-kpi-grid" id="an-kpis"></div>
+      <div class="an-chart-wrap" id="an-day-chart-wrap">
+        <div class="an-bar-title">Etiquetas por día</div>
+        <div class="an-chart-sub" id="an-day-range"></div>
+        <div class="an-day-chart" id="an-day-bars"></div>
+        <div class="an-day-labels" id="an-day-labels"></div>
       </div>
-      <!-- Fila 2: navegador + plan + top -->
-      <div class="an-row2">
-        <div class="an-chart-box">
-          <div class="an-chart-title">Navegador</div>
-          <div class="an-ct" style="height:150px"><canvas id="an-chart-browser"></canvas></div>
-        </div>
-        <div class="an-chart-box">
-          <div class="an-chart-title">Plan de usuarios</div>
-          <div class="an-ct" style="height:150px"><canvas id="an-chart-plan"></canvas></div>
-        </div>
-      </div>
-      <!-- Top usuarios -->
-      <div class="an-chart-box">
-        <div class="an-chart-title">Top usuarios por generaciones</div>
-        <div class="sa-tos-table-wrap" style="border:none">
+      <div class="an-bars-grid" id="an-bars-grid"></div>
+      <div class="an-bar-section" style="margin-top:14px">
+        <div class="an-bar-title">Top usuarios por generaciones</div>
+        <div class="sa-tos-table-wrap" style="border:none;margin-top:12px">
           <table class="sa-tos-table">
             <thead><tr><th>#</th><th>Usuario</th><th>Plan</th><th>Etiquetas</th><th>Última actividad</th></tr></thead>
             <tbody id="an-top-users-tbody"></tbody>
@@ -5824,15 +5823,16 @@ function _injectAdminPanel() {
         </div>
       </div>
     </div>
+  </div>
 
-    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px" id="wm-config-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px">
-        <div>
-          <p class="sa-section-title" style="margin:0 0 2px">🎨 Configurar Marca de Agua</p>
-          <p style="font-size:12px;color:var(--text2);margin:0">Posición, tamaño y opacidad del logo Etify en etiquetas del plan Free.</p>
-        </div>
+  <!-- TAB: MARCA DE AGUA -->
+  <div class="sa-tab-pane" id="sa-tab-wm">
+    <div class="sa-main" id="wm-config-section">
+      <div style="margin-bottom:20px">
+        <h2 style="font-size:20px;font-weight:800;margin:0 0 2px;letter-spacing:-.3px">Marca de agua</h2>
+        <p style="font-size:13px;color:var(--text2);margin:0">Posición, tamaño y opacidad del logo en etiquetas del plan Free.</p>
       </div>
-      <p style="font-size:12px;color:var(--text2);margin-bottom:14px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;line-height:1.6">
         💡 Subí una etiqueta PDF de referencia, hacé click en el canvas para posicionar el logo, ajustá tamaño y opacidad, y guardá para aplicar a todos los usuarios free.
       </p>
       <div class="wm-tabs">
@@ -5843,7 +5843,7 @@ function _injectAdminPanel() {
       </div>
       <div class="wm-editor">
         <div>
-          <div style="margin-bottom:8px">
+          <div style="margin-bottom:10px">
             <input type="file" id="wm-pdf-input" accept=".pdf" style="font-size:12px;color:var(--text)" onchange="wmLoadPdf(event)">
           </div>
           <div class="wm-canvas-wrap" id="wm-canvas-wrap" onclick="wmCanvasClick(event)">
@@ -5889,14 +5889,29 @@ function _injectAdminPanel() {
             <button class="btn-sa" onclick="wmReset()">↺ Reset defaults</button>
           </div>
           <div id="wm-msg" style="display:none;margin-top:10px;font-size:13px;border-radius:6px;padding:8px 12px"></div>
-          <div style="margin-top:16px;padding:12px;background:var(--surface2);border-radius:var(--r-sm);font-size:12px;color:var(--text2);line-height:1.6">
+          <div style="margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);font-size:12px;color:var(--text2);line-height:1.6">
             <strong style="color:var(--text)">Valores actuales:</strong><br>
             <span id="wm-vals-display"></span>
           </div>
         </div>
       </div>
     </div>
+  </div>
   `;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN TAB SYSTEM
+═══════════════════════════════════════════════════════ */
+let _saActiveTab = 'usuarios';
+function saSetTab(tab, btn) {
+  _saActiveTab = tab;
+  document.querySelectorAll('.sa-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sa-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('sa-tab-' + tab);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (tab === 'metricas') anLoad();
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -5904,7 +5919,6 @@ function _injectAdminPanel() {
 ═══════════════════════════════════════════════════════ */
 let _anEvents = [];
 let _anPeriodDays = 7;
-let _anCharts = {};
 
 function _anGetBrowser() {
   const ua = navigator.userAgent;
@@ -5932,13 +5946,6 @@ function anTrack(labelType, labelCount) {
 }
 
 async function anLoad() {
-  // Cargar Chart.js si no está disponible
-  if (typeof Chart === 'undefined') {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script'); s.src = CDN_CHARTJS;
-      s.onload = res; s.onerror = rej; document.head.appendChild(s);
-    });
-  }
   try {
     _anEvents = await _api('/api/admin?type=analytics') || [];
   } catch(_) { _anEvents = []; }
@@ -5965,55 +5972,58 @@ function anRender() {
   const totalGens   = genEvs.length;
   const avgPerGen   = totalGens ? (totalLabels / totalGens).toFixed(1) : 0;
   document.getElementById('an-kpis').innerHTML = `
-    <div class="an-kpi"><div class="an-kpi-val">${totalLabels}</div><div class="an-kpi-lbl">Etiquetas generadas</div></div>
-    <div class="an-kpi"><div class="an-kpi-val">${totalGens}</div><div class="an-kpi-lbl">Generaciones</div></div>
-    <div class="an-kpi"><div class="an-kpi-val">${uniqueUsers}</div><div class="an-kpi-lbl">Usuarios activos</div></div>
-    <div class="an-kpi"><div class="an-kpi-val">${avgPerGen}</div><div class="an-kpi-lbl">Etiquetas por generación</div></div>
+    <div class="an-kpi"><div class="an-kpi-val">${totalLabels}</div><div class="an-kpi-lbl">Etiquetas</div><div class="an-kpi-sub">generadas</div></div>
+    <div class="an-kpi"><div class="an-kpi-val">${totalGens}</div><div class="an-kpi-lbl">Generaciones</div><div class="an-kpi-sub">en el período</div></div>
+    <div class="an-kpi"><div class="an-kpi-val">${uniqueUsers}</div><div class="an-kpi-lbl">Usuarios activos</div><div class="an-kpi-sub">únicos</div></div>
+    <div class="an-kpi"><div class="an-kpi-val">${avgPerGen}</div><div class="an-kpi-lbl">Promedio</div><div class="an-kpi-sub">etiquetas/generación</div></div>
   `;
 
-  // Chart.js colores
-  const COLORS = ['#f0c000','#4ecdc4','#a78bfa','#f97316','#34d399','#60a5fa'];
-
-  const BASE_OPTS = { responsive:true, maintainAspectRatio:false, animation:{ duration:400 } };
-  const GRID_COLOR = 'rgba(128,128,128,.12)';
-  const TICK_STYLE = { color:'var(--text2)', font:{ size:10 } };
-
-  // --- Línea: etiquetas por día ---
+  // --- Chart de barras por día (SVG/CSS nativo, sin Chart.js) ---
   const byDay = {};
   genEvs.forEach(e => { byDay[e.date] = (byDay[e.date] || 0) + (e.labelCount || 0); });
-  const days = Object.keys(byDay).sort().slice(-(_anPeriodDays < 99999 ? _anPeriodDays : 365));
-  _anChart('line', 'an-chart-line', {
-    type: 'line',
-    data: { labels: days, datasets: [{ label: 'Etiquetas', data: days.map(d => byDay[d] || 0),
-      borderColor:'#f0c000', backgroundColor:'rgba(240,192,0,.1)', tension:.4, fill:true, pointRadius:2, pointHoverRadius:5, borderWidth:2 }] },
-    options: { ...BASE_OPTS, plugins:{ legend:{display:false} },
-      scales:{ x:{ ticks:{...TICK_STYLE, maxTicksLimit:8}, grid:{color:GRID_COLOR} },
-               y:{ beginAtZero:true, ticks:TICK_STYLE, grid:{color:GRID_COLOR} } } }
-  });
+  const maxDays = _anPeriodDays < 99999 ? Math.min(_anPeriodDays, 60) : 60;
+  const days = Object.keys(byDay).sort().slice(-maxDays);
+  const maxVal = Math.max(...days.map(d => byDay[d] || 0), 1);
+  const barsEl = document.getElementById('an-day-bars');
+  const labelsEl = document.getElementById('an-day-labels');
+  const rangeEl = document.getElementById('an-day-range');
+  if (barsEl) {
+    barsEl.innerHTML = days.map(d => {
+      const h = Math.max(2, Math.round(((byDay[d] || 0) / maxVal) * 100));
+      return `<div class="an-day-bar" style="height:${h}%" title="${d}: ${byDay[d] || 0} etiquetas"></div>`;
+    }).join('') || '<span style="font-size:12px;color:var(--text2)">Sin datos</span>';
+  }
+  if (labelsEl) {
+    const show = days.filter((_, i) => i === 0 || i === Math.floor(days.length/2) || i === days.length-1);
+    labelsEl.innerHTML = `<span>${show[0] || ''}</span><span>${show[1] || ''}</span><span>${show[2] || ''}</span>`;
+  }
+  if (rangeEl && days.length) rangeEl.textContent = `${days[0]} → ${days[days.length-1]}`;
 
-  // --- Dona: tipo de etiqueta ---
-  const byType = { 'Mercado Libre':0, 'Correo Arg.':0, 'Andreani':0 };
-  genEvs.forEach(e => {
-    if (e.labelType === 'ml') byType['Mercado Libre'] += e.labelCount || 0;
-    else if (e.labelType === 'ca') byType['Correo Arg.'] += e.labelCount || 0;
-    else if (e.labelType === 'andreani') byType['Andreani'] += e.labelCount || 0;
-  });
-  _anDoughnut('an-chart-type', Object.keys(byType), Object.values(byType), COLORS, BASE_OPTS);
+  // --- Barras de categorías ---
+  const _mkBars = (title, map, total) => {
+    const sorted = Object.entries(map).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    const rows = sorted.map(([lbl, cnt]) => {
+      const pct = total ? Math.round(cnt / total * 100) : 0;
+      return `<div class="an-bar-row">
+        <div class="an-bar-label">${lbl}</div>
+        <div class="an-bar-track"><div class="an-bar-fill" style="width:${pct}%"></div></div>
+        <div class="an-bar-count">${cnt} · ${pct}%</div>
+      </div>`;
+    }).join('') || '<div style="font-size:12px;color:var(--text2);padding:4px 0">Sin datos</div>';
+    return `<div class="an-bar-section"><div class="an-bar-title">${title}</div>${rows}</div>`;
+  };
 
-  // --- Dona: dispositivo ---
-  const byDev = {};
-  genEvs.forEach(e => { byDev[e.device || 'desktop'] = (byDev[e.device || 'desktop'] || 0) + 1; });
-  _anDoughnut('an-chart-device', Object.keys(byDev), Object.values(byDev), COLORS, BASE_OPTS);
+  const byType = {}; genEvs.forEach(e => { const k = e.labelType==='ml'?'Mercado Libre':e.labelType==='ca'?'Correo Arg.':e.labelType==='andreani'?'Andreani':'Otro'; byType[k]=(byType[k]||0)+(e.labelCount||0); });
+  const byDev = {};  genEvs.forEach(e => { const k = e.device==='mobile'?'Móvil':e.device==='tablet'?'Tablet':'Escritorio'; byDev[k]=(byDev[k]||0)+1; });
+  const byBr = {};   genEvs.forEach(e => { byBr[e.browser||'Otro']=(byBr[e.browser||'Otro']||0)+1; });
+  const byPlan = {}; genEvs.forEach(e => { byPlan[e.plan||'free']=(byPlan[e.plan||'free']||0)+1; });
 
-  // --- Dona: navegador ---
-  const byBr = {};
-  genEvs.forEach(e => { byBr[e.browser || 'Otro'] = (byBr[e.browser || 'Otro'] || 0) + 1; });
-  _anDoughnut('an-chart-browser', Object.keys(byBr), Object.values(byBr), COLORS, BASE_OPTS);
-
-  // --- Dona: plan ---
-  const byPlan = {};
-  genEvs.forEach(e => { byPlan[e.plan || 'free'] = (byPlan[e.plan || 'free'] || 0) + 1; });
-  _anDoughnut('an-chart-plan', Object.keys(byPlan), Object.values(byPlan), COLORS, BASE_OPTS);
+  const grid = document.getElementById('an-bars-grid');
+  if (grid) grid.innerHTML =
+    _mkBars('Tipo de etiqueta', byType, totalLabels) +
+    _mkBars('Dispositivo', byDev, genEvs.length) +
+    _mkBars('Navegador', byBr, genEvs.length) +
+    _mkBars('Plan', byPlan, genEvs.length);
 
   // --- Top usuarios ---
   const userStats = {};
@@ -6031,25 +6041,6 @@ function anRender() {
       <td style="padding:10px 12px;font-weight:700;color:var(--accent)">${s.labels}</td>
       <td style="padding:10px 12px;color:var(--text2);font-size:12px">${new Date(s.last).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}</td>
     </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">Sin datos en este período</td></tr>';
-}
-
-function _anChart(key, id, cfg) {
-  if (_anCharts[key]) { _anCharts[key].destroy(); delete _anCharts[key]; }
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  _anCharts[key] = new Chart(canvas.getContext('2d'), cfg);
-}
-
-function _anDoughnut(id, labels, data, colors, baseOpts) {
-  const key = id;
-  if (_anCharts[key]) { _anCharts[key].destroy(); delete _anCharts[key]; }
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  _anCharts[key] = new Chart(canvas.getContext('2d'), {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderWidth: 2, borderColor: 'var(--surface)' }] },
-    options: { ...baseOpts, plugins:{ legend:{ position:'bottom', labels:{ font:{size:10}, color:'var(--text2)', padding:6, boxWidth:10 } } }, cutout:'62%' }
-  });
 }
 
 function anExportCSV() {
@@ -6070,8 +6061,7 @@ async function openSuperAdmin() {
   showScreen('screen-superadmin');
   // Pre-cargar logo y init configurador
   getWmLogo().then(() => { wmSyncControls(); wmRedraw(); });
-  // Cargar métricas
-  anLoad();
+  // No pre-cargamos métricas — se cargan al abrir la pestaña
 }
 
 /* ═══════════════════════════════════════════════════════
