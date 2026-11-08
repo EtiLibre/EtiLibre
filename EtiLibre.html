@@ -3025,18 +3025,6 @@ function addHistoryEntry(username, entry) {
 ═══════════════════════════════════════════════════════ */
 let currentUser = null;
 
-// Guardar test-wm en sessionStorage si viene en el hash
-if (location.hash === '#test-wm') { sessionStorage.setItem('etl-test-wm','1'); location.hash = ''; }
-
-// TEST ONLY — llamar desde consola: testFreeMode()
-function testFreeMode() {
-  currentUser = '__test_free__';
-  _userData = { plan: 'free', active: false, used: 0, displayName: 'Test Free' };
-  showScreen('screen-app');
-  clearAll && clearAll();
-  refreshTopbar && refreshTopbar();
-  console.log('Modo test FREE activo. Combiná etiquetas para ver la watermark.');
-}
 
 /* ═══════════════════════════════════════════════════════
    THEME
@@ -4478,7 +4466,7 @@ async function buildSheetCanvas(group, gapPt, lineType, cropHeader) {
   const gapPx  = Math.round(pt2px(gapPt));
   const outW   = Math.round(pt2px(A4_W_PT));
   const outH   = Math.round(pt2px(A4_H_PT));
-  const isFree = getUserPlan(currentUser) === 'free' || sessionStorage.getItem('etl-test-wm') === '1';
+  const isFree = getUserPlan(currentUser) === 'free';
 
   const canvas = document.createElement('canvas');
   canvas.width = outW; canvas.height = outH;
