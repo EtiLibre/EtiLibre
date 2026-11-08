@@ -20,6 +20,12 @@ export default async function handler(req, res) {
     const { type } = req.query;
     if (type === 'history')       return res.json(doc.data()?.history || []);
     if (type === 'notifications') return res.json(doc.data()?.notifications || []);
+    if (type === 'config') {
+      const { key } = req.query;
+      if (!key) return res.status(400).json({ error: 'key required' });
+      const cfgDoc = await db.collection('config').doc(key).get();
+      return res.json(cfgDoc.exists ? cfgDoc.data().value : null);
+    }
     return res.status(400).json({ error: 'Falta type' });
   }
 

@@ -4432,7 +4432,7 @@ let _wmConfig = {
 
 async function loadWmConfig() {
   try {
-    const r = await _api('/api/admin?type=config&key=watermark');
+    const r = await _api('/api/user?type=config&key=watermark');
     if (r && typeof r === 'object') Object.assign(_wmConfig, r);
   } catch(_) {}
 }
