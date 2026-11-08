@@ -2207,6 +2207,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </div>
       </div>
       <button class="btn-upgrade-top" id="btn-upgrade-top" onclick="openProfile('plan')" style="display:none">⬆ Mejorar plan</button>
+      <button id="btn-sim-free" onclick="toggleSimFree()" style="display:none;font-size:11px;padding:4px 10px;border-radius:6px;border:1.5px dashed var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-weight:600">🧪 Simular Free</button>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </nav>
@@ -3933,6 +3934,14 @@ function schedulePromoExpiry(userData) {
   }, msLeft);
 }
 
+function toggleSimFree() {
+  const active = sessionStorage.getItem('etl-sim-free') === '1';
+  if (active) sessionStorage.removeItem('etl-sim-free');
+  else sessionStorage.setItem('etl-sim-free', '1');
+  refreshTopbar();
+  showToast(active ? 'Simulación Free desactivada' : '🧪 Simulando plan Free — combiná etiquetas para ver la marca de agua');
+}
+
 function refreshTopbar() {
   if (!currentUser) return;
   const u = getUser(currentUser);
@@ -3957,6 +3966,15 @@ function refreshTopbar() {
 
   document.getElementById('btn-upgrade-top').style.display =
     (planKey !== 'admin' && planKey !== 'premium') ? '' : 'none';
+
+  const simBtn = document.getElementById('btn-sim-free');
+  if (simBtn) {
+    simBtn.style.display = planKey === 'admin' ? '' : 'none';
+    const active = sessionStorage.getItem('etl-sim-free') === '1';
+    simBtn.textContent = active ? '🧪 Free ON' : '🧪 Simular Free';
+    simBtn.style.background = active ? 'var(--accent)' : 'transparent';
+    simBtn.style.color = active ? '#000' : 'var(--accent)';
+  }
 
   // Dropdown header
   const udropAvatar = document.getElementById('udrop-avatar');
@@ -4484,7 +4502,7 @@ async function buildSheetCanvas(group, gapPt, lineType, cropHeader) {
   const gapPx  = Math.round(pt2px(gapPt));
   const outW   = Math.round(pt2px(A4_W_PT));
   const outH   = Math.round(pt2px(A4_H_PT));
-  const isFree = getUserPlan(currentUser) === 'free';
+  const isFree = getUserPlan(currentUser) === 'free' || sessionStorage.getItem('etl-sim-free') === '1';
 
   const canvas = document.createElement('canvas');
   canvas.width = outW; canvas.height = outH;
