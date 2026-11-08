@@ -4408,7 +4408,7 @@ let _wmConfig = {
 
 async function loadWmConfig() {
   try {
-    const r = await _api('/api/config?key=watermark');
+    const r = await _api('/api/admin?type=config&key=watermark');
     if (r && typeof r === 'object') Object.assign(_wmConfig, r);
   } catch(_) {}
 }
@@ -5970,7 +5970,7 @@ function wmRedraw() {
 async function wmSave() {
   const msg = document.getElementById('wm-msg');
   try {
-    await _api('/api/config', 'PUT', { key: 'watermark', value: _wmConfig });
+    await _api('/api/admin', 'POST', { action: 'save-config', key: 'watermark', value: _wmConfig });
     if (msg) { msg.style.display=''; msg.style.background='#d1fae5'; msg.style.color='#065f46'; msg.textContent='✓ Configuración guardada'; }
     setTimeout(() => { if(msg) msg.style.display='none'; }, 3000);
   } catch(e) {

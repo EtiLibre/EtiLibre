@@ -14,8 +14,14 @@ export default async function handler(req, res) {
 
   const ref = db.collection('users');
 
-  // GET — listar usuarios, bajas o códigos promo
+  // GET — listar usuarios, bajas, códigos promo o config
   if (req.method === 'GET') {
+    if (req.query.type === 'config') {
+      const { key } = req.query;
+      if (!key) return res.status(400).json({ error: 'key required' });
+      const doc = await db.collection('config').doc(key).get();
+      return res.json(doc.exists ? doc.data().value : null);
+    }
     if (req.query.type === 'deleted') {
       const snap = await db.collection('deleted_users').get();
       const users = snap.docs.map(d => { const { pass:_, ...u } = d.data(); return u; });
@@ -78,6 +84,13 @@ export default async function handler(req, res) {
     const { action, username } = req.body;
 
     // Gestión de códigos promocionales (no requieren username)
+    if (action === 'save-config') {
+      const { key, value } = req.body;
+      if (!key || value === undefined) return res.status(400).json({ error: 'key and value required' });
+      await db.collection('config').doc(String(key).slice(0, 50)).set({ value, updatedAt: new Date().toISOString() });
+      return res.json({ ok: true });
+    }
+
     if (action === 'create-promo') {
       const { code, plan, maxUses, durationDays } = req.body;
       if (!code || !plan || !maxUses) return res.status(400).json({ error: 'Faltan datos' });
