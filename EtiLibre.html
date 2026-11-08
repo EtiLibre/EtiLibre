@@ -946,7 +946,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 ════════════════════════════════════════════════════════ */
 #screen-superadmin{min-height:100vh;background:var(--bg);display:none!important}
 #screen-superadmin.active{display:flex!important;flex-direction:column}
-.sa-topbar{height:64px;background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:50}
+.sa-topbar{background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.sa-topbar-row1{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.sa-topbar-row2{display:flex;gap:6px;padding:0 28px 10px;flex-wrap:wrap}
+.sa-nav-btn{font-size:12px;font-weight:600;font-family:inherit;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.sa-nav-btn:hover,.sa-nav-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
 .sa-topbar-left{display:flex;align-items:center;gap:16px}
 .sa-logo{font-size:16px;font-weight:900;color:var(--accent)}
 .sa-badge{background:var(--danger);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:100px;letter-spacing:.5px}
@@ -981,19 +985,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .sa-tos-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
 .sa-tos-table{width:100%;border-collapse:collapse;font-size:13px}
 /* Analytics */
-.an-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.an-kpi{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:14px 18px;display:flex;flex-direction:column;gap:4px}
-.an-kpi-val{font-size:26px;font-weight:800;color:var(--accent);line-height:1.1}
+.an-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.an-kpi{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:16px 20px;display:flex;flex-direction:column;gap:3px}
+.an-kpi-val{font-size:28px;font-weight:800;color:var(--accent);line-height:1.1;font-variant-numeric:tabular-nums}
 .an-kpi-lbl{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
 .an-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.an-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.an-chart-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:16px}
+.an-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.an-chart-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:16px 18px}
 .an-chart-box .an-ct{position:relative;width:100%}
-.an-chart-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px}
-.an-period{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.an-chart-title{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.an-period{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
 .an-period button{font-size:11px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:600;font-family:inherit;transition:all .15s}
 .an-period button.active{background:var(--accent);border-color:var(--accent);color:#000}
-@media(max-width:900px){.an-grid{grid-template-columns:repeat(2,1fr)}.an-row{grid-template-columns:1fr}.an-row2{grid-template-columns:1fr}}
+/* WM Configurator mejorado */
+.wm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.wm-editor{display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start}
+@media(max-width:800px){.wm-editor{grid-template-columns:1fr}.an-grid{grid-template-columns:repeat(2,1fr)}.an-row{grid-template-columns:1fr}.an-row2{grid-template-columns:1fr}}
+@media(max-width:500px){.an-grid{grid-template-columns:repeat(2,1fr)}}
 /* WM Configurator */
 .wm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .wm-tab{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-family:inherit;font-size:11px;font-weight:600;padding:5px 11px;cursor:pointer;transition:all .2s}
@@ -5647,19 +5655,29 @@ function _injectAdminPanel() {
   el.dataset.injected = '1';
   el.innerHTML = `
   <nav class="sa-topbar">
-    <div class="sa-topbar-left">
-      <span class="sa-logo">⚙️ Panel Super Admin</span>
-      <span class="sa-badge">ADMIN</span>
+    <div class="sa-topbar-row1">
+      <div class="sa-topbar-left">
+        <span class="sa-logo">⚙️ Panel Admin</span>
+        <span class="sa-badge">ADMIN</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sa" onclick="renderSuperAdmin();anLoad()">↺ Actualizar</button>
+        <button class="btn-logout" onclick="showScreen('screen-app')">← App</button>
+        <button class="btn-logout" onclick="doLogout()">Salir</button>
+      </div>
     </div>
-    <div style="display:flex;gap:10px">
-      <button class="btn-sa" onclick="renderSuperAdmin()">↺ Actualizar</button>
-      <button class="btn-logout" onclick="showScreen('screen-app')">← Volver a la app</button>
-      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    <div class="sa-topbar-row2">
+      <button class="sa-nav-btn" onclick="document.getElementById('sa-anchor-users').scrollIntoView({behavior:'smooth'})">👥 Usuarios</button>
+      <button class="sa-nav-btn" onclick="document.getElementById('sa-anchor-deleted').scrollIntoView({behavior:'smooth'})">🗑 Bajas</button>
+      <button class="sa-nav-btn" onclick="document.getElementById('sa-anchor-promos').scrollIntoView({behavior:'smooth'})">🎟 Códigos Promo</button>
+      <button class="sa-nav-btn" onclick="document.getElementById('sa-anchor-tos').scrollIntoView({behavior:'smooth'})">📋 T&amp;C</button>
+      <button class="sa-nav-btn" onclick="document.getElementById('an-section').scrollIntoView({behavior:'smooth'})">📊 Métricas</button>
+      <button class="sa-nav-btn" onclick="document.getElementById('wm-config-section').scrollIntoView({behavior:'smooth'})">🎨 Marca de Agua</button>
     </div>
   </nav>
   <div class="sa-main">
     <div class="sa-stats" id="sa-stats"></div>
-    <p class="sa-section-title">Usuarios registrados</p>
+    <p class="sa-section-title" id="sa-anchor-users">Usuarios registrados</p>
     <div class="sa-toolbar">
       <input class="sa-search" id="sa-search" type="text" placeholder="Buscar por nombre, email o plan…" oninput="renderSAUsers()"/>
       <select class="sa-filter" id="sa-filter" onchange="renderSAUsers()">
@@ -5678,9 +5696,9 @@ function _injectAdminPanel() {
     </div>
     <div class="sa-user-list" id="sa-user-list"></div>
 
-    <div style="margin-top:48px">
+    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0">Bajas y eliminados</p>
+        <p class="sa-section-title" style="margin:0" id="sa-anchor-deleted">Bajas y eliminados</p>
         <button class="btn-sa success" onclick="exportDeletedCSV()">⬇ Exportar CSV</button>
       </div>
       <div class="sa-tos-table-wrap">
@@ -5691,9 +5709,9 @@ function _injectAdminPanel() {
       </div>
     </div>
 
-    <div style="margin-top:48px">
+    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0">🎟️ Códigos Promocionales</p>
+        <p class="sa-section-title" style="margin:0" id="sa-anchor-promos">🎟️ Códigos Promocionales</p>
         <button class="btn-sa success" onclick="togglePromoForm()">+ Nuevo código</button>
       </div>
       <div id="promo-form" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:20px;margin-bottom:20px">
@@ -5735,9 +5753,9 @@ function _injectAdminPanel() {
       </div>
     </div>
 
-    <div style="margin-top:48px">
+    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0">Registro de aceptación de Términos y Condiciones</p>
+        <p class="sa-section-title" style="margin:0" id="sa-anchor-tos">Registro de aceptación de Términos y Condiciones</p>
         <button class="btn-sa success" onclick="exportTosCSV()">⬇ Exportar CSV</button>
       </div>
       <div class="sa-tos-table-wrap">
@@ -5750,12 +5768,15 @@ function _injectAdminPanel() {
   </div>
   <input type="file" id="sa-invoice-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="saHandleInvoiceUpload(event)"/>
 
-    <div style="margin-top:40px" id="an-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-        <p class="sa-section-title" style="margin:0">📊 Métricas y Analytics</p>
+    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px" id="an-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+        <div>
+          <p class="sa-section-title" style="margin:0 0 2px">📊 Métricas y Analytics</p>
+          <p style="font-size:12px;color:var(--text2);margin:0">Actividad de generación de etiquetas por usuarios.</p>
+        </div>
         <div style="display:flex;gap:8px">
           <button class="btn-sa" onclick="anLoad()">↺ Actualizar</button>
-          <button class="btn-sa success" onclick="anExportCSV()">⬇ Exportar CSV</button>
+          <button class="btn-sa success" onclick="anExportCSV()">⬇ CSV</button>
         </div>
       </div>
       <div class="an-period">
@@ -5804,12 +5825,15 @@ function _injectAdminPanel() {
       </div>
     </div>
 
-    <div style="margin-top:48px" id="wm-config-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <p class="sa-section-title" style="margin:0">🎨 Configurar Marca de Agua (Plan Free)</p>
+    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px" id="wm-config-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+        <div>
+          <p class="sa-section-title" style="margin:0 0 2px">🎨 Configurar Marca de Agua</p>
+          <p style="font-size:12px;color:var(--text2);margin:0">Posición, tamaño y opacidad del logo Etify en etiquetas del plan Free.</p>
+        </div>
       </div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">
-        Subí una etiqueta de cada proveedor, hacé click en el canvas para posicionar el logo, y ajustá tamaño y opacidad. Guardá para aplicar a todos los usuarios free.
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px">
+        💡 Subí una etiqueta PDF de referencia, hacé click en el canvas para posicionar el logo, ajustá tamaño y opacidad, y guardá para aplicar a todos los usuarios free.
       </p>
       <div class="wm-tabs">
         <button class="wm-tab active" onclick="wmSelectTab(event,'ml')">Mercado Libre</button>
