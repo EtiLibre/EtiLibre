@@ -980,6 +980,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-sa.success:hover{border-color:var(--teal);color:var(--teal)}
 .sa-tos-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
 .sa-tos-table{width:100%;border-collapse:collapse;font-size:13px}
+/* WM Configurator */
+.wm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.wm-tab{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-family:inherit;font-size:12px;font-weight:600;padding:7px 14px;cursor:pointer;transition:all .2s}
+.wm-tab.active,.wm-tab:hover{border-color:var(--accent);color:var(--accent)}
+.wm-editor{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:start}
+@media(max-width:700px){.wm-editor{grid-template-columns:1fr}}
+.wm-canvas-wrap{position:relative;border:1.5px solid var(--border2);border-radius:var(--r-sm);overflow:hidden;background:#f0f0f0;cursor:crosshair;min-height:120px}
+.wm-canvas-wrap canvas{display:block;width:100%;height:auto}
+.wm-controls{display:flex;flex-direction:column;gap:14px}
+.wm-ctrl label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.wm-ctrl-row{display:flex;align-items:center;gap:8px}
+.wm-ctrl-row input[type=range]{flex:1;accent-color:var(--accent)}
+.wm-ctrl-row input[type=number]{width:62px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:13px;color:var(--text);font-family:inherit;text-align:right}
+.wm-ctrl-row span{font-size:12px;color:var(--text2);min-width:12px}
+.wm-hint{font-size:11px;color:var(--text2);margin-top:6px;line-height:1.4}
 .sa-tos-table th{background:var(--surface2);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
 .sa-tos-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
 .sa-tos-table tr:last-child td{border-bottom:none}
@@ -3837,6 +3852,7 @@ async function enterApp(username) {
   updateNotifBadge();
   showScreen('screen-app');
   clearAll();
+  loadWmConfig(); // carga config de marca de agua desde Firebase (no bloquea)
 
   // Si el usuario eligió un plan desde la landing antes de loguearse, redirigir al tab Plan
   const pendingPlan = sessionStorage.getItem('selected_plan_after_login');
@@ -4382,6 +4398,21 @@ function detectLabelBounds(canvas) {
   return { x:rx, y:ry, w:Math.min(w - rx, x1-x0+1+2*pad), h:Math.min(h - ry, y1-y0+1+2*pad) };
 }
 
+// Config dinámica de marca de agua (cargada desde Firebase, con defaults)
+let _wmConfig = {
+  ml:        { x: 0.72, y: 0.015, size: 0.26, opacity: 1.0 },
+  ml_no_hdr: { x: 0.72, y: 0.015, size: 0.26, opacity: 1.0 },
+  ca:        { x: 0.72, y: 0.74,  size: 0.26, opacity: 1.0 },
+  andreani:  { x: 0.72, y: 0.22,  size: 0.26, opacity: 1.0 },
+};
+
+async function loadWmConfig() {
+  try {
+    const r = await _api('/api/config?key=watermark');
+    if (r && typeof r === 'object') Object.assign(_wmConfig, r);
+  } catch(_) {}
+}
+
 // Cache del logo Etify para watermark
 let _wmLogoImg = null;
 function getWmLogo() {
@@ -4430,28 +4461,14 @@ function getWmLogo() {
 
 function drawWatermark(ctx, lx, ly, lw, lh, mode) {
   if (!_wmLogoImg) return;
-  // Proporción logo: 512 × 197.93
-  const wmW = Math.round(lw * 0.26);
+  const cfgKey = mode === 'ml' ? 'ml' : mode === 'andreani' ? 'andreani' : 'ca';
+  const cfg = _wmConfig[cfgKey] || _wmConfig.ml;
+  const wmW = Math.round(lw * cfg.size);
   const wmH = Math.round(wmW * (197.93 / 512));
-  const margin = Math.round(lw * 0.02);
-
-  let wx, wy;
-  if (mode === 'ml') {
-    // Top-RIGHT del header (a la derecha del texto Remitente)
-    wx = lx + lw - wmW - margin;
-    wy = ly + margin;
-  } else if (mode === 'andreani') {
-    // Right de la fila "Id: #101 / Remito:" - zona antes del N° de Bulto
-    wx = lx + lw - wmW - margin;
-    wy = ly + Math.round(lh * 0.22);
-  } else {
-    // CA: zona derecha entre DESTINATARIO y T&T barcode
-    wx = lx + lw - wmW - margin;
-    wy = ly + Math.round(lh * 0.74);
-  }
-
+  const wx  = lx + Math.round(lw * cfg.x);
+  const wy  = ly + Math.round(lh * cfg.y);
   ctx.save();
-  ctx.globalAlpha = 1.0;
+  ctx.globalAlpha = cfg.opacity;
   ctx.drawImage(_wmLogoImg, wx, wy, wmW, wmH);
   ctx.restore();
 }
@@ -5691,7 +5708,77 @@ function _injectAdminPanel() {
       </div>
     </div>
   </div>
-  <input type="file" id="sa-invoice-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="saHandleInvoiceUpload(event)"/>`;
+  <input type="file" id="sa-invoice-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="saHandleInvoiceUpload(event)"/>
+
+    <div style="margin-top:48px" id="wm-config-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <p class="sa-section-title" style="margin:0">🎨 Configurar Marca de Agua (Plan Free)</p>
+      </div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">
+        Subí una etiqueta de cada proveedor, hacé click en el canvas para posicionar el logo, y ajustá tamaño y opacidad. Guardá para aplicar a todos los usuarios free.
+      </p>
+      <div class="wm-tabs">
+        <button class="wm-tab active" onclick="wmSelectTab(event,'ml')">Mercado Libre</button>
+        <button class="wm-tab" onclick="wmSelectTab(event,'ml_no_hdr')">ML sin encabezado</button>
+        <button class="wm-tab" onclick="wmSelectTab(event,'ca')">Correo Argentino</button>
+        <button class="wm-tab" onclick="wmSelectTab(event,'andreani')">Andreani</button>
+      </div>
+      <div class="wm-editor">
+        <div>
+          <div style="margin-bottom:8px">
+            <input type="file" id="wm-pdf-input" accept=".pdf" style="font-size:12px;color:var(--text)" onchange="wmLoadPdf(event)">
+          </div>
+          <div class="wm-canvas-wrap" id="wm-canvas-wrap" onclick="wmCanvasClick(event)">
+            <canvas id="wm-preview-canvas" width="400" height="560"></canvas>
+          </div>
+          <div class="wm-hint">▶ Hacé click en el canvas para mover la marca de agua · El área gris claro es el canvas de previsualización (sube un PDF para ver la etiqueta real)</div>
+        </div>
+        <div class="wm-controls">
+          <div class="wm-ctrl">
+            <label>Posición X (% del ancho)</label>
+            <div class="wm-ctrl-row">
+              <input type="range" id="wm-x" min="0" max="95" step="0.5" oninput="wmFromSlider('x')">
+              <input type="number" id="wm-x-num" min="0" max="95" step="0.5" oninput="wmFromNum('x')">
+              <span>%</span>
+            </div>
+          </div>
+          <div class="wm-ctrl">
+            <label>Posición Y (% del alto)</label>
+            <div class="wm-ctrl-row">
+              <input type="range" id="wm-y" min="0" max="95" step="0.5" oninput="wmFromSlider('y')">
+              <input type="number" id="wm-y-num" min="0" max="95" step="0.5" oninput="wmFromNum('y')">
+              <span>%</span>
+            </div>
+          </div>
+          <div class="wm-ctrl">
+            <label>Tamaño (% del ancho de etiqueta)</label>
+            <div class="wm-ctrl-row">
+              <input type="range" id="wm-size" min="5" max="80" step="0.5" oninput="wmFromSlider('size')">
+              <input type="number" id="wm-size-num" min="5" max="80" step="0.5" oninput="wmFromNum('size')">
+              <span>%</span>
+            </div>
+          </div>
+          <div class="wm-ctrl">
+            <label>Opacidad</label>
+            <div class="wm-ctrl-row">
+              <input type="range" id="wm-opacity" min="5" max="100" step="1" oninput="wmFromSlider('opacity')">
+              <input type="number" id="wm-opacity-num" min="5" max="100" step="1" oninput="wmFromNum('opacity')">
+              <span>%</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button class="btn-sa success" onclick="wmSave()">💾 Guardar</button>
+            <button class="btn-sa" onclick="wmReset()">↺ Reset defaults</button>
+          </div>
+          <div id="wm-msg" style="display:none;margin-top:10px;font-size:13px;border-radius:6px;padding:8px 12px"></div>
+          <div style="margin-top:16px;padding:12px;background:var(--surface2);border-radius:var(--r-sm);font-size:12px;color:var(--text2);line-height:1.6">
+            <strong style="color:var(--text)">Valores actuales:</strong><br>
+            <span id="wm-vals-display"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 async function openSuperAdmin() {
@@ -5700,6 +5787,201 @@ async function openSuperAdmin() {
   await _refreshSAUsers();
   renderSuperAdmin();
   showScreen('screen-superadmin');
+  // Init configurador después de que el DOM esté listo
+  setTimeout(() => { wmSyncControls(); wmRedraw(); }, 100);
+}
+
+/* ═══════════════════════════════════════════════════════
+   WATERMARK CONFIGURATOR (admin only)
+═══════════════════════════════════════════════════════ */
+let _wmCurrentTab = 'ml';
+let _wmLabelCanvas = null; // canvas del label procesado para preview
+const WM_DEFAULTS = {
+  ml:        { x: 0.72, y: 0.015, size: 0.26, opacity: 1.0 },
+  ml_no_hdr: { x: 0.72, y: 0.015, size: 0.26, opacity: 1.0 },
+  ca:        { x: 0.72, y: 0.74,  size: 0.26, opacity: 1.0 },
+  andreani:  { x: 0.72, y: 0.22,  size: 0.26, opacity: 1.0 },
+};
+
+function wmSelectTab(e, mode) {
+  _wmCurrentTab = mode;
+  _wmLabelCanvas = null;
+  document.querySelectorAll('.wm-tab').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  const inp = document.getElementById('wm-pdf-input');
+  if (inp) inp.value = '';
+  wmSyncControls();
+  wmRedraw();
+}
+
+function wmSyncControls() {
+  const cfg = _wmConfig[_wmCurrentTab];
+  if (!cfg) return;
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  };
+  set('wm-x',       (cfg.x    * 100).toFixed(1));
+  set('wm-x-num',   (cfg.x    * 100).toFixed(1));
+  set('wm-y',       (cfg.y    * 100).toFixed(1));
+  set('wm-y-num',   (cfg.y    * 100).toFixed(1));
+  set('wm-size',    (cfg.size * 100).toFixed(1));
+  set('wm-size-num',(cfg.size * 100).toFixed(1));
+  set('wm-opacity', Math.round(cfg.opacity * 100));
+  set('wm-opacity-num', Math.round(cfg.opacity * 100));
+  wmUpdateValsDisplay();
+}
+
+function wmFromSlider(field) {
+  const v = parseFloat(document.getElementById('wm-' + field).value);
+  document.getElementById('wm-' + field + '-num').value = v;
+  wmApplyControls();
+}
+
+function wmFromNum(field) {
+  const v = parseFloat(document.getElementById('wm-' + field + '-num').value);
+  document.getElementById('wm-' + field).value = v;
+  wmApplyControls();
+}
+
+function wmApplyControls() {
+  const get = id => parseFloat(document.getElementById(id)?.value || 0);
+  _wmConfig[_wmCurrentTab] = {
+    x:       get('wm-x-num')       / 100,
+    y:       get('wm-y-num')       / 100,
+    size:    get('wm-size-num')    / 100,
+    opacity: get('wm-opacity-num') / 100,
+  };
+  wmUpdateValsDisplay();
+  wmRedraw();
+}
+
+function wmUpdateValsDisplay() {
+  const el = document.getElementById('wm-vals-display');
+  if (!el) return;
+  const cfg = _wmConfig[_wmCurrentTab];
+  el.innerHTML = `x: ${(cfg.x*100).toFixed(1)}% &nbsp; y: ${(cfg.y*100).toFixed(1)}% &nbsp; size: ${(cfg.size*100).toFixed(1)}% &nbsp; opacity: ${Math.round(cfg.opacity*100)}%`;
+}
+
+function wmCanvasClick(e) {
+  const wrap = document.getElementById('wm-canvas-wrap');
+  const canvas = document.getElementById('wm-preview-canvas');
+  if (!wrap || !canvas) return;
+  const rect = wrap.getBoundingClientRect();
+  // Coordenadas relativas al canvas (escala CSS vs canvas interno)
+  const scaleX = canvas.width  / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const cx = (e.clientX - rect.left) * scaleX;
+  const cy = (e.clientY - rect.top)  * scaleY;
+  // Convertir a porcentaje
+  const cfg = _wmConfig[_wmCurrentTab];
+  cfg.x = Math.max(0, Math.min(0.95, cx / canvas.width));
+  cfg.y = Math.max(0, Math.min(0.95, cy / canvas.height));
+  wmSyncControls();
+  wmRedraw();
+}
+
+async function wmLoadPdf(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (typeof pdfjsLib === 'undefined') { alert('PDF.js aún no cargó, esperá un momento.'); return; }
+  try {
+    const ab  = await file.arrayBuffer();
+    const buf = new Uint8Array(ab);
+    const src = await renderPageToCanvas(buf);
+
+    if (_wmCurrentTab === 'ml' || _wmCurrentTab === 'ml_no_hdr') {
+      // Crop ML fijo
+      const cx = Math.round(pt2px(CROP.x));
+      const cw = Math.round(pt2px(CROP.w));
+      const ch = Math.round(pt2px(CROP.h));
+      const pagePt = src.height / RENDER_SCALE;
+      let cy = Math.round(pt2px(CROP.y));
+      if (_wmCurrentTab === 'ml_no_hdr' && pagePt > STANDARD_LABEL_H_PT + 20)
+        cy = Math.round(pt2px(CROP.y + (pagePt - STANDARD_LABEL_H_PT)));
+      const cc = document.createElement('canvas');
+      cc.width = cw; cc.height = ch;
+      cc.getContext('2d').drawImage(src, cx, cy, cw, ch, 0, 0, cw, ch);
+      _wmLabelCanvas = cc;
+    } else {
+      // CA / Andreani: detectar bounds
+      const b  = detectLabelBounds(src);
+      const cc = document.createElement('canvas');
+      cc.width = b.w; cc.height = b.h;
+      cc.getContext('2d').drawImage(src, b.x, b.y, b.w, b.h, 0, 0, b.w, b.h);
+      _wmLabelCanvas = cc;
+    }
+
+    // Ajustar canvas de preview al aspect ratio del label
+    const canvas = document.getElementById('wm-preview-canvas');
+    if (canvas && _wmLabelCanvas) {
+      const maxW = 400;
+      const scale = maxW / _wmLabelCanvas.width;
+      canvas.width  = Math.round(_wmLabelCanvas.width  * scale);
+      canvas.height = Math.round(_wmLabelCanvas.height * scale);
+    }
+    wmRedraw();
+  } catch(err) {
+    alert('Error al leer el PDF: ' + err.message);
+  }
+}
+
+function wmRedraw() {
+  const canvas = document.getElementById('wm-preview-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (_wmLabelCanvas) {
+    ctx.drawImage(_wmLabelCanvas, 0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.fillStyle = '#e8e8e8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#999';
+    ctx.font = `13px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Subí un PDF de etiqueta para previsualizar', canvas.width / 2, canvas.height / 2);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  if (_wmLogoImg) {
+    const cfg = _wmConfig[_wmCurrentTab];
+    const lw  = canvas.width;
+    const lh  = canvas.height;
+    const wmW = Math.round(lw * cfg.size);
+    const wmH = Math.round(wmW * (197.93 / 512));
+    const wx  = Math.round(lw * cfg.x);
+    const wy  = Math.round(lh * cfg.y);
+    // Indicador de posición (cruz roja)
+    ctx.save();
+    ctx.strokeStyle = 'rgba(220,50,50,0.6)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    ctx.strokeRect(wx, wy, wmW, wmH);
+    ctx.setLineDash([]);
+    ctx.globalAlpha = cfg.opacity;
+    ctx.drawImage(_wmLogoImg, wx, wy, wmW, wmH);
+    ctx.restore();
+  }
+}
+
+async function wmSave() {
+  const msg = document.getElementById('wm-msg');
+  try {
+    await _api('/api/config', 'PUT', { key: 'watermark', value: _wmConfig });
+    if (msg) { msg.style.display=''; msg.style.background='#d1fae5'; msg.style.color='#065f46'; msg.textContent='✓ Configuración guardada'; }
+    setTimeout(() => { if(msg) msg.style.display='none'; }, 3000);
+  } catch(e) {
+    if (msg) { msg.style.display=''; msg.style.background='#fee2e2'; msg.style.color='#991b1b'; msg.textContent='Error al guardar: ' + e.message; }
+  }
+}
+
+function wmReset() {
+  Object.assign(_wmConfig, JSON.parse(JSON.stringify(WM_DEFAULTS)));
+  wmSyncControls();
+  wmRedraw();
 }
 
 function renderSuperAdmin() {
