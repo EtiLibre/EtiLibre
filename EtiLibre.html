@@ -981,20 +981,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .sa-tos-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
 .sa-tos-table{width:100%;border-collapse:collapse;font-size:13px}
 /* WM Configurator */
-.wm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-.wm-tab{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-family:inherit;font-size:12px;font-weight:600;padding:7px 14px;cursor:pointer;transition:all .2s}
+.wm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.wm-tab{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-family:inherit;font-size:11px;font-weight:600;padding:5px 11px;cursor:pointer;transition:all .2s}
 .wm-tab.active,.wm-tab:hover{border-color:var(--accent);color:var(--accent)}
-.wm-editor{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:start}
+.wm-editor{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
 @media(max-width:700px){.wm-editor{grid-template-columns:1fr}}
-.wm-canvas-wrap{position:relative;border:1.5px solid var(--border2);border-radius:var(--r-sm);overflow:hidden;background:#f0f0f0;cursor:crosshair;min-height:120px}
+.wm-canvas-wrap{position:relative;border:1.5px solid var(--border2);border-radius:var(--r-sm);overflow:hidden;background:#ebebeb;cursor:crosshair;width:260px}
 .wm-canvas-wrap canvas{display:block;width:100%;height:auto}
-.wm-controls{display:flex;flex-direction:column;gap:14px}
-.wm-ctrl label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
-.wm-ctrl-row{display:flex;align-items:center;gap:8px}
-.wm-ctrl-row input[type=range]{flex:1;accent-color:var(--accent)}
-.wm-ctrl-row input[type=number]{width:62px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:13px;color:var(--text);font-family:inherit;text-align:right}
-.wm-ctrl-row span{font-size:12px;color:var(--text2);min-width:12px}
-.wm-hint{font-size:11px;color:var(--text2);margin-top:6px;line-height:1.4}
+.wm-controls{display:flex;flex-direction:column;gap:10px}
+.wm-ctrl label{display:block;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.wm-ctrl-row{display:flex;align-items:center;gap:6px}
+.wm-ctrl-row input[type=range]{flex:1;accent-color:var(--accent);height:4px}
+.wm-ctrl-row input[type=number]{width:52px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:6px;padding:4px 6px;font-size:12px;color:var(--text);font-family:inherit;text-align:right}
+.wm-ctrl-row span{font-size:11px;color:var(--text2);min-width:10px}
+.wm-hint{font-size:10px;color:var(--text2);margin-top:4px;line-height:1.4}
 .sa-tos-table th{background:var(--surface2);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
 .sa-tos-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
 .sa-tos-table tr:last-child td{border-bottom:none}
@@ -5729,9 +5729,9 @@ function _injectAdminPanel() {
             <input type="file" id="wm-pdf-input" accept=".pdf" style="font-size:12px;color:var(--text)" onchange="wmLoadPdf(event)">
           </div>
           <div class="wm-canvas-wrap" id="wm-canvas-wrap" onclick="wmCanvasClick(event)">
-            <canvas id="wm-preview-canvas" width="400" height="560"></canvas>
+            <canvas id="wm-preview-canvas" width="260" height="380"></canvas>
           </div>
-          <div class="wm-hint">▶ Hacé click en el canvas para mover la marca de agua · El área gris claro es el canvas de previsualización (sube un PDF para ver la etiqueta real)</div>
+          <div class="wm-hint">▶ Click en el canvas para posicionar · Subí un PDF para ver la etiqueta real</div>
         </div>
         <div class="wm-controls">
           <div class="wm-ctrl">
@@ -5787,8 +5787,8 @@ async function openSuperAdmin() {
   await _refreshSAUsers();
   renderSuperAdmin();
   showScreen('screen-superadmin');
-  // Init configurador después de que el DOM esté listo
-  setTimeout(() => { wmSyncControls(); wmRedraw(); }, 100);
+  // Pre-cargar logo y init configurador
+  getWmLogo().then(() => { wmSyncControls(); wmRedraw(); });
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -5915,7 +5915,7 @@ async function wmLoadPdf(event) {
     // Ajustar canvas de preview al aspect ratio del label
     const canvas = document.getElementById('wm-preview-canvas');
     if (canvas && _wmLabelCanvas) {
-      const maxW = 400;
+      const maxW = 260;
       const scale = maxW / _wmLabelCanvas.width;
       canvas.width  = Math.round(_wmLabelCanvas.width  * scale);
       canvas.height = Math.round(_wmLabelCanvas.height * scale);
