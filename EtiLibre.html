@@ -980,6 +980,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-sa.success:hover{border-color:var(--teal);color:var(--teal)}
 .sa-tos-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
 .sa-tos-table{width:100%;border-collapse:collapse;font-size:13px}
+/* Analytics */
+.an-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.an-kpi{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:20px 24px}
+.an-kpi-val{font-size:32px;font-weight:800;color:var(--accent);line-height:1}
+.an-kpi-lbl{font-size:12px;color:var(--text2);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.an-charts{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+.an-chart-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:20px}
+.an-chart-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px}
+.an-chart-box canvas{display:block;width:100%!important}
+.an-period{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.an-period button{font-size:12px;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:600;font-family:inherit}
+.an-period button.active{background:var(--accent);border-color:var(--accent);color:#000}
+@media(max-width:700px){.an-charts{grid-template-columns:1fr}}
 /* WM Configurator */
 .wm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .wm-tab{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-family:inherit;font-size:11px;font-weight:600;padding:5px 11px;cursor:pointer;transition:all .2s}
@@ -2728,6 +2741,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 ════════════════════════════════════════════════════════ -->
 <script>
 const LIB_BASE   = './libs/';
+const CDN_CHARTJS = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
 const CDN_PDFJS  = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
 const CDN_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const CDN_PDFLIB = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
@@ -4659,6 +4673,7 @@ async function combineLabels() {
 
     // Incrementar uso POR HOJA
     if (currentUser) {
+      anTrack(labelMode, slots.length);
       incrementUsage(currentUser, totalSheets);
       // Convertir PDF a base64 para re-descarga (se elimina a los 7 días)
       let pdfBase64 = null;
@@ -5734,6 +5749,55 @@ function _injectAdminPanel() {
   </div>
   <input type="file" id="sa-invoice-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="saHandleInvoiceUpload(event)"/>
 
+    <div style="margin-top:48px" id="an-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <p class="sa-section-title" style="margin:0">📊 Métricas y Analytics</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sa" onclick="anLoad()">↺ Actualizar</button>
+          <button class="btn-sa success" onclick="anExportCSV()">⬇ Exportar CSV</button>
+        </div>
+      </div>
+      <div class="an-period">
+        <button class="active" onclick="anSetPeriod(7,this)">7 días</button>
+        <button onclick="anSetPeriod(30,this)">30 días</button>
+        <button onclick="anSetPeriod(90,this)">90 días</button>
+        <button onclick="anSetPeriod(365,this)">1 año</button>
+        <button onclick="anSetPeriod(99999,this)">Todo</button>
+      </div>
+      <div class="an-grid" id="an-kpis"></div>
+      <div class="an-charts">
+        <div class="an-chart-box" style="grid-column:1/-1">
+          <div class="an-chart-title">Etiquetas generadas por día</div>
+          <canvas id="an-chart-line" height="90"></canvas>
+        </div>
+        <div class="an-chart-box">
+          <div class="an-chart-title">Tipo de etiqueta</div>
+          <canvas id="an-chart-type" height="200"></canvas>
+        </div>
+        <div class="an-chart-box">
+          <div class="an-chart-title">Dispositivo</div>
+          <canvas id="an-chart-device" height="200"></canvas>
+        </div>
+        <div class="an-chart-box">
+          <div class="an-chart-title">Navegador</div>
+          <canvas id="an-chart-browser" height="200"></canvas>
+        </div>
+        <div class="an-chart-box">
+          <div class="an-chart-title">Plan de usuarios</div>
+          <canvas id="an-chart-plan" height="200"></canvas>
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <div class="an-chart-title" style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Top usuarios por generaciones</div>
+        <div class="sa-tos-table-wrap">
+          <table class="sa-tos-table" id="an-top-users-table">
+            <thead><tr><th>#</th><th>Usuario</th><th>Plan</th><th>Etiquetas generadas</th><th>Última actividad</th></tr></thead>
+            <tbody id="an-top-users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <div style="margin-top:48px" id="wm-config-section">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
         <p class="sa-section-title" style="margin:0">🎨 Configurar Marca de Agua (Plan Free)</p>
@@ -5805,6 +5869,163 @@ function _injectAdminPanel() {
   `;
 }
 
+/* ═══════════════════════════════════════════════════════
+   ANALYTICS (admin only)
+═══════════════════════════════════════════════════════ */
+let _anEvents = [];
+let _anPeriodDays = 7;
+let _anCharts = {};
+
+function _anGetBrowser() {
+  const ua = navigator.userAgent;
+  if (/Edg\//.test(ua))    return 'Edge';
+  if (/OPR\//.test(ua))    return 'Opera';
+  if (/Chrome\//.test(ua)) return 'Chrome';
+  if (/Firefox\//.test(ua))return 'Firefox';
+  if (/Safari\//.test(ua)) return 'Safari';
+  return 'Otro';
+}
+function _anGetDevice() {
+  const ua = navigator.userAgent;
+  if (/Mobi|Android|iPhone/i.test(ua)) return 'mobile';
+  if (/iPad|Tablet/i.test(ua))          return 'tablet';
+  return 'desktop';
+}
+
+function anTrack(labelType, labelCount) {
+  _api('/api/user', 'POST', {
+    action: 'track-event', event: 'label_gen',
+    labelType, labelCount,
+    device:  _anGetDevice(),
+    browser: _anGetBrowser(),
+  }).catch(() => {});
+}
+
+async function anLoad() {
+  // Cargar Chart.js si no está disponible
+  if (typeof Chart === 'undefined') {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script'); s.src = CDN_CHARTJS;
+      s.onload = res; s.onerror = rej; document.head.appendChild(s);
+    });
+  }
+  try {
+    _anEvents = await _api('/api/admin?type=analytics') || [];
+  } catch(_) { _anEvents = []; }
+  anRender();
+}
+
+function anSetPeriod(days, btn) {
+  _anPeriodDays = days;
+  document.querySelectorAll('.an-period button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  anRender();
+}
+
+function anRender() {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - _anPeriodDays);
+  const events = _anPeriodDays >= 99999 ? _anEvents
+    : _anEvents.filter(e => new Date(e.ts) >= cutoff);
+  const genEvs = events.filter(e => e.event === 'label_gen');
+
+  // KPIs
+  const totalLabels = genEvs.reduce((s, e) => s + (e.labelCount || 0), 0);
+  const uniqueUsers = new Set(genEvs.map(e => e.userId)).size;
+  const totalGens   = genEvs.length;
+  const avgPerGen   = totalGens ? (totalLabels / totalGens).toFixed(1) : 0;
+  document.getElementById('an-kpis').innerHTML = `
+    <div class="an-kpi"><div class="an-kpi-val">${totalLabels}</div><div class="an-kpi-lbl">Etiquetas generadas</div></div>
+    <div class="an-kpi"><div class="an-kpi-val">${totalGens}</div><div class="an-kpi-lbl">Generaciones</div></div>
+    <div class="an-kpi"><div class="an-kpi-val">${uniqueUsers}</div><div class="an-kpi-lbl">Usuarios activos</div></div>
+    <div class="an-kpi"><div class="an-kpi-val">${avgPerGen}</div><div class="an-kpi-lbl">Etiquetas por generación</div></div>
+  `;
+
+  // Chart.js colores
+  const COLORS = ['#f0c000','#4ecdc4','#a78bfa','#f97316','#34d399','#60a5fa'];
+
+  // --- Línea: etiquetas por día ---
+  const byDay = {};
+  genEvs.forEach(e => { byDay[e.date] = (byDay[e.date] || 0) + (e.labelCount || 0); });
+  const days = Object.keys(byDay).sort();
+  _anChart('line', 'an-chart-line', {
+    type: 'line',
+    data: { labels: days, datasets: [{ label: 'Etiquetas', data: days.map(d => byDay[d]),
+      borderColor: '#f0c000', backgroundColor: 'rgba(240,192,0,.12)', tension: .4, fill: true, pointRadius: 3 }] },
+    options: { responsive:true, plugins:{ legend:{display:false} }, scales:{ x:{ ticks:{font:{size:10}}, grid:{color:'rgba(128,128,128,.1)'} }, y:{ beginAtZero:true, grid:{color:'rgba(128,128,128,.1)'} } } }
+  });
+
+  // --- Dona: tipo de etiqueta ---
+  const byType = { 'Mercado Libre':0, 'Correo Arg.':0, 'Andreani':0 };
+  genEvs.forEach(e => {
+    if (e.labelType === 'ml') byType['Mercado Libre'] += e.labelCount || 0;
+    else if (e.labelType === 'ca') byType['Correo Arg.'] += e.labelCount || 0;
+    else if (e.labelType === 'andreani') byType['Andreani'] += e.labelCount || 0;
+  });
+  _anDoughnut('an-chart-type', Object.keys(byType), Object.values(byType), COLORS);
+
+  // --- Dona: dispositivo ---
+  const byDev = {};
+  genEvs.forEach(e => { byDev[e.device || 'desktop'] = (byDev[e.device || 'desktop'] || 0) + 1; });
+  _anDoughnut('an-chart-device', Object.keys(byDev), Object.values(byDev), COLORS);
+
+  // --- Dona: navegador ---
+  const byBr = {};
+  genEvs.forEach(e => { byBr[e.browser || 'Otro'] = (byBr[e.browser || 'Otro'] || 0) + 1; });
+  _anDoughnut('an-chart-browser', Object.keys(byBr), Object.values(byBr), COLORS);
+
+  // --- Dona: plan ---
+  const byPlan = {};
+  genEvs.forEach(e => { byPlan[e.plan || 'free'] = (byPlan[e.plan || 'free'] || 0) + 1; });
+  _anDoughnut('an-chart-plan', Object.keys(byPlan), Object.values(byPlan), COLORS);
+
+  // --- Top usuarios ---
+  const userStats = {};
+  genEvs.forEach(e => {
+    if (!userStats[e.userId]) userStats[e.userId] = { labels: 0, plan: e.plan, last: e.ts };
+    userStats[e.userId].labels += e.labelCount || 0;
+    if (e.ts > userStats[e.userId].last) { userStats[e.userId].last = e.ts; userStats[e.userId].plan = e.plan; }
+  });
+  const top = Object.entries(userStats).sort((a,b)=>b[1].labels-a[1].labels).slice(0,10);
+  document.getElementById('an-top-users-tbody').innerHTML = top.map(([u,s],i)=>`
+    <tr>
+      <td style="padding:10px 12px;color:var(--text2)">${i+1}</td>
+      <td style="padding:10px 12px;font-weight:600">${u}</td>
+      <td style="padding:10px 12px"><span class="plan-badge ${s.plan}">${s.plan}</span></td>
+      <td style="padding:10px 12px;font-weight:700;color:var(--accent)">${s.labels}</td>
+      <td style="padding:10px 12px;color:var(--text2);font-size:12px">${new Date(s.last).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}</td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">Sin datos en este período</td></tr>';
+}
+
+function _anChart(key, id, cfg) {
+  if (_anCharts[key]) { _anCharts[key].destroy(); delete _anCharts[key]; }
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  _anCharts[key] = new Chart(canvas.getContext('2d'), cfg);
+}
+
+function _anDoughnut(id, labels, data, colors) {
+  const key = id;
+  if (_anCharts[key]) { _anCharts[key].destroy(); delete _anCharts[key]; }
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  _anCharts[key] = new Chart(canvas.getContext('2d'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderWidth: 2, borderColor: 'var(--surface)' }] },
+    options: { responsive:true, plugins:{ legend:{ position:'bottom', labels:{ font:{size:11}, color:'var(--text2)', padding:10 } } }, cutout:'60%' }
+  });
+}
+
+function anExportCSV() {
+  const rows = [['Fecha','Usuario','Plan','Tipo','Cant. Etiquetas','Dispositivo','Navegador']];
+  _anEvents.filter(e=>e.event==='label_gen').forEach(e=>{
+    rows.push([e.date,e.userId,e.plan,e.labelType,e.labelCount,e.device,e.browser]);
+  });
+  const csv = rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = Object.assign(document.createElement('a'),{href:'data:text/csv;charset=utf-8,'+encodeURIComponent('﻿'+csv),download:`etify-analytics-${new Date().toISOString().slice(0,10)}.csv`});
+  a.click();
+}
+
 async function openSuperAdmin() {
   if (currentUser !== 'admin') return;
   _injectAdminPanel();
@@ -5813,6 +6034,8 @@ async function openSuperAdmin() {
   showScreen('screen-superadmin');
   // Pre-cargar logo y init configurador
   getWmLogo().then(() => { wmSyncControls(); wmRedraw(); });
+  // Cargar métricas
+  anLoad();
 }
 
 /* ═══════════════════════════════════════════════════════

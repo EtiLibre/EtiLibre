@@ -22,6 +22,10 @@ export default async function handler(req, res) {
       const doc = await db.collection('config').doc(key).get();
       return res.json(doc.exists ? doc.data().value : null);
     }
+    if (req.query.type === 'analytics') {
+      const snap = await db.collection('analytics_events').orderBy('ts', 'desc').limit(2000).get();
+      return res.json(snap.docs.map(d => d.data()));
+    }
     if (req.query.type === 'deleted') {
       const snap = await db.collection('deleted_users').get();
       const users = snap.docs.map(d => { const { pass:_, ...u } = d.data(); return u; });

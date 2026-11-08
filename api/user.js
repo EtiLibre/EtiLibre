@@ -60,6 +60,27 @@ export default async function handler(req, res) {
       await ref.update({ notifications: list });
       return res.json({ ok:true });
     }
+    if (action === 'track-event') {
+      const { event, labelType, labelCount, device, browser } = req.body;
+      const VALID_EVENTS = ['label_gen', 'login'];
+      const VALID_TYPES  = ['ml', 'ca', 'andreani', ''];
+      const VALID_DEV    = ['mobile', 'tablet', 'desktop'];
+      if (!VALID_EVENTS.includes(event)) return res.status(400).json({ error: 'Evento inválido' });
+      const userDoc = await ref.get();
+      const plan = userDoc.exists ? (userDoc.data()?.plan || 'free') : 'free';
+      await db.collection('analytics_events').add({
+        event:      event,
+        userId:     payload.username,
+        plan:       plan,
+        labelType:  VALID_TYPES.includes(labelType) ? labelType : '',
+        labelCount: Math.max(0, Math.min(1000, parseInt(labelCount) || 0)),
+        device:     VALID_DEV.includes(device) ? device : 'desktop',
+        browser:    String(browser || '').slice(0, 50),
+        ts:         new Date().toISOString(),
+        date:       new Date().toISOString().slice(0, 10),
+      });
+      return res.json({ ok: true });
+    }
     return res.status(400).json({ error: 'Acción inválida' });
   }
 
